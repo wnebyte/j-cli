@@ -1,5 +1,6 @@
-package convert;
+package util;
 
+import core.TypeConverter;
 import exception.runtime.ParseException;
 
 public class StringTypeConverter implements TypeConverter<String> {

@@ -1,4 +1,4 @@
-package convert;
+package core;
 
 import exception.config.NoSuchTypeConverterException;
 import exception.runtime.ParseException;
@@ -6,10 +6,6 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public final class TypeConverterRepository {
-
-    public static Map<Class<?>, TypeConverter<?>> get() {
-        return TYPE_CONVERTERS;
-    }
 
     @SuppressWarnings("unchecked")
     public static <T> TypeConverter<T> getTypeConverter(final Class<T> typeOf) throws NoSuchTypeConverterException {

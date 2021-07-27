@@ -1,4 +1,4 @@
-import convert.StringTypeConverter;
+import util.StringTypeConverter;
 import exception.config.NoDefaultConstructorException;
 import core.Console;
 import core.IConsole;

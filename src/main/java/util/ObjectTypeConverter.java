@@ -1,7 +1,11 @@
-package convert;
+package util;
 
+import core.TypeConverter;
 import exception.runtime.ParseException;
 
+/**
+ * "Default" implementation of the <code>TypeConverter</code> interface.
+ */
 public class ObjectTypeConverter implements TypeConverter<Object> {
 
     @Override

@@ -1,4 +1,4 @@
-import convert.TypeConverterRepository;
+import core.TypeConverterRepository;
 import org.junit.Test;
 
 public class ArrayTypeConverterTest {

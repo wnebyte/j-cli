@@ -3,53 +3,76 @@ package core;
 import exception.config.IllegalAnnotationException;
 import exception.config.NoSuchTypeConverterException;
 import exception.runtime.ParseException;
-import util.AnnotationUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import util.AnnotationUtil;
 import static util.ReflectionUtil.isBoolean;
 import static util.AnnotationUtil.*;
 
+/**
+ * Class represents a Command mapped directly from a java Method.
+ */
 public final class Command {
 
-    private final Object methodClass;
+    /** The Object to which the Method belongs to */
+    private final Object owner;
 
+    /** The Method */
     private final Method method;
 
+    /** List of Command Arguments */
     private final List<Argument> arguments;
 
+    /** Command Prefix */
     private final String prefix;
 
+    /** Command Name */
     private final String name;
 
+    /** Command Description */
     private final String description;
 
-    public Command(Object methodClass, Method method) throws IllegalAnnotationException, NoSuchTypeConverterException {
+    /**
+     * This class's primary constructor.
+     * @param owner the object to which the specified Method belongs to.
+     * @param method the Method.
+     * @throws IllegalAnnotationException in the event of the specified Method not being annotated with
+     * <code>Command</code>.
+     * @throws NoSuchTypeConverterException in the event of there not being any registered <code>TypeConverters</code>
+     * with one or more of the Parameters belonging to the specified Method.
+     * @see annotation.Command
+     * @see TypeConverter
+     */
+    Command(Object owner, Method method) throws IllegalAnnotationException, NoSuchTypeConverterException {
         if (!(isAnnotated(method))) {
             throw new IllegalAnnotationException(
                     "\t\nMethod: " + method.toGenericString() + " is not annotated with " +
                             annotation.Command.class.toString()
             );
         }
-        this.methodClass = methodClass;
+        this.owner = owner;
         this.method = method;
         this.prefix = AnnotationUtil.isAnnotated(getDeclaringClass()) ?
                 AnnotationUtil.getName(getDeclaringClass()) : "";
         this.name = AnnotationUtil.getName(method);
         this.description = AnnotationUtil.getDescription(method);
-        this.arguments = initArguments();
+        this.arguments = createArguments();
     }
 
-    private List<Argument> initArguments() throws NoSuchTypeConverterException {
+    /**
+     * @return a list of Command Arguments.
+     * @throws NoSuchTypeConverterException in the event of there not being any registered <code>TypeConverters</code>
+     * with one or more of the Parameters belonging to the specified Method.
+     */
+    private List<Argument> createArguments() throws NoSuchTypeConverterException {
         List<Argument> arguments = new ArrayList<>(method.getParameterCount());
         int index = hasPrefix() ? 1 : 0;
 
-        for (Parameter parameter : method.getParameters())
-        {
+        for (Parameter parameter : method.getParameters()) {
             Class<? extends Argument> type = AnnotationUtil.getType(parameter);
 
             if ((type == Optional.class) || (isBoolean(parameter.getType()))) {
@@ -65,39 +88,68 @@ public final class Command {
         return arguments;
     }
 
-    protected Object getMethodClass() {
-        return methodClass;
+    /**
+     * Returns the "owner" of <code>this</code> Method.
+     */
+    protected Object getOwner() {
+        return owner;
     }
 
+    /**
+     * Returns the declaring class of <code>this</code> Method.
+     */
     public Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
     }
 
-    protected Method getMethod() {
-        return method;
-    }
-
+    /**
+     * Returns the arguments belonging to this class.
+     */
     public List<Argument> getArguments() {
         return arguments;
     }
 
+    /**
+     * Returns whether this class has a prefix.
+     */
     public boolean hasPrefix() {
         return (getPrefix() != null) && !(getPrefix().equals(""));
     }
 
+    /**
+     * Returns the prefix of this class.
+     */
     public String getPrefix() {
         return prefix;
     }
 
+    /**
+     * Returns the name of this class.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the description of this class.
+     */
     public String getDescription() {
         return description;
     }
 
-    public void call(final String input) throws ParseException {
+    /**
+     * Returns the underlying method of this class.
+     */
+    Method getMethod() {
+        return method;
+    }
+
+    /**
+     * Attempts to parse and initialize the underlying Method's Arguments, and invoke said Method.
+     * @param input the input received from the user.
+     * @throws ParseException in the event of an un-initialize able Argument.
+     */
+    void invoke(final String input) throws ParseException {
         Object[] args = new Object[getArguments().size()];
 
         int i = 0;
@@ -112,12 +164,15 @@ public final class Command {
             }
         }
         try {
-            getMethod().invoke(getMethodClass(), args);
+            getMethod().invoke(getOwner(), args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Returns a <code>String</code> representation of this class.
+     */
     public String toString() {
         return getPrefix() + getName() + " " +
                 getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));

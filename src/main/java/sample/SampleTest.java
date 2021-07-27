@@ -1,23 +1,17 @@
 package sample;
 
-import config.Shell;
-import config.ConfigurationBuilder;
-import convert.TypeConverter;
-import convert.TypeConverterRepository;
+import core.Command;
+import core.Shell;
+import core.ConfigurationBuilder;
 import core.Console;
-
-import java.util.Arrays;
-import java.util.Map;
 
 public class SampleTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Shell shell = new Shell(new ConfigurationBuilder()
                 .setConsole(new Console())
                 .setNullifyHelpCommands()
         );
         shell.run();
-  
-        }
     }
 }

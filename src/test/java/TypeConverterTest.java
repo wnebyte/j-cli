@@ -1,6 +1,6 @@
-import convert.StringTypeConverter;
-import convert.TypeConverter;
-import convert.TypeConverterRepository;
+import util.StringTypeConverter;
+import core.TypeConverter;
+import core.TypeConverterRepository;
 import exception.runtime.ParseException;
 import core.Person;
 import org.junit.Assert;

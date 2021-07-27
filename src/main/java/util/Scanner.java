@@ -1,4 +1,4 @@
-package config;
+package util;
 
 import annotation.Command;
 import org.reflections.Reflections;

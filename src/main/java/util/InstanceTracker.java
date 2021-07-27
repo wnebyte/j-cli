@@ -1,4 +1,4 @@
-package config;
+package util;
 
 import exception.config.NoDefaultConstructorException;
 import core.IConsole;
@@ -27,7 +27,9 @@ public final class InstanceTracker {
     }
 
     public final Object add(Class<?> objectClass) throws NoDefaultConstructorException {
-        return exists(objectClass) ? get(objectClass) : newInstance(objectClass);
+        return exists(objectClass) ?
+                get(objectClass) :
+                newInstance(objectClass);
     }
 
     public final void add(Object object) {

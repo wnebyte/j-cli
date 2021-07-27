@@ -1,12 +1,12 @@
 package annotation;
 
-import convert.TypeConverter;
-import convert.ObjectTypeConverter;
-import core.Required;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import core.TypeConverter;
+import util.ObjectTypeConverter;
+import core.Required;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

@@ -1,12 +1,14 @@
-package config;
+package core;
 
 import annotation.Argument;
 import annotation.Command;
 import exception.config.ConfigException;
+import exception.config.IllegalAnnotationException;
 import exception.runtime.ParseException;
-import core.AnnotationProcessor;
-import core.IConsole;
-import core.Positional;
+import exception.runtime.UnknownCommandException;
+import struct.BiImmutableMap;
+import util.InstanceTracker;
+import util.Scanner;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -16,33 +18,40 @@ import java.util.stream.Collectors;
 import static util.ReflectionUtil.isNested;
 import static util.ReflectionUtil.isStatic;
 
-/**
- * @author wnebyte.
- */
-public final class Shell {
+public class Shell {
 
-    /** annotation processor */
+    /** Annotation processor */
     private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
 
-    /** processed commands */
+    /** Commands */
     private Map<String, core.Command> commands;
 
-    /** configuration */
-    private final config.ConfigurationBuilder config;
+    /** Configuration object */
+    protected final ConfigurationBuilder config;
 
-    public Shell(config.ConfigurationBuilder config) {
-        this.config = Objects.requireNonNullElseGet(config, () -> new config.ConfigurationBuilder());
+    /**
+     * This class's primary constructor.
+     * @param config the <code>ConfigurationBuilder</code> object to be used when building the shell.
+     */
+    public Shell(ConfigurationBuilder config) {
+        this.config = Objects.requireNonNullElseGet(config, ConfigurationBuilder::new);
         build();
     }
 
+    /**
+     * Unsupported constructor.
+     */
     private Shell() {
         throw new UnsupportedOperationException(
                 "Constructor is not supported."
         );
     }
 
+    /**
+     * Builds the shell in accordance with the properties of the specified <code>ConfigurationBuilder</code>.
+     */
     private void build() {
-        Scanner scanner = new Scanner();
+        util.Scanner scanner = new Scanner();
         InstanceTracker tracker = (config.getControllers() != null) ?
                 new InstanceTracker(config.getControllers()) :
                 new InstanceTracker();
@@ -50,15 +59,12 @@ public final class Shell {
         if (config.getConsole() != null) {
             tracker.setInjectable(config.getConsole());
         }
-
         if (config.getControllers() != null) {
             scanner.scan(config.getControllers());
         }
-
         if (!(config.isNullifyScanPackages()) && (config.getPackages() != null)) {
             scanner.scan(config.getPackages());
         }
-
         if (config.isNullifyHelpCommands()) {
             scanner.removeIf(method -> method.getDeclaringClass() == this.getClass());
         } else {
@@ -74,7 +80,8 @@ public final class Shell {
                 }
                 Object object = isStatic(method) ? null : tracker.add(method.getDeclaringClass());
                 return new core.Command(object, method);
-            } catch (ConfigException e) {
+            }
+            catch (ConfigException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -82,21 +89,33 @@ public final class Shell {
 
         try {
             this.commands = annotationProcessor.process(commands);
-        } catch (Exception e) {
+        }
+        catch (IllegalAnnotationException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Accepts input from the user.
+     * @param input the input to match against a registered <code>Command</code>.
+     */
     public final void accept(String input) {
         try {
-            match(input).call(input);
-        } catch (NullPointerException e) {
-            handleNoSuchCommand(input);
-        } catch (ParseException ex) {
-            handleParseException(ex);
+            match(input).invoke(input);
+        }
+        catch (UnknownCommandException e) {
+            handleUnknownCommandException(input);
+        }
+        catch (ParseException e) {
+            handleParseException(e);
         }
     }
 
+    /**
+     * Calls {@link Shell#accept(String)} in a continuous loop until the shell reads 'exit'.<br/>
+     * @throws IllegalStateException if no {@linkplain core.IConsole} implementation has been specified via
+     * this object's <code>ConfigurationBuilder</code>.
+     */
     public final void run() {
         IConsole console = config.getConsole();
         boolean cont = true;
@@ -106,7 +125,6 @@ public final class Shell {
                     "no console has been been specified."
             );
         }
-
         while (cont) {
             String in = console.read();
             if (cont=((in != null) && !(in.equals("exit")))) {
@@ -120,42 +138,51 @@ public final class Shell {
     }
 
     /**
-     * Handles a <code>NoSuchCommand</code> event at 'runtime' in accordance with the specifications of the
-     * <code>config</code>.
-     * @param input the supplied userInput.
+     * Handles a <code>UnknownCommandException</code> at "runtime" in accordance with the settings specified by this
+     * class's <code>ConfigurationBuilder</code> object.
+     * @param input the input received from the user.
      */
-    private void handleNoSuchCommand(String input) {
+    protected void handleUnknownCommandException(String input) {
         IConsole console = config.getConsole();
         Consumer<String> handler = config.getNoSuchCommandHandler();
-        Function<String, String> formatter = config.getNoSuchCommandOutputFormatter();
+        Function<String, String> formatter = config.getUnknownCommandOutputFormatter();
 
         if (handler != null) {
             handler.accept(input);
-        } else if (console != null) {
+        }
+        else if (console != null) {
             console.printerr(formatter.apply(input));
         }
     }
 
     /**
-     * Handles a <code>ParseException</code> being thrown at 'runtime' in accordance with the specifications of the
-     * <code>config</code>.
+     * Handles a <code>ParseException</code> at "runtime" in accordance with the settings specified by this
+     * class's <code>ConfigurationBuilder</code> object.
      * @param e the thrown <code>ParseException</code>.
      */
-    private void handleParseException(ParseException e) {
+    protected void handleParseException(ParseException e) {
         IConsole console = config.getConsole();
         Consumer<ParseException> handler = config.getParseExceptionHandler();
         Function<ParseException, String> formatter = config.getParseExceptionOutputFormatter();
 
         if (handler != null) {
             handler.accept(e);
-        } else if (console != null) {
+        }
+        else if (console != null) {
             console.printerr(formatter.apply(e));
         }
     }
 
-    private core.Command match(String input) throws NullPointerException {
+    /**
+     * Attempts to match the specified input with a known <code>Command</code>.
+     * @param input the input received from the user.
+     * @return The <code>Command</code> associated with the specified input, if one exists,
+     * otherwise throws an <code>UnknownCommandException</code>.
+     */
+    protected core.Command match(String input) throws UnknownCommandException {
         return commands.entrySet().stream().filter(kv -> Pattern.compile(kv.getKey()).matcher(input).matches())
-                .findFirst().orElseThrow(NullPointerException::new).getValue();
+                .findFirst().orElseThrow(UnknownCommandException::new)
+                .getValue();
     }
 
     @Command(name = "--help")

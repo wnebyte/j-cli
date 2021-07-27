@@ -1,22 +1,19 @@
-package config;
+package core;
 
 import exception.runtime.ParseException;
-import core.Command;
-import core.IConsole;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static util.StringUtil.whitespace;
 
-public final class ConfigurationBuilder {
+public class ConfigurationBuilder {
 
     private IConsole console;
 
     private Consumer<String> noSuchCommandHandler;
 
-    private Function<String, String> noSuchCommandOutputFormatter = new Function<>() {
+    private Function<String, String> unknownCommandOutputFormatter = new Function<>() {
         @Override
         public String apply(String input) {
             return "'".concat(input).concat("'").concat(" is not recognized as an internal command.");
@@ -82,14 +79,14 @@ public final class ConfigurationBuilder {
         return this;
     }
 
-    public final ConfigurationBuilder setNoSuchCommandOutputFormatter(final Function<String, String> formatter) {
+    public final ConfigurationBuilder setUnknownCommandOutputFormatter(final Function<String, String> formatter) {
         if (formatter != null) {
-            this.noSuchCommandOutputFormatter = formatter;
+            this.unknownCommandOutputFormatter = formatter;
         }
         return this;
     }
 
-    public final ConfigurationBuilder setNoSuchCommandHandler(final Consumer<String> handler) {
+    public final ConfigurationBuilder setUnknownCommandHandler(final Consumer<String> handler) {
         if (handler != null) {
             this.noSuchCommandHandler = handler;
         }
@@ -151,47 +148,55 @@ public final class ConfigurationBuilder {
         return this;
     }
 
-    protected IConsole getConsole() {
+    public final <T> ConfigurationBuilder
+    registerTypeConverter(final Class<T> typeOf, final TypeConverter<T> typeConverter) {
+        if ((typeOf != null) && (typeConverter != null)) {
+            TypeConverterRepository.putIfAbsent(typeOf, typeConverter);
+        }
+        return this;
+    }
+
+    public IConsole getConsole() {
         return console;
     }
 
-    protected Consumer<String> getNoSuchCommandHandler() {
+    public Consumer<String> getNoSuchCommandHandler() {
         return noSuchCommandHandler;
     }
 
-    protected Function<String, String> getNoSuchCommandOutputFormatter() {
-        return noSuchCommandOutputFormatter;
+    public Function<String, String> getUnknownCommandOutputFormatter() {
+        return unknownCommandOutputFormatter;
     }
 
-    protected Consumer<ParseException> getParseExceptionHandler() {
+    public Consumer<ParseException> getParseExceptionHandler() {
         return parseExceptionHandler;
     }
 
-    protected Function<ParseException, String> getParseExceptionOutputFormatter() {
+    public Function<ParseException, String> getParseExceptionOutputFormatter() {
         return parseExceptionOutputFormatter;
     }
 
-    protected Consumer<Collection<Command>> getHelpHandler() {
+    public Consumer<Collection<Command>> getHelpHandler() {
         return helpHandler;
     }
 
-    protected Function<Collection<Command>, String> getHelpOutputFormatter() {
+    public Function<Collection<Command>, String> getHelpOutputFormatter() {
         return helpOutputFormatter;
     }
 
-    protected Set<String> getPackages() {
+    public Set<String> getPackages() {
         return packages;
     }
 
-    protected Set<Object> getControllers() {
+    public Set<Object> getControllers() {
         return controllers;
     }
 
-    protected boolean isNullifyScanPackages() {
+    public boolean isNullifyScanPackages() {
         return nullifyScanPackages;
     }
 
-    protected boolean isNullifyHelpCommands() {
+    public boolean isNullifyHelpCommands() {
         return nullifyHelpCommands;
     }
 }

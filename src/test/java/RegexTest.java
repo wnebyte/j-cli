@@ -1,5 +1,5 @@
-import convert.TypeConverter;
-import convert.TypeConverterRepository;
+import core.TypeConverter;
+import core.TypeConverterRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import util.Splitter;

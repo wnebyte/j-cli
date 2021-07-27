@@ -5,17 +5,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ReadableMap<K, V> extends HashMap<K, V> {
+public class BiImmutableMap<K, V> extends HashMap<K, V> {
 
-    public ReadableMap() {
+    public BiImmutableMap() {
         super();
     }
 
-    public ReadableMap(Map<? extends K, ? extends V> map) {
+    public BiImmutableMap(Map<? extends K, ? extends V> map) {
         super(map);
     }
 
-    public ReadableMap(int initialCapacity, float loadFactor) {
+    public BiImmutableMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }
 

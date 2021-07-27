@@ -1,6 +1,5 @@
 package core;
 
-import convert.TypeConverter;
 import exception.config.NoSuchTypeConverterException;
 import exception.runtime.ParseException;
 import util.AnnotationUtil;
