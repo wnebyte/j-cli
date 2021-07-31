@@ -26,11 +26,29 @@ public final class AnnotationUtil {
         return (parameter != null) && (parameter.isAnnotationPresent(Argument.class));
     }
 
+    /*
     public static String getName(Class<?> objectClass) {
         if ((isAnnotated(objectClass)) && !(hasDefaultName(objectClass.getAnnotation(Controller.class)))) {
             return objectClass.getAnnotation(Controller.class).name();
         }
         return objectClass.getSimpleName().toLowerCase(Locale.ROOT).replace("controller", "");
+    }
+     */
+
+    public static String getName(Class<?> objectClass) {
+        if (objectClass == null) {
+            throw new IllegalArgumentException(
+                    "Class must not be null."
+            );
+        }
+        if (isAnnotated(objectClass)) {
+            Controller annotation = objectClass.getAnnotation(Controller.class);
+
+            return hasDefaultName(annotation) ?
+                    objectClass.getSimpleName().toLowerCase(Locale.ROOT) :
+                    annotation.name();
+        }
+        return "";
     }
 
     public static String getName(Method method) {
@@ -45,23 +63,6 @@ public final class AnnotationUtil {
 
     }
 
-    public static boolean hasDefaultName(Controller controller) {
-        return (controller != null) && (controller.name().equals(""));
-    }
-
-    public static boolean hasDefaultTypeConverter(Argument argument) {
-        return (argument != null) && (argument.typeConverter() == ObjectTypeConverter.class);
-    }
-
-    public static boolean hasDefaultName(Method method) {
-        return (isAnnotated(method)) &&
-                method.getAnnotation(Command.class).name().equals(Command.DEFAULT_NAME);
-    }
-
-    public static boolean hasDefaultName(Argument argument) {
-        return (argument != null) && (argument.name().equals(""));
-    }
-
     public static String getName(Parameter parameter) {
         if (parameter == null) {
             throw new IllegalArgumentException(
@@ -71,6 +72,29 @@ public final class AnnotationUtil {
         return isAnnotated(parameter) ?
                 parameter.getAnnotation(Argument.class).name() :
                 parameter.getName().toLowerCase(Locale.ROOT);
+    }
+
+    public static boolean hasDefaultName(Controller controller) {
+        return (controller != null) && (controller.name().equals(""));
+    }
+
+    public static boolean hasDefaultTypeConverter(Argument argument) {
+        return (argument != null) && (argument.typeConverter() == ObjectTypeConverter.class);
+    }
+
+    public static boolean hasTypeConverter(Parameter parameter) {
+        return (isAnnotated(parameter)) &&
+                !(parameter.getAnnotation(Argument.class)
+                        .typeConverter() == ObjectTypeConverter.class);
+    }
+
+    public static boolean hasDefaultName(Method method) {
+        return (isAnnotated(method)) &&
+                method.getAnnotation(Command.class).name().equals(Command.DEFAULT_NAME);
+    }
+
+    public static boolean hasDefaultName(Argument argument) {
+        return (argument != null) && (argument.name().equals(""));
     }
 
     public static String getDescription(Method method) {
@@ -96,15 +120,16 @@ public final class AnnotationUtil {
     }
 
     public static TypeConverter<?> getTypeConverter(Parameter parameter) throws NoSuchTypeConverterException {
-        if ((isAnnotated(parameter)) && !(hasDefaultTypeConverter(parameter.getAnnotation(Argument.class)))) {
+        if (hasTypeConverter(parameter)) {
             Class<?> typeOf = parameter.getAnnotation(Argument.class).typeConverter();
             try {
-                return (TypeConverter<?>) ReflectionUtil.newInstance(typeOf);
+                TypeConverter<?> typeConverter =
+                        (TypeConverter<?>) ReflectionUtil.newInstance(typeOf);
+                return typeConverter;
             } catch (NoDefaultConstructorException e) {
                 throw new NoSuchTypeConverterException(e.getMessage());
             }
         }
-
         return TypeConverterRepository.getTypeConverter(parameter.getType());
     }
 

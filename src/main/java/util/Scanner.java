@@ -9,6 +9,7 @@ import org.reflections.util.ConfigurationBuilder;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -18,14 +19,36 @@ public class Scanner {
 
     public Scanner() {}
 
-    public final void scan(Set<Object> objects) {
+    public final void scanObjects(Set<Object> objects) {
         if (objects != null) {
-            objects.forEach(object -> scanned.addAll(Arrays.stream(object.getClass().getMethods())
-                    .filter(method -> method.isAnnotationPresent(Command.class)).collect(Collectors.toList())));
+            for (Object object : objects) {
+                scanned.addAll(Arrays.stream(object.getClass().getDeclaredMethods())
+                        .filter(method -> method.isAnnotationPresent(Command.class))
+                        .collect(Collectors.toSet()));
+            }
         }
     }
 
-    public final void scan(Collection<String> urls) {
+    public final void scanBundle(Bundle bundle) {
+        if (bundle != null) {
+            scanned.addAll(Arrays.stream(bundle.getOwner().getClass().getDeclaredMethods())
+                    .filter(method -> method.isAnnotationPresent(Command.class) &&
+                            bundle.getMethodNames().contains(method.getName()))
+                    .collect(Collectors.toSet()));
+        }
+    }
+
+    public final void scanClasses(Set<Class<?>> classes) {
+        if (classes != null) {
+            for (Class<?> cl : classes) {
+                scanned.addAll(Arrays.stream(cl.getDeclaredMethods())
+                        .filter(method -> method.isAnnotationPresent(Command.class))
+                        .collect(Collectors.toSet()));
+            }
+        }
+    }
+
+    public final void scanURLS(Collection<String> urls) {
         scanned.addAll(new Reflections(new ConfigurationBuilder()
                 .setUrls(toURL(urls))
                 .setScanners(new MethodAnnotationsScanner()))
@@ -36,15 +59,15 @@ public class Scanner {
         scanned.removeIf(predicate);
     }
 
+    public final Set<Method> getScanned() {
+        return scanned;
+    }
+
     private Collection<URL> toURL(Collection<String> collection) {
         List<URL> urls = new ArrayList<>();
         if (collection != null) {
             collection.forEach(string -> urls.addAll(ClasspathHelper.forPackage(string)));
         }
         return urls;
-    }
-
-    public final Set<Method> getScanned() {
-        return scanned;
     }
 }

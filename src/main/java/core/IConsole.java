@@ -26,5 +26,5 @@ public interface IConsole {
 
     void printerr(String out);
 
-    void setOnTextAppended(Consumer<String> onTextAppended);
+    void setOnInputReceived(Consumer<String> onInputReceived);
 }

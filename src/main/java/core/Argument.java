@@ -19,34 +19,44 @@ public abstract class Argument {
 
     private final String description;
 
+    private final int index;
+
+    // Todo: is effectively final
     private String regex;
 
-    protected Argument(Parameter parameter) throws NoSuchTypeConverterException {
+    /**
+     * Primary Constructor.
+     */
+    Argument(Parameter parameter, int index) throws NoSuchTypeConverterException {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."
             );
         }
-        String tmp = AnnotationUtil.getName(parameter);
-        this.name = StringUtil.normalize(tmp, PREFIX, true);
+        this.name = StringUtil.normalizeName(AnnotationUtil.getName(parameter));
         this.description = AnnotationUtil.getDescription(parameter);
         this.typeConverter = AnnotationUtil.getTypeConverter(parameter);
         this.type = parameter.getType();
+        this.index = index;
     }
 
-    protected Argument(Parameter parameter, String name) throws NoSuchTypeConverterException {
+    /**
+     * Used by Positional.class subclass.
+     */
+    protected Argument(Parameter parameter, int index, String name) throws NoSuchTypeConverterException {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."
             );
         }
-        this.description = AnnotationUtil.getDescription(parameter);
-        this.typeConverter = AnnotationUtil.getTypeConverter(parameter);
-        this.type = parameter.getType();
         this.name = name;
+        this.description = AnnotationUtil.getDescription(parameter);
+        this.typeConverter = AnnotationUtil.getTypeConverter(parameter);
+        this.type = parameter.getType();
+        this.index = index;
     }
 
-    protected abstract Object initialize(final String input) throws ParseException;
+    abstract Object initialize(final String input) throws ParseException;
 
     protected void setRegex(String regex) {
         this.regex = regex;
@@ -54,6 +64,10 @@ public abstract class Argument {
 
     protected String getRegex() {
         return regex;
+    }
+
+    protected int getIndex() {
+        return index;
     }
 
     public String getName() {

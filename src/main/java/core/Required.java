@@ -7,16 +7,15 @@ import java.lang.reflect.Parameter;
 
 public final class Required extends Argument {
 
-    public Required(Parameter parameter) throws NoSuchTypeConverterException {
-        super(parameter);
+    public Required(Parameter parameter, int index) throws NoSuchTypeConverterException {
+        super(parameter, index);
         setRegex("\\s".concat(getName()).concat(getTypeConverter().isArray() ?
                 TypeConverter.ARRAY_REGEX : TypeConverter.STANDARD_REGEX));
     }
 
     @Override
     protected Object initialize(final String input) throws ParseException {
-        String value = new Splitter()
-                .setContent(input)
+        String value = new Splitter().setContent(input)
                 .setDelimiter(getName())
                 .split();
         return getTypeConverter().convert(value);

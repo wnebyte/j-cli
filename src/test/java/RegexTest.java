@@ -88,4 +88,11 @@ public class RegexTest {
         Assert.assertTrue(pattern.matcher(input1).matches());
         Assert.assertTrue(pattern.matcher(input2).matches());
     }
+
+    @Test
+    public void test09() {
+        String regex = "^array((\\s\\[([^\\s]*|\"[^\"]*\")*\\](\\s-b\\s([^\\s]*|\"[^\"]*\")|))|)$";
+        Pattern pattern = Pattern.compile(regex);
+        System.out.println(pattern.matcher("array").matches());
+    }
 }

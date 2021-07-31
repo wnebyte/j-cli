@@ -6,10 +6,8 @@ import exception.config.ConfigException;
 import exception.config.IllegalAnnotationException;
 import exception.runtime.ParseException;
 import exception.runtime.UnknownCommandException;
-import struct.BiImmutableMap;
 import util.InstanceTracker;
 import util.Scanner;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -51,24 +49,31 @@ public class Shell {
      * Builds the shell in accordance with the properties of the specified <code>ConfigurationBuilder</code>.
      */
     private void build() {
-        util.Scanner scanner = new Scanner();
-        InstanceTracker tracker = (config.getControllers() != null) ?
-                new InstanceTracker(config.getControllers()) :
+        Scanner scanner = new Scanner();
+        InstanceTracker tracker = (config.getObjects() != null) ?
+                new InstanceTracker(config.getObjects()) :
                 new InstanceTracker();
 
         if (config.getConsole() != null) {
             tracker.setInjectable(config.getConsole());
         }
-        if (config.getControllers() != null) {
-            scanner.scan(config.getControllers());
+        if (config.getObjects() != null) {
+            scanner.scanObjects(config.getObjects());
+        }
+        if (config.getClasses() != null) {
+            scanner.scanClasses(config.getClasses());
         }
         if (!(config.isNullifyScanPackages()) && (config.getPackages() != null)) {
-            scanner.scan(config.getPackages());
+            scanner.scanURLS(config.getPackages());
+        }
+        if (config.getBundle() != null) {
+            scanner.scanBundle(config.getBundle());
+            tracker.addObject(config.getBundle().getOwner());
         }
         if (config.isNullifyHelpCommands()) {
             scanner.removeIf(method -> method.getDeclaringClass() == this.getClass());
         } else {
-            tracker.add(this);
+            tracker.addObject(this);
         }
 
         Set<core.Command> commands = scanner.getScanned().stream().map(method -> {
@@ -78,7 +83,8 @@ public class Shell {
                             "\n\tA Command may not be declared within a nested class."
                     );
                 }
-                Object object = isStatic(method) ? null : tracker.add(method.getDeclaringClass());
+                Object object = isStatic(method) ?
+                        null : tracker.addClass(method.getDeclaringClass());
                 return new core.Command(object, method);
             }
             catch (ConfigException e) {
@@ -101,7 +107,7 @@ public class Shell {
      */
     public final void accept(String input) {
         try {
-            match(input).invoke(input);
+            match(input).execute(input);
         }
         catch (UnknownCommandException e) {
             handleUnknownCommandException(input);
@@ -122,7 +128,7 @@ public class Shell {
 
         if (console == null) {
             throw new IllegalStateException(
-                    "no console has been been specified."
+                    "No console has been been specified."
             );
         }
         while (cont) {
@@ -183,6 +189,10 @@ public class Shell {
         return commands.entrySet().stream().filter(kv -> Pattern.compile(kv.getKey()).matcher(input).matches())
                 .findFirst().orElseThrow(UnknownCommandException::new)
                 .getValue();
+    }
+
+    public Set<String> getCommandKeys() {
+        return commands.keySet();
     }
 
     @Command(name = "--help")

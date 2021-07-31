@@ -1,6 +1,8 @@
 package util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -40,8 +42,6 @@ public final class StringUtil {
      * Normalizes the specified <code>String</code> by removing any non leading characters equal to the specified prefix,
      * and any non letters anywhere in the specified <code>String</code>.
      * Also Inserts the specified prefix at the head, if insert is true.
-     * @param str
-     * @return
      */
     public static String normalize(String str, char prefix, boolean insert) {
         String regex = "^" + prefix + "+" + "[a-zA-Z]*$";
@@ -67,25 +67,38 @@ public final class StringUtil {
     }
 
     /**
+     * Returns the specified String, not containing any of the following characters: < ' ', '"', '[', ']' >.
+     */
+    public static String normalizeName(String name) {
+        String regex = "^[^\\s\"\\[\\]]*$";
+        Pattern pattern = Pattern.compile(regex);
+
+        return (pattern.matcher(name).matches()) ?
+                name :
+                name.transform(new Function<String, String>() {
+                    final List<Character> characters = Arrays.asList(
+                            ' ', '"', '[', ']'
+                    );
+                    @Override
+                    public String apply(String s) {
+                        StringBuilder builder = new StringBuilder();
+                        for (char character : s.toCharArray()) {
+                            if (!(characters.contains(character))) {
+                                builder.append(character);
+                            }
+                        }
+                        return builder.toString();
+                    }
+                });
+    }
+
+    /**
      * Generates a <code>String</code> consisting of the specified number of whitespace characters.
      */
     public static String whitespace(int len) {
         char[] chars = new char[len];
         Arrays.fill(chars, ' ');
         return new String(chars);
-    }
-
-    private static boolean equals(String substring, char prefix) {
-        for (char c : substring.toCharArray()) {
-            if (c != prefix) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String remove(String s, char c) {
-        return s.replace(String.valueOf(c),"");
     }
 
     /*
@@ -138,5 +151,52 @@ public final class StringUtil {
             }
         }
         return index;
+    }
+
+    public static List<String> split(String str) {
+        List<String> elements = new ArrayList<>();
+        char[] array = str.toCharArray();
+        int startIndex = 0;
+
+        for (int i = 0; i < array.length; i++) {
+            char character = array[i];
+
+            if ((character == ' ') && (evenNumberOfPrecedingOccurrences(str, i))) {
+                String element = str.substring(startIndex, i);
+                elements.add(element);
+                startIndex = i + 1;
+            }
+        }
+
+        String element = str.substring(startIndex);
+        elements.add(element);
+        return elements;
+    }
+
+    public static boolean evenNumberOfPrecedingOccurrences(String str, int endIndex) {
+        if (str == null) {
+            return true;
+        }
+        char[] array = str.toCharArray();
+        int counter = 0;
+        int secondCounter = 0;
+
+        for (int i = 0; i <= endIndex; i++) {
+            char character = array[i];
+
+            switch (character) {
+                case '"':
+                    counter++;
+                    break;
+                case '[':
+                    secondCounter++;
+                    break;
+                case ']':
+                    secondCounter--;
+                    break;
+            }
+        }
+
+        return (counter % 2 == 0) && (secondCounter == 0);
     }
 }

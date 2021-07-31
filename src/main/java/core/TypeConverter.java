@@ -14,16 +14,16 @@ public interface TypeConverter<T> {
 
     String ARRAY_ELEMENT_SEPARATOR = ",";
 
-    String STANDARD_REGEX = WHITESPACE_REGEX + "([^\\s-]*|\"[^\"-]*\")";
+    String STANDARD_REGEX = WHITESPACE_REGEX + "([^\\s\"]*|\"[^\"]*\")";
     //"[^\\s-]*";
     // "([^\\s-]*|\"[^\"]*\")"
 
-    String ARRAY_REGEX = WHITESPACE_REGEX + "\\[([^\\s-]*|\"[^\"-]*\")*\\]";
+    String ARRAY_REGEX = WHITESPACE_REGEX + "\\[([^\\s\"]*|\"[^\"]*\")*\\]";
     //\[[^\s-]*\]
 
-    static String normalize(String str) {
-        if (str != null) {
-            return str.replace("[", "")
+    static String normalize(String value) {
+        if (value != null) {
+            return value.replace("[", "")
                     .replace("]", "")
                     .replace("\"", "")
                     .trim();

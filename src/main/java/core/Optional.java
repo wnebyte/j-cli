@@ -9,8 +9,8 @@ import static util.ReflectionUtil.isBoolean;
 
 public final class Optional extends Argument {
 
-    public Optional(Parameter parameter) throws NoSuchTypeConverterException {
-        super(parameter);
+    public Optional(Parameter parameter, int index) throws NoSuchTypeConverterException {
+        super(parameter, index);
         setRegex(isBoolean(parameter.getType()) ?
                 "(\\s".concat(getName()).concat("|)") :
                         getTypeConverter().isArray() ?
@@ -25,7 +25,8 @@ public final class Optional extends Argument {
             if (isBoolean(getType())) {
                 return true;
             } else {
-                String value = new Splitter().setContent(input).setDelimiter(getName())
+                String value = new Splitter().setContent(input)
+                        .setDelimiter(getName())
                         .split();
                 return getTypeConverter().convert(value);
             }

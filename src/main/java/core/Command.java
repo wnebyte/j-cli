@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import util.AnnotationUtil;
+import util.StringUtil;
+
 import static util.ReflectionUtil.isBoolean;
 import static util.AnnotationUtil.*;
 
@@ -37,7 +39,7 @@ public final class Command {
     private final String description;
 
     /**
-     * This class's primary constructor.
+     * Primary Constructor.
      * @param owner the object to which the specified Method belongs to.
      * @param method the Method.
      * @throws IllegalAnnotationException in the event of the specified Method not being annotated with
@@ -56,9 +58,8 @@ public final class Command {
         }
         this.owner = owner;
         this.method = method;
-        this.prefix = AnnotationUtil.isAnnotated(getDeclaringClass()) ?
-                AnnotationUtil.getName(getDeclaringClass()) : "";
-        this.name = AnnotationUtil.getName(method);
+        this.prefix = StringUtil.normalizeName(AnnotationUtil.getName(getDeclaringClass()));
+        this.name = StringUtil.normalizeName(AnnotationUtil.getName(method));
         this.description = AnnotationUtil.getDescription(method);
         this.arguments = createArguments();
     }
@@ -70,19 +71,20 @@ public final class Command {
      */
     private List<Argument> createArguments() throws NoSuchTypeConverterException {
         List<Argument> arguments = new ArrayList<>(method.getParameterCount());
-        int index = hasPrefix() ? 1 : 0;
+        int position = hasPrefix() ? 1 : 0;
 
-        for (Parameter parameter : method.getParameters()) {
+        for (int index = 0; index < method.getParameterCount(); index++) {
+            Parameter parameter = method.getParameters()[index];
             Class<? extends Argument> type = AnnotationUtil.getType(parameter);
 
             if ((type == Optional.class) || (isBoolean(parameter.getType()))) {
-                arguments.add(new Optional(parameter));
+                arguments.add(new Optional(parameter, index));
             }
             else if (type == Required.class) {
-                arguments.add(new Required(parameter));
+                arguments.add(new Required(parameter, index));
             }
             else if (type == Positional.class) {
-                arguments.add(new Positional(parameter, index++));
+                arguments.add(new Positional(parameter, index, position++));
             }
         }
         return arguments;
@@ -144,12 +146,8 @@ public final class Command {
         return method;
     }
 
-    /**
-     * Attempts to parse and initialize the underlying Method's Arguments, and invoke said Method.
-     * @param input the input received from the user.
-     * @throws ParseException in the event of an un-initialize able Argument.
-     */
-    void invoke(final String input) throws ParseException {
+    /*
+    void execute(final String input) throws ParseException {
         Object[] args = new Object[getArguments().size()];
 
         int i = 0;
@@ -169,12 +167,29 @@ public final class Command {
             e.printStackTrace();
         }
     }
+    */
+
+    /**
+     * Parses the specified input and invokes the underlying Java Method.
+     * @param input the input received from the user.
+     */
+    void execute(final String input) throws ParseException {
+        Parser parser = new Parser(this, input);
+
+        try {
+            Object[] args = parser.parse();
+            getMethod().invoke(getOwner(), args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Returns a <code>String</code> representation of this class.
      */
     public String toString() {
-        return getPrefix() + getName() + " " +
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + getName() + " " +
                 getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));
     }
 }

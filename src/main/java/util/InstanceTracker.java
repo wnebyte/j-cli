@@ -1,12 +1,12 @@
 package util;
 
-import exception.config.NoDefaultConstructorException;
 import core.IConsole;
-
+import exception.config.NoDefaultConstructorException;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class InstanceTracker {
 
@@ -18,23 +18,47 @@ public final class InstanceTracker {
         this.objects = new HashSet<>();
     }
 
+    /**
+     * Secondary Constructor.
+     * @param objects to populate tracker with, objects belonging to duplicate classes will be removed.
+     */
     public InstanceTracker(Set<Object> objects) {
         this.objects = Objects.requireNonNullElse(objects, new HashSet<>());
+        this.objects.removeIf(object ->
+                getNotThis(object).stream().anyMatch(obj -> obj.getClass() == object.getClass()));
     }
 
     public final void setInjectable(IConsole console) {
         this.injectable = console;
     }
 
-    public final Object add(Class<?> objectClass) throws NoDefaultConstructorException {
-        return exists(objectClass) ?
+    public final Object addClass(Class<?> objectClass) throws NoDefaultConstructorException {
+        return contains(objectClass) ?
                 get(objectClass) :
                 newInstance(objectClass);
     }
 
-    public final void add(Object object) {
-        assert !(exists(object.getClass()));
-        objects.add(object);
+    /**
+     * Adds the specified <code>Object</code> to the tracker, if it is NON-NULL, and the tracker is not already
+     * tracking an <code>Object</code> of the same class.
+     * <p/>
+     * @param object the <code>Object</code> to be tracked.
+     * @return true if successful, otherwise false.
+     */
+    public final boolean addObject(Object object) {
+        if ((object != null) && (!(contains(object.getClass())))) {
+            objects.add(object);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean contains(Class<?> objectClass) {
+        return objects.stream().anyMatch(object -> object.getClass() == objectClass);
+    }
+
+    public final int size() {
+        return objects.size();
     }
 
     private Object newInstance(Class<?> objectClass) throws NoDefaultConstructorException {
@@ -62,16 +86,16 @@ public final class InstanceTracker {
                 );
             }
         }
-
+        objects.add(newInstance);
         return newInstance;
     }
 
-    private boolean exists(Class<?> objectClass) {
-        return objects.stream().anyMatch(o -> o.getClass() == objectClass);
+    private Set<Object> getNotThis(Object object) {
+        return objects.stream().filter(obj -> !(obj == object)).collect(Collectors.toSet());
     }
 
     private Object get(Class<?> objectClass) throws IllegalStateException {
-        return objects.stream().filter(o -> o.getClass() == objectClass).findFirst()
+        return objects.stream().filter(object -> object.getClass() == objectClass).findFirst()
                 .orElseThrow(() -> new IllegalStateException(
                         "class: "  + objectClass + " is not present within set."
                 ));

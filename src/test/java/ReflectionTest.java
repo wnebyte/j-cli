@@ -4,8 +4,14 @@ import core.Console;
 import core.IConsole;
 import org.junit.Assert;
 import org.junit.Test;
-import sample.FirstClass;
 import sample.SampleController;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static util.ReflectionUtil.*;
 
@@ -27,18 +33,26 @@ public class ReflectionTest {
         Assert.assertTrue(object instanceof SampleController);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void test02() {
-        Class<?> first = FirstClass.class;
-        Class<?> second = FirstClass.SecondClass.class;
-        Class<?> third = FirstClass.SecondClass.ThirdClass.class;
+    public void test02() throws NoSuchMethodException {
+        Method method = getClass().getMethod("foo", List.class, String.class);
+        method.setAccessible(true);
 
-        System.out.println(first.getSimpleName() + ", declaring: " + first.getDeclaringClass() + ", " +
-                "enclosing: " + first.getEnclosingClass());
-        System.out.println(second.getSimpleName() + ", declaring: " + second.getDeclaringClass() + ", " +
-                "enclosing: " + second.getEnclosingClass());
-        System.out.println(third.getSimpleName() + ", declaring: " + third.getDeclaringClass() + ", " +
-                "enclosing: " + third.getEnclosingClass());
+        Parameter parameter = method.getParameters()[0];
+        Type parameterizedType = parameter.getParameterizedType();
+
+        Parameter parameter1 = method.getParameters()[1];
+        Type parameterizedType1 = parameter1.getParameterizedType();
+
+        System.out.println("parameterizedType: " + parameterizedType);
+        System.out.println("parameterizedType: " + parameterizedType1);
+
+        Class<List<String>> clazz = (Class<List<String>>)(Class<?>) List.class;
+        System.out.println(clazz);
     }
 
+    public void foo(List<String> myList, String myString) {
+
+    }
 }

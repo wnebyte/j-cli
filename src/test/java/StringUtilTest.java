@@ -1,8 +1,11 @@
 import org.junit.Assert;
 import org.junit.Test;
 import util.Splitter;
+import util.StringUtil;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static util.StringUtil.*;
 
@@ -84,5 +87,18 @@ public class StringUtilTest {
         String[] array = {"hello", "there", "you"};
         String toString = Arrays.toString(array);
         System.out.println(toString);
+    }
+
+    @Test
+    public void test09() {
+        String str = "prefix cmd -a 5 [1,2,3] \"this is a sentence\" -b";
+        List<String> elements = StringUtil.split(str);
+        Assert.assertEquals(str, String.join(" ", elements));
+
+        str = "cmd [\"this is\",\"a sentence\"] -b -c 900 -d [1,2,3]";
+        elements = StringUtil.split(str);
+        Assert.assertEquals(str, String.join(" ", elements));
+        Assert.assertEquals("cmd", elements.get(0));
+        Assert.assertEquals("[\"this is\",\"a sentence\"]", elements.get(1));
     }
 }
