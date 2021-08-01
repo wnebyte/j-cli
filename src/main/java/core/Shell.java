@@ -196,6 +196,38 @@ public class Shell {
     }
 
     @Command(name = "--help")
+    private void help(
+            @Argument(name = "-n", type = Optional.class)
+            String name
+    ) {
+        IConsole console = config.getConsole();
+        Consumer<Collection<core.Command>> handler = config.getHelpHandler();
+        Function<Collection<core.Command>, String> formatter = config.getHelpOutputFormatter();
+
+        if (handler != null) {
+            handler.accept(commands.values().stream()
+                    .filter(command -> command.getDeclaringClass() != this.getClass())
+                    .filter(command -> name == null || command.getName().equals(name) || command.getPrefix().equals(name))
+                    .collect(Collectors.toList()));
+        }
+        else if (console != null) {
+            console.println(formatter.apply(commands.values().stream()
+                    .filter(command -> command.getDeclaringClass() != this.getClass())
+                    .filter(command -> name == null || command.getName().equals(name) || command.getPrefix().equals(name))
+                    .collect(Collectors.toList())));
+        }
+    }
+
+    @Command(name = "-h")
+    private void h(
+            @Argument(name = "-n", type = Optional.class)
+            String name
+    ) {
+        help(name);
+    }
+
+    /*
+    @Command(name = "--help")
     private void help() {
         IConsole console = config.getConsole();
         Consumer<Collection<core.Command>> handler = config.getHelpHandler();
@@ -238,4 +270,5 @@ public class Shell {
     private void h(@Argument(name = "n", type = Positional.class) String n) {
         help(n);
     }
+     */
 }

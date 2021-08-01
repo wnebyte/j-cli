@@ -3,6 +3,8 @@ package core;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Sets;
 import exception.config.IllegalAnnotationException;
 import static util.AnnotationUtil.*;
 
@@ -13,7 +15,7 @@ public final class AnnotationProcessor {
     {
         // commands
         Map<String, Command> commands = new HashMap<>(transientCommands.size());
-        // signatures generated from every Command
+        // signatures
         Set<List<String>> signatures = new HashSet<>(transientCommands.size());
 
         for (Command command : transientCommands) {
@@ -27,18 +29,21 @@ public final class AnnotationProcessor {
             }
 
             // signature check
-            List<String> signature = signature(command);
-            boolean duplicate = !signatures.add(signature);
+            List<List<String>> signature = signatureOf(command);
+            boolean duplicate = !addSignature(signatures, signature);
 
-            // assert that signature has not already been produced
+            // assert that signature has not already been generated
             if (duplicate) {
                 throw new IllegalAnnotationException(
-                        "\t\n" + "Command signature " + Arrays.toString(signature.toArray()) +
-                                " has already been produced."
+                        "\t\n" + "The named properties of a Command may not collide with those of another Command.\n" +
+                                 "Signature " + Arrays.toString(signature.toArray()) + " has already been generated."
                 );
             }
-            // assert that every non-positional argument, cmd and prefix have distinct names
-            if (!distinct(command)) {
+            // assert that every non-positional argument has a distinct name
+            if (!distinct(command.getArguments().stream()
+                    .filter(argument -> !(argument instanceof Positional))
+                    .map(Argument::getName)
+                    .collect(Collectors.toList()))) {
                 throw new IllegalAnnotationException(
                         "\t\n" + "The named properties of a Command must all be distinct."
                 );
@@ -66,19 +71,16 @@ public final class AnnotationProcessor {
      * <p/>
      */
     @SuppressWarnings("StringEquality")
-    private boolean distinct(List<String> signature) {
-        signature = new ArrayList<>(signature); // the signature of the command
-        signature.removeIf(s -> s.equals(Positional.SYMBOL)); // remove signature generated from positional-argument
-
-        // iterate the signature values
-        for (String value : signature) {
-            // fetch the 'other' signature values
-            List<String> other = signature.stream()
-                    .filter(s -> !(s == value)).collect(Collectors.toList());
+    private boolean distinct(List<String> values) {
+        // iterate of the values
+        for (String value : values) {
+            // fetch the "not this" values
+            List<String> other = values.stream()
+                    .filter(s -> !(s == value))
+                    .collect(Collectors.toList());
             // check for equality
             boolean taken = other.stream()
                     .anyMatch(s -> (s.equals(value)));
-                           // || (s.contains(value)) || (value.contains(s))));
             // if equal return false
             if (taken) {
                 return false;
@@ -87,48 +89,50 @@ public final class AnnotationProcessor {
         return true;
     }
 
-    private boolean distinct(Command command) {
-        List<String> names = new ArrayList<>();
-        if (command.hasPrefix()) {
-            names.add(command.getPrefix());
-        }
-        names.add(command.getName());
-        names.addAll(
-                command.getArguments().stream()
-                        .map(Argument::getName)
-                        .collect(Collectors.toList()));
-        return distinct(names);
-    }
-
-    // Todo: does not include optional argument names, should it?
     /**
      * Generates a signature from the specified <code>Command</code>.
      * <p></p>
      */
-    private List<String> signature(Command command) {
-        /*
-        List<String> signature = command.getArguments().stream()
-                .filter(arg -> (arg instanceof Positional))
-                .map(Argument::getName).collect(Collectors.toList());
-        signature.addAll(
-                command.getArguments().stream()
-                        .filter(arg -> (arg instanceof Required))
-                        .map(Argument::getName).sorted().collect(Collectors.toList())
-        );
-        int i = 0;
-        if (command.hasPrefix()) {
-            i = 1;
-            signature.add(0, command.getPrefix());
-        }
-        signature.add(i, command.getName());
-        return signature;
-         */
+    private List<List<String>> signatureOf(final Command command) {
+        List<List<String>> sigOf = new ArrayList<>();
         List<String> signature = new ArrayList<>();
+
         if (command.hasPrefix()) {
             signature.add(command.getPrefix());
         }
         signature.add(command.getName());
-        return signature;
+        signature.addAll(command.getArguments().stream()
+                .filter(argument -> argument instanceof Positional)
+                .map(Argument::getName)
+                .sorted()
+                .collect(Collectors.toList()));
+        signature.addAll(command.getArguments().stream()
+                .filter(argument -> argument instanceof Required)
+                .map(Argument::getName)
+                .sorted()
+                .collect(Collectors.toList()));
+        Set<String> set = command.getArguments().stream()
+                .filter(argument -> argument instanceof Optional)
+                .map(Argument::getName)
+                .collect(Collectors.toSet());
+
+        Set<Set<String>> powerSet = Sets.powerSet(set);
+
+        for (Set<String> s : powerSet) {
+            sigOf.add(new ArrayList<>(signature) {{ addAll(s); }});
+        }
+
+        return sigOf;
+    }
+
+    private boolean addSignature(Set<List<String>> set, List<List<String>> list) {
+        for (List<String> element : list) {
+            boolean duplicate = !set.add(element);
+            if (duplicate) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String permute(final List<Argument> arguments)
@@ -142,31 +146,16 @@ public final class AnnotationProcessor {
         Set<List<String>> regExpressions = toSet(arguments);
         for (List<String> permutation : regExpressions)
         {
-          //  str = str.concat("(" + Arrays.toString(list.toArray()) + ")");
-            String permutationAsString = Arrays.toString(permutation.toArray());
-            str = str.concat("(").concat(permutationAsString.substring(1, permutationAsString.length() - 1))
+            String string = Arrays.toString(permutation.toArray());
+            str = str.concat("(").concat(string.substring(1, string.length() - 1))
                     .concat(")");
             if (i < regExpressions.size() - 1) {
                 str = str.concat("|");
             }
             i++;
         }
-        return str.replace(", ", "").concat(")");
-        /*
-        return str
-                .replace("([", "(")
-                .replace("])", ")")
-                .replace(", ", "")
+        return str.replace(", ", "")
                 .concat(")");
-         */
-        /*
-        return str
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "")
-                .concat(")");
-
-         */
     }
 
     private Set<List<String>> toSet(final List<Argument> arguments)
@@ -175,11 +164,14 @@ public final class AnnotationProcessor {
         Set<List<String>> set = new HashSet<>();
         // init a linked list for the regex's belonging to the non-positional arguments
         LinkedList<String> nonPositional = arguments.stream().filter(arg -> !(arg instanceof Positional))
-                .map(Argument::getRegex).collect(Collectors.toCollection(LinkedList::new));
+                .map(Argument::getRegex)
+                .collect(Collectors.toCollection(LinkedList::new));
 
         // arguments contain no non-positional arguments
         if (nonPositional.isEmpty()) {
-            set.add(arguments.stream().map(Argument::getRegex).collect(Collectors.toList()));
+            set.add(arguments.stream()
+                    .map(Argument::getRegex)
+                    .collect(Collectors.toList()));
             return set;
         }
 
@@ -211,7 +203,6 @@ public final class AnnotationProcessor {
                 });
             }
         }
-
         return set;
     }
 }

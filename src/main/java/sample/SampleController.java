@@ -1,8 +1,8 @@
 package sample;
 
+import annotation.*;
 import annotation.Argument;
 import annotation.Command;
-import annotation.Controller;
 import core.*;
 
 import java.util.Arrays;
@@ -15,6 +15,27 @@ public class SampleController {
         this.console = console;
     }
 
+
+    @Command
+    public void foo(
+            @Argument(name = "-a", type = Optional.class)
+            int a,
+            @Argument(name = "-b", type = Optional.class)
+            int b,
+            @Argument(name = "-c", type = Optional.class)
+            int c) {
+
+    }
+
+    @Command(name = "foo")
+    public void funct(
+            @Argument(name = "-a")
+            int a
+    ) {
+
+    }
+
+    /*
     @Command(
             name = "foo",
             description = "does something"
@@ -69,31 +90,6 @@ public class SampleController {
             )
             boolean d) {
         console.println("-a: " + a + ", -b: " + Arrays.toString(b) + ", -c: " + c + ", -d: " + d);
-    }
-
-    /*
-    @Command(
-            description = "does something else"
-    )
-    public void foo(
-            @Argument(name = "a",
-                    type = Positional.class
-            ) String[] a,
-            @Argument(
-                    name = "b",
-                    type = Optional.class
-            ) int b) {
-        console.println("a: " + Arrays.toString(a) + ", b: " + b);
-    }
-
-    @Command
-    public void str(
-            @Argument(name = "-a")
-            String a,
-            @Argument(name  = "-b")
-            String b
-    ) {
-        console.println("a: " + a + ", b: " + b);
     }
      */
 }
