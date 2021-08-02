@@ -1,10 +1,11 @@
 package core;
 
 import exception.runtime.ParseException;
+import util.StringUtil;
 
 public interface TypeConverter<T> {
 
-    T convert(String value) throws ParseException;
+    T convert(final String value) throws ParseException;
 
     T defaultValue();
 
@@ -12,16 +13,11 @@ public interface TypeConverter<T> {
 
     String WHITESPACE_REGEX = "\\s";
 
-    String ARRAY_ELEMENT_SEPARATOR = ",";
+    String DEFAULT_REGEX = WHITESPACE_REGEX + "([^\\s\"]*|\"[^\"]*\")";
 
-    String STANDARD_REGEX = WHITESPACE_REGEX + "([^\\s\"]*|\"[^\"]*\")";
-    //"[^\\s-]*";
-    // "([^\\s-]*|\"[^\"]*\")"
+    String ARRAY_REGEX = WHITESPACE_REGEX + "\\[([^\\s\"\\[\\]]*|\"[^\"\\[\\]]*\")*\\]";
 
-    String ARRAY_REGEX = WHITESPACE_REGEX + "\\[([^\\s\"]*|\"[^\"]*\")*\\]";
-    //\[[^\s-]*\]
-
-    static String normalize(String value) {
+    static String normalize(final String value) {
         if (value != null) {
             return value.replace("[", "")
                     .replace("]", "")
@@ -29,5 +25,9 @@ public interface TypeConverter<T> {
                     .trim();
         }
         return "";
+    }
+
+    static String[] arraySplit(final String value) {
+        return StringUtil.splitByComma(value).toArray(new String[0]);
     }
 }

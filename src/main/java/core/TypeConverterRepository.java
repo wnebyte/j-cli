@@ -8,17 +8,20 @@ import java.util.*;
 public final class TypeConverterRepository {
 
     @SuppressWarnings("unchecked")
-    public static <T> TypeConverter<T> getTypeConverter(final Class<T> typeOf) throws NoSuchTypeConverterException {
+    public static <T> TypeConverter<T> getTypeConverter(final Class<T> typeOf)
+            throws NoSuchTypeConverterException {
         if (typeOf == null) {
             throw new IllegalArgumentException(
-                    "The specified class must not be null."
+                    "The specified Type of the TypeConverter must not be null."
             );
         }
         if (TYPE_CONVERTERS.containsKey(typeOf)) {
             return (TypeConverter<T>) TYPE_CONVERTERS.get(typeOf);
         }
         else {
-            throw new NoSuchTypeConverterException("No TypeConverter of the specified type is known.");
+            throw new NoSuchTypeConverterException(
+                    "No TypeConverter of the specified Type is registered."
+            );
         }
     }
 
@@ -34,14 +37,14 @@ public final class TypeConverterRepository {
             @SuppressWarnings("unchecked")
             public T[] convert(String value) throws ParseException {
                 try {
-                    String[] elements =
-                            TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                    String[] elements = TypeConverter.arraySplit(value);
                     T[] array = (T[]) Array.newInstance(componentType, elements.length);
                     TypeConverter<T> typeConverter =
                             TypeConverterRepository.getTypeConverter(componentType);
                     int i = 0;
                     for (String element : elements) {
-                        array[i++] = typeConverter.convert(element);
+                        String val = TypeConverter.normalize(element);
+                        array[i++] = typeConverter.convert(val);
                     }
                     return array;
                 } catch (NoSuchTypeConverterException e) {
@@ -82,12 +85,12 @@ public final class TypeConverterRepository {
         @Override
         public boolean[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 boolean[] array = new boolean[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = BOOLEAN_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = BOOLEAN_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -127,12 +130,12 @@ public final class TypeConverterRepository {
         @Override
         public byte[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 byte[] array = new byte[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = BYTE_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = BYTE_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -172,12 +175,12 @@ public final class TypeConverterRepository {
         @Override
         public char[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 char[] array = new char[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = CHARACTER_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = CHARACTER_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -217,11 +220,12 @@ public final class TypeConverterRepository {
         @Override
         public double[] convert(String value) throws ParseException {
             try {
-                String[] elements = TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 double[] array = new double[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = DOUBLE_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = DOUBLE_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -261,12 +265,12 @@ public final class TypeConverterRepository {
         @Override
         public float[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 float[] array = new float[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = FLOAT_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = FLOAT_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -306,12 +310,12 @@ public final class TypeConverterRepository {
         @Override
         public int[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 int[] array = new int[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = INTEGER_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = INTEGER_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -351,12 +355,12 @@ public final class TypeConverterRepository {
         @Override
         public long[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 long[] array = new long[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = LONG_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = LONG_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -396,12 +400,12 @@ public final class TypeConverterRepository {
         @Override
         public short[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 short[] array = new short[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = SHORT_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = SHORT_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {
@@ -437,12 +441,12 @@ public final class TypeConverterRepository {
         @Override
         public String[] convert(String value) throws ParseException {
             try {
-                String[] elements =
-                        TypeConverter.normalize(value).split(TypeConverter.ARRAY_ELEMENT_SEPARATOR);
+                String[] elements = TypeConverter.arraySplit(value);
                 String[] array = new String[elements.length];
                 int i = 0;
                 for (String element : elements) {
-                    array[i++] = STRING_TYPE_CONVERTER.convert(element);
+                    String val = TypeConverter.normalize(element);
+                    array[i++] = STRING_TYPE_CONVERTER.convert(val);
                 }
                 return array;
             } catch (Exception e) {

@@ -24,7 +24,7 @@ public final class AnnotationProcessor {
 
             if (!(isAnnotated(method))) {
                 throw new IllegalAnnotationException(
-                        "\t\n" + "Method " + method + " is not annotated with " + annotation.Command.class.toString()
+                        "\t\n" + "Method " + method + " is not annotated with " + annotation.Command.class.toString() + "."
                 );
             }
 

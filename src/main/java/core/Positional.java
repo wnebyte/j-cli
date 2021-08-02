@@ -13,7 +13,7 @@ public final class Positional extends Argument {
 
     protected Positional(Parameter parameter, int index, int position) throws NoSuchTypeConverterException {
         super(parameter, index, SYMBOL);
-        setRegex(getTypeConverter().isArray() ? TypeConverter.ARRAY_REGEX : TypeConverter.STANDARD_REGEX);
+        setRegex(getTypeConverter().isArray() ? TypeConverter.ARRAY_REGEX : TypeConverter.DEFAULT_REGEX);
         this.position = position;
     }
 

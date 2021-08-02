@@ -1,12 +1,13 @@
 package sample;
 
-import annotation.*;
 import annotation.Argument;
 import annotation.Command;
+import annotation.Controller;
 import core.*;
 
 import java.util.Arrays;
 
+@Controller(name = "foo")
 public class SampleController {
 
     private final IConsole console;
@@ -15,81 +16,49 @@ public class SampleController {
         this.console = console;
     }
 
-
-    @Command
-    public void foo(
+   @Command(description = "test")
+   public void foo(
             @Argument(name = "-a", type = Optional.class)
-            int a,
-            @Argument(name = "-b", type = Optional.class)
-            int b,
-            @Argument(name = "-c", type = Optional.class)
-            int c) {
-
-    }
-
-    @Command(name = "foo")
-    public void funct(
-            @Argument(name = "-a")
-            int a
-    ) {
-
-    }
-
-    /*
-    @Command(
-            name = "foo",
-            description = "does something"
-    )
-    public void foo(
-            @Argument(
-                    name = "-a",
-                    type = Required.class,
-                    description = "number of somethings"
-            ) int a,
-            @Argument(
-                    name = "-b",
-                    type = Optional.class
-            ) int b) {
-        console.println("a: " + a + ", b: " + b);
-    }
-
-    @Command
-    public void array(
-            @Argument(
-                    name = "-a",
-                    type = Positional.class
-            )
             String[] a,
-            @Argument(
-                    name = "-b",
-                    type = Optional.class
-            )
-            String b
-    ) {
-        console.println("a: " + Arrays.toString(a) + ", b: " + b);
-    }
+            @Argument(name = "-b", type = Optional.class)
+            String b,
+            @Argument(name = "-c", type = Optional.class)
+            String[] c,
+            @Argument(name = "-d", type = Optional.class)
+            String d
+   ) {
+        console.println("a: " + Arrays.toString(a) + ", b: " + b + ", c: " + Arrays.toString(c) + ", d: " + d);
+   }
 
-    @Command
-    public void test(
-            @Argument(
-                    name = "-b",
-                    type = Positional.class
-            )
-                    int[] b,
-            @Argument(
-                    name = "-a"
-            )
-            int a,
-            @Argument(
-                    name = "-c"
-            )
-            String c,
-            @Argument(
-                    name = "-d",
-                    type = Optional.class
-            )
-            boolean d) {
-        console.println("-a: " + a + ", -b: " + Arrays.toString(b) + ", -c: " + c + ", -d: " + d);
-    }
-     */
+   @Command(description = "add two integers")
+   public void add(
+           @Argument(type = Positional.class)
+           int a,
+           @Argument(type = Positional.class)
+           int b
+   ) {
+        console.println((a + b));
+   }
+
+   @Command
+   public void test(
+           @Argument(type = Positional.class)
+                   int a,
+           @Argument(type = Positional.class)
+                   int b,
+           @Argument(name = "-c", type = Optional.class)
+                   String c,
+           @Argument(name = "-d", type = Optional.class)
+                   String d
+   ) {
+        console.println("a: " + a + ", b: " + b + ", c: " + c + ", d: " + d);
+   }
+
+   @Command(
+           name = "",
+           description = ""
+   )
+   public void foo() {
+
+   }
 }

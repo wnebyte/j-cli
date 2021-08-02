@@ -3,6 +3,7 @@ package util;
 import core.IConsole;
 import exception.config.NoDefaultConstructorException;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -61,28 +62,30 @@ public final class InstanceTracker {
         return objects.size();
     }
 
-    private Object newInstance(Class<?> objectClass) throws NoDefaultConstructorException {
+    private Object newInstance(final Class<?> cls) throws NoDefaultConstructorException {
         Object newInstance = null;
         Constructor<?> constructor;
         boolean success = false;
 
         if (injectable != null) {
             try {
-                constructor = objectClass.getConstructor(IConsole.class);
+                constructor = Arrays.stream(cls.getConstructors())
+                        .filter(con -> con.getParameterCount() == 1 &&
+                                IConsole.class.isAssignableFrom(con.getParameterTypes()[0]))
+                        .findFirst().orElseThrow();
                 constructor.setAccessible(true);
                 newInstance = constructor.newInstance(injectable);
                 success = true;
             } catch (Exception ignored) {}
         }
-
         if (!success) {
             try {
-                constructor = objectClass.getConstructor();
+                constructor = cls.getConstructor();
                 constructor.setAccessible(true);
                 newInstance = constructor.newInstance();
             } catch (Exception e) {
                 throw new NoDefaultConstructorException(
-                        "No default constructor is available for: " + objectClass
+                        "No default constructor is available for: " + cls
                 );
             }
         }

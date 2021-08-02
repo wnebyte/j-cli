@@ -195,7 +195,7 @@ public class Shell {
         return commands.keySet();
     }
 
-    @Command(name = "--help")
+    @Command(name = "--help", description = "help command")
     private void help(
             @Argument(name = "-n", type = Optional.class)
             String name

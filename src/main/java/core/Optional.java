@@ -15,7 +15,7 @@ public final class Optional extends Argument {
                 "(\\s".concat(getName()).concat("|)") :
                         getTypeConverter().isArray() ?
                                 "(\\s".concat(getName()).concat(TypeConverter.ARRAY_REGEX).concat("|)") :
-                                "(\\s".concat(getName()).concat(TypeConverter.STANDARD_REGEX).concat("|)")
+                                "(\\s".concat(getName()).concat(TypeConverter.DEFAULT_REGEX).concat("|)")
                 );
     }
 

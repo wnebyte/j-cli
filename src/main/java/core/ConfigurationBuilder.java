@@ -36,7 +36,6 @@ public class ConfigurationBuilder {
 
     private Consumer<Collection<Command>> helpHandler;
 
-    /** The HelpOutputFormatter Function */
     private Function<Collection<core.Command>, String> helpOutputFormatter = new Function<>() {
         // default implementation
         @Override

@@ -26,14 +26,9 @@ public final class AnnotationUtil {
         return (parameter != null) && (parameter.isAnnotationPresent(Argument.class));
     }
 
-    /*
-    public static String getName(Class<?> objectClass) {
-        if ((isAnnotated(objectClass)) && !(hasDefaultName(objectClass.getAnnotation(Controller.class)))) {
-            return objectClass.getAnnotation(Controller.class).name();
-        }
-        return objectClass.getSimpleName().toLowerCase(Locale.ROOT).replace("controller", "");
+    public static boolean hasDefaultName(Parameter parameter) {
+        return isAnnotated(parameter) && parameter.getAnnotation(Argument.class).name().equals("");
     }
-     */
 
     public static String getName(Class<?> objectClass) {
         if (objectClass == null) {
@@ -69,9 +64,14 @@ public final class AnnotationUtil {
                     "Parameter must not be null."
             );
         }
-        return isAnnotated(parameter) ?
-                parameter.getAnnotation(Argument.class).name() :
-                parameter.getName().toLowerCase(Locale.ROOT);
+        if (isAnnotated(parameter)) {
+            return hasDefaultName(parameter) ?
+                    parameter.getName().toLowerCase(Locale.ROOT) :
+                    parameter.getAnnotation(Argument.class).name();
+        }
+        else {
+            return parameter.getName().toLowerCase(Locale.ROOT);
+        }
     }
 
     public static boolean hasDefaultName(Controller controller) {

@@ -10,7 +10,7 @@ public final class Required extends Argument {
     public Required(Parameter parameter, int index) throws NoSuchTypeConverterException {
         super(parameter, index);
         setRegex("\\s".concat(getName()).concat(getTypeConverter().isArray() ?
-                TypeConverter.ARRAY_REGEX : TypeConverter.STANDARD_REGEX));
+                TypeConverter.ARRAY_REGEX : TypeConverter.DEFAULT_REGEX));
     }
 
     @Override

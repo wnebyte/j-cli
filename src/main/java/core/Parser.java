@@ -3,19 +3,19 @@ package core;
 import exception.runtime.ParseException;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static util.StringUtil.split;
+import static util.StringUtil.splitByWhitespace;
 
 public final class Parser {
 
     private final Command command;
 
     private final String input;
+
 
     public Parser(Command command, String input) {
         this.command = command;
@@ -37,7 +37,7 @@ public final class Parser {
                             }
                         })
                         .collect(Collectors.toList());
-        LinkedList<String> values = process(split(input)); // list of user input
+        LinkedList<String> values = process(splitByWhitespace(input)); // list of user input
 
         for (Positional argument : positionalArguments) {
             String value = values.pop();

@@ -8,36 +8,6 @@ import java.util.regex.Pattern;
 
 public final class StringUtil {
 
-    /*
-    public static String normalize(String s, char prefix, boolean add) {
-        if ((s != null) && (1 <= s.length())) {
-
-            // iterate over the string
-            for (int i = 0; i < s.length(); i++) {
-                char c = s.charAt(i);
-
-                if (c == prefix) {
-                    // if char equals prefix then fetch leading string.
-                    var sub = s.substring(0, i);
-
-                    if (!(equals(sub, prefix))) {
-                        // if every char of leading string is not identical then remove every occurrence of char.
-                        s = remove(s, prefix);
-                    }
-                }
-                else if (!(Character.isLetter(c))) {
-                    // if char is not letter then remove char.
-                    s = remove(s, c);
-                }
-            }
-        }
-        if ((add) && (s != null) && !(s.startsWith(String.valueOf(prefix)))) {
-            s = prefix + s;
-        }
-        return s;
-    }
-     */
-
     /**
      * Normalizes the specified <code>String</code> by removing any non leading characters equal to the specified prefix,
      * and any non letters anywhere in the specified <code>String</code>.
@@ -76,14 +46,14 @@ public final class StringUtil {
         return (pattern.matcher(name).matches()) ?
                 name :
                 name.transform(new Function<String, String>() {
-                    final List<Character> characters = Arrays.asList(
+                    final List<Character> forbidden = Arrays.asList(
                             ' ', '"', '[', ']'
                     );
                     @Override
                     public String apply(String s) {
                         StringBuilder builder = new StringBuilder();
                         for (char character : s.toCharArray()) {
-                            if (!(characters.contains(character))) {
+                            if (!(forbidden.contains(character))) {
                                 builder.append(character);
                             }
                         }
@@ -153,22 +123,33 @@ public final class StringUtil {
         return index;
     }
 
-    public static List<String> split(String str) {
+    /**
+     * Used to split userInput.
+     */
+    public static List<String> splitByWhitespace(final String string) {
         List<String> elements = new ArrayList<>();
-        char[] array = str.toCharArray();
+        if (string == null) {
+            return elements;
+        }
+        char[] array = string.toCharArray();
         int startIndex = 0;
 
         for (int i = 0; i < array.length; i++) {
             char character = array[i];
-
-            if ((character == ' ') && (evenNumberOfPrecedingOccurrences(str, i))) {
-                String element = str.substring(startIndex, i);
+            /*
+            if character is a whitespace, and String has an even number of preceding
+            quotation characters, and the same number of opening square brackets as closing square brackets.
+             */
+            if ((character == ' ') && (evenNumberOfPrecedingOccurrences(string, i))) {
+                // get substring
+                String element = string.substring(startIndex, i);
+                // add substring to list
                 elements.add(element);
+                // set index
                 startIndex = i + 1;
             }
         }
-
-        String element = str.substring(startIndex);
+        String element = string.substring(startIndex);
         elements.add(element);
         return elements;
     }
@@ -188,15 +169,57 @@ public final class StringUtil {
                 case '"':
                     counter++;
                     break;
+                    /*
                 case '[':
                     secondCounter++;
                     break;
                 case ']':
                     secondCounter--;
                     break;
+                     */
             }
         }
 
-        return (counter % 2 == 0) && (secondCounter == 0);
+        return (counter % 2 == 0); // && (secondCounter == 0);
+    }
+
+    /**
+     * Used to split arrays.
+     */
+    public static List<String> splitByComma(final String string) {
+        List<String> elements = new ArrayList<>();
+        if (string == null) {
+            return elements;
+        }
+        char[] array = string.toCharArray();
+        int startIndex = 0;
+
+        for (int i = 0; i < array.length; i++) {
+            char character = array[i];
+
+            if ((character == ',') && (evenNumberOfPrecedingQuotationChars(string, i))) {
+                String element = string.substring(startIndex, i);
+                elements.add(element);
+                startIndex = i + 1;
+            }
+        }
+        String element = string.substring(startIndex);
+        elements.add(element);
+        return elements;
+    }
+
+    public static boolean evenNumberOfPrecedingQuotationChars(final String string, final int index) {
+        if (string == null) {
+            return true;
+        }
+        char[] array = string.toCharArray();
+        int counter = 0;
+
+        for (int i = 0; i <= index; i++) {
+            if (array[i] == '"') {
+                counter++;
+            }
+        }
+        return counter % 2 == 0;
     }
 }

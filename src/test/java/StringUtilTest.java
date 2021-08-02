@@ -5,7 +5,6 @@ import util.StringUtil;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static util.StringUtil.*;
 
@@ -92,13 +91,25 @@ public class StringUtilTest {
     @Test
     public void test09() {
         String str = "prefix cmd -a 5 [1,2,3] \"this is a sentence\" -b";
-        List<String> elements = StringUtil.split(str);
+        List<String> elements = StringUtil.splitByWhitespace(str);
         Assert.assertEquals(str, String.join(" ", elements));
 
         str = "cmd [\"this is\",\"a sentence\"] -b -c 900 -d [1,2,3]";
-        elements = StringUtil.split(str);
+        elements = StringUtil.splitByWhitespace(str);
         Assert.assertEquals(str, String.join(" ", elements));
         Assert.assertEquals("cmd", elements.get(0));
         Assert.assertEquals("[\"this is\",\"a sentence\"]", elements.get(1));
+    }
+
+    @Test
+    public void test10() {
+        String string = "[element1,\"ele,ment2\",element3]";
+        List<String> elements = splitByComma(string);
+        List<String> expected = Arrays.asList(
+                "[element1",
+                "\"ele,ment2\"",
+                "element3]"
+        );
+        Assert.assertEquals(expected, elements);
     }
 }
