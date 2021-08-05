@@ -2,13 +2,16 @@ package core;
 
 import exception.runtime.ParseException;
 import util.Bundle;
+import util.StringUtil;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static util.StringUtil.whitespace;
-
+/**
+ * This class is used to specify configuration options for an instance of the {@link Shell} class.
+ */
 public class ConfigurationBuilder {
 
     private IConsole console;
@@ -34,6 +37,29 @@ public class ConfigurationBuilder {
         }
     };
 
+    private Consumer<Command> helpHandler;
+
+    private Function<Command, String> helpOutputFormatter = new Function<Command, String>() {
+        @Override
+        public String apply(Command command) {
+            String ln0 = (command.hasDescription()) ?
+                    command.getDescription().concat("\n").concat(command.toString()) :
+                    command.toString();
+            int len = command.toString().length();
+
+            String lnr = command.getArguments().stream().map(new Function<Argument, String>() {
+                @Override
+                public String apply(Argument argument) {
+                    return StringUtil.genWhitespace(len).concat(argument.getName())
+                            .concat(argument.getDescription());
+                }
+            }).collect(Collectors.joining("\n"));
+
+            return ln0.concat("\n").concat(lnr);
+        }
+    };
+
+    /*
     private Consumer<Collection<Command>> helpHandler;
 
     private Function<Collection<core.Command>, String> helpOutputFormatter = new Function<>() {
@@ -62,10 +88,11 @@ public class ConfigurationBuilder {
             return new String(output);
         }
     };
+     */
 
     private Set<Object> objects;
 
-    private Set<String> packages = new HashSet<>() {
+    private final Set<String> packages = new HashSet<>() {
         {
             add(""); // defaults to all packages on the classpath
         }
@@ -83,11 +110,8 @@ public class ConfigurationBuilder {
     }
 
     /**
-     * Configure the Shell to use the specified console.
-     * <p/>
-     * By not specifying a console the Shell has no means of providing any output, and all the
-     * configured formatter functions will be void.
-     * @param console the console to be used.
+     * Configure the Shell to use the specified IConsole.<br/>
+     * @param console the console to be used by the Shell to print and read.
      */
     public final ConfigurationBuilder setConsole(final IConsole console) {
         this.console = console;
@@ -146,22 +170,38 @@ public class ConfigurationBuilder {
         return this;
     }
 
+
     /**
      * Configure the Shell to use the specified Handler, in the event of the Shell's help Command being matched.
      * @param handler the handler to be used.
      */
+    public final ConfigurationBuilder setHelpHandler(final Consumer<Command> handler) {
+        if (handler != null) {
+            this.helpHandler = handler;
+        }
+        return this;
+    }
+    /*
     public final ConfigurationBuilder setHelpHandler(final Consumer<Collection<Command>> handler) {
         if (handler != null) {
             this.helpHandler = handler;
         }
         return this;
     }
+     */
 
     /**
-     * Configure the Shell to use the specified formatter Function, to format the output
-     * of the Shell's help Command.
-     * @param formatter the formatter Function to be used.
+     * Configure the Shell to use the specified formatter, to format the output
+     * for the Shell's built in help Command.
+     * @param formatter the formatter to be used.
      */
+    public final ConfigurationBuilder setHelpOutputFormatter(final Function<Command, String> formatter) {
+        if (formatter != null) {
+            this.helpOutputFormatter = formatter;
+        }
+        return this;
+    }
+    /*
     public final ConfigurationBuilder
     setHelpOutputFormatter(final Function<Collection<Command>, String> formatter) {
         if (formatter != null) {
@@ -169,19 +209,23 @@ public class ConfigurationBuilder {
         }
         return this;
     }
+     */
 
     /**
      * Configure the Shell to scan the specified packages. By default all packages are scanned.
      */
+    /*
     public final ConfigurationBuilder setScanPackages(final String... packages) {
         if ((packages != null) && (packages.length != 0)) {
             this.packages = new HashSet<>(Arrays.asList(packages));
         }
         return this;
     }
+     */
 
     /**
-     * Configure the Shell to scan the specified Objects.
+     * Configure the Shell to scan the declared classes of the specified Objects for Command annotated Java Methods.
+     * @param objects the Objects to be scanned for, and used to invoke any declared Commands.
      */
     public final ConfigurationBuilder setScanObjects(final Object... objects) {
         if ((objects != null) && (objects.length != 0)) {
@@ -201,7 +245,8 @@ public class ConfigurationBuilder {
     }
 
     /**
-     * Configure the Shell to scan the specified Classes.
+     * Configure the Shell to scan the specified Classes for Command annotated Java Methods.
+     * @param classes the Classes to be scanned.
      */
     public final ConfigurationBuilder setScanClasses(final Class<?>... classes) {
         if ((classes != null) && (classes.length != 0)) {
@@ -211,7 +256,9 @@ public class ConfigurationBuilder {
     }
 
     /**
-     * Configure the Shell to not scan any packages. By default all packages are scanned.
+     * Configure the Shell to not scan all the packages on the class-path.
+     * <br/>
+     * By default all packages are scanned.
      */
     public final ConfigurationBuilder nullifyScanPackages() {
         this.nullifyScanPackages = true;
@@ -219,7 +266,7 @@ public class ConfigurationBuilder {
     }
 
     /**
-     * Configure the Shell to not map/include its declared help Commands.
+     * Configure the Shell to not include it's built in help Commands.
      */
     public final ConfigurationBuilder nullifyHelpCommands() {
         this.nullifyHelpCommands = true;
@@ -257,11 +304,11 @@ public class ConfigurationBuilder {
         return parseExceptionOutputFormatter;
     }
 
-    public Consumer<Collection<Command>> getHelpHandler() {
+    public Consumer<Command> getHelpHandler() {
         return helpHandler;
     }
 
-    public Function<Collection<Command>, String> getHelpOutputFormatter() {
+    public Function<Command, String> getHelpOutputFormatter() {
         return helpOutputFormatter;
     }
 

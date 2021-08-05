@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 import core.Shell;
 
 /**
- * Annotate your Java Methods with this annotation and they can be accessed via an instance of the
- * {@link Shell} class during runtime.<br/>
+ * Annotate your Java Methods with this annotation and they can be parsed, initialized, and invoked via an
+ * instance of the {@link Shell} class at runtime.<br/>
  * Here are some examples of usage:<br/><br/>
  * <code>
  *     {@literal @}Command<br/>

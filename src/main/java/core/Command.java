@@ -16,38 +16,34 @@ import static util.ReflectionUtil.isBoolean;
 import static util.AnnotationUtil.*;
 
 /**
- * Class represents a Command mapped directly from a java Method.
+ * This class represents a Command mapped directly from a Java Method.
+ * @see annotation.Command
  */
 public final class Command {
 
-    /** The Object to which the Method belongs to */
     private final Object owner;
 
-    /** The Method */
     private final Method method;
 
-    /** List of Command Arguments */
     private final List<Argument> arguments;
 
-    /** Command Prefix */
     private final String prefix;
 
-    /** Command Name */
     private final String name;
 
-    /** Command Description */
     private final String description;
 
     /**
-     * Primary Constructor.
-     * @param owner the object to which the specified Method belongs to.
-     * @param method the Method.
-     * @throws IllegalAnnotationException in the event of the specified Method not being annotated with
-     * <code>Command</code>.
-     * @throws NoSuchTypeConverterException in the event of there not being any registered <code>TypeConverters</code>
-     * with one or more of the Parameters belonging to the specified Method.
-     * @see annotation.Command
-     * @see TypeConverter
+     * Constructs a new Command instance using the specified Object and Method.
+     * @param owner the Object to which the specified Method belongs to.<br/>
+     *              Is expected to be <code>null</code> if the Method does not belong to an Object.
+     * @param method the Method that is to be mapped into a Command.
+     * @throws IllegalAnnotationException if the specified Method is not annotated with
+     * {@linkplain annotation.Command}.
+     * @throws NoSuchTypeConverterException if the {@linkplain TypeConverterRepository} lacks an implementation
+     * for the Type of one of the specified Method's Parameters,
+     * or if one of the Method's Arguments have a specified TypeConverter class which can not be
+     * reflectively instantiated.
      */
     Command(Object owner, Method method) throws IllegalAnnotationException, NoSuchTypeConverterException {
         if (!(isAnnotated(method))) {
@@ -65,9 +61,11 @@ public final class Command {
     }
 
     /**
-     * @return a list of Command Arguments.
-     * @throws NoSuchTypeConverterException in the event of there not being any registered <code>TypeConverters</code>
-     * with one or more of the Parameters belonging to the specified Method.
+     * Initializes and returns the Arguments of this Command.
+     * @return this Command's Arguments.
+     * @throws NoSuchTypeConverterException if the {@linkplain TypeConverterRepository} lacks an implementation
+     * for the Type of one of the underlying Method's Parameters,
+     * or if one of the Arguments have a specified TypeConverter class which can not be instantiated.
      */
     private List<Argument> createArguments() throws NoSuchTypeConverterException {
         List<Argument> arguments = new ArrayList<>(method.getParameterCount());
@@ -91,59 +89,92 @@ public final class Command {
     }
 
     /**
-     * Returns the "owner" of <code>this</code> Method.
+     * Attempts to execute this Command by parsing the specified input, and invoking this Command's
+     * underlying Method.
+     * @param input the input received from the user.
+     * @throws ParseException if one of this Command's Arguments failed to convert.
      */
-    protected Object getOwner() {
+    void execute(final String input) throws ParseException {
+        Parser parser = new Parser(this, input);
+
+        try {
+            Object[] args = parser.parse();
+            getMethod().invoke(getOwner(), args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @return the Object to which this Command's underlying Method belongs to.
+     */
+    Object getOwner() {
         return owner;
     }
 
     /**
-     * Returns the declaring class of <code>this</code> Method.
+     * @return the underlying Method of this Command.
      */
-    public Class<?> getDeclaringClass() {
+    Method getMethod() {
+        return method;
+    }
+
+    /**
+     * @return the declaring Class of this Command's underlying Method.
+     */
+    Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
     }
 
     /**
-     * Returns the arguments belonging to this class.
+     * @return this Command's List of Arguments.
      */
     public List<Argument> getArguments() {
         return arguments;
     }
 
     /**
-     * Returns whether this class has a prefix.
+     * @return whether this Command has a prefix.
      */
     public boolean hasPrefix() {
         return (getPrefix() != null) && !(getPrefix().equals(""));
     }
 
     /**
-     * Returns the prefix of this class.
+     * @return this Command's prefix.
      */
     public String getPrefix() {
         return prefix;
     }
 
     /**
-     * Returns the name of this class.
+     * @return the name of this Command.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns the description of this class.
+     * @return the description of this Command.
      */
     public String getDescription() {
         return description;
     }
 
     /**
-     * Returns the underlying method of this class.
+     * @return whether this Command has a description.
      */
-    Method getMethod() {
-        return method;
+    public boolean hasDescription() {
+        return (description != null) && !(description.equals(""));
+    }
+
+    /**
+     * @return a String representation of this Command.
+     */
+    public String toString() {
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + getName() + " " +
+                getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));
     }
 
     /*
@@ -168,28 +199,4 @@ public final class Command {
         }
     }
     */
-
-    /**
-     * Parses the specified input and invokes the underlying Java Method.
-     * @param input the input received from the user.
-     */
-    void execute(final String input) throws ParseException {
-        Parser parser = new Parser(this, input);
-
-        try {
-            Object[] args = parser.parse();
-            getMethod().invoke(getOwner(), args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Returns a <code>String</code> representation of this class.
-     */
-    public String toString() {
-        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
-        return prefix + getName() + " " +
-                getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));
-    }
 }

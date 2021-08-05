@@ -112,4 +112,11 @@ public class StringUtilTest {
         );
         Assert.assertEquals(expected, elements);
     }
+
+    @Test
+    public void test11() {
+        String array = "[\"first element\",\"[[[]\"]";
+        String newArray = StringUtil.replaceFirstAndLast(array, '[', ']');
+        System.out.println(newArray);
+    }
 }

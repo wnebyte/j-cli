@@ -5,28 +5,49 @@ import exception.runtime.ParseException;
 import java.lang.reflect.Array;
 import java.util.*;
 
+/**
+ * This static class acts as a Repository for implementations of the {@link TypeConverter} interface.
+ */
 public final class TypeConverterRepository {
 
+    /**
+     * Returns the TypeConverter to which the specified Class is mapped,
+     * or throws a NoSuchTypeConverterException if there is no mapping for the specified Class.
+     * @param cls the Class whose associated TypeConverter is to be returned.
+     * @param <T> the Type of the specified Class.
+     * @return the TypeConverter to which the specified Class is mapped.
+     * @throws NoSuchTypeConverterException if there is no mapping for the specified Class.
+     */
     @SuppressWarnings("unchecked")
-    public static <T> TypeConverter<T> getTypeConverter(final Class<T> typeOf)
+    public static <T> TypeConverter<T> getTypeConverter(final Class<T> cls)
             throws NoSuchTypeConverterException {
-        if (typeOf == null) {
+        if (cls == null) {
             throw new IllegalArgumentException(
-                    "The specified Type of the TypeConverter must not be null."
+                    "The specified Class must not be null."
             );
         }
-        if (TYPE_CONVERTERS.containsKey(typeOf)) {
-            return (TypeConverter<T>) TYPE_CONVERTERS.get(typeOf);
+        if (TYPE_CONVERTERS.containsKey(cls)) {
+            return (TypeConverter<T>) TYPE_CONVERTERS.get(cls);
         }
         else {
             throw new NoSuchTypeConverterException(
-                    "No TypeConverter of the specified Type is registered."
+                    "No TypeConverter of the specified Class is registered."
             );
         }
     }
 
-    public static <T> boolean putIfAbsent(final Class<T> typeOf, final TypeConverter<T> typeConverter) {
-        TypeConverter<?> tc = TYPE_CONVERTERS.putIfAbsent(typeOf, typeConverter);
+    /**
+     * If the specified Class is not already associated with a TypeConverter
+     * (or is mapped to <code>null</code>) associates it with the given TypeConverter and returns
+     * <code>true</code>, else returns <code>false</code>.
+     * @param cls Class which the specified TypeConverter is to be associated.
+     * @param typeConverter TypeConverter to be associated with the specified Class.
+     * @param <T> Type of the specified Class.
+     * @return <code>true</code> if there was no previous mapping for the specified Class,
+     * else <code>false</code>.
+     */
+    public static <T> boolean putIfAbsent(final Class<T> cls, final TypeConverter<T> typeConverter) {
+        TypeConverter<?> tc = TYPE_CONVERTERS.putIfAbsent(cls, typeConverter);
         return tc == null;
     }
 

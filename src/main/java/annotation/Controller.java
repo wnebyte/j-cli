@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotate your Class with this annotation if it declares any {@link Command} annotated Java Methods,
- * to give each <code>Command</code> a prefix.
+ * to give each Command a prefix.
  * <br/>
  * Here are some examples of usages:
  * <br><br/>

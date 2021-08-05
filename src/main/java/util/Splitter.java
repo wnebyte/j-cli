@@ -23,17 +23,6 @@ public final class Splitter {
         return this;
     }
 
-    /*
-    public String split() {
-        if ((content == null) || (delimiter == null)) {
-            throw new IllegalArgumentException(
-                    "content and/or delimiter must not be null."
-            );
-        }
-        return content.split(delimiter.concat("\\s"), 2)[1].split("\\s", 2)[0];
-    }
-     */
-
     public String split() {
         if (content == null) {
             throw new IllegalArgumentException(
@@ -59,4 +48,5 @@ public final class Splitter {
             return split.split("\\s", 2)[0];
         }
     }
+
 }

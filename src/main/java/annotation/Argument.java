@@ -24,7 +24,7 @@ import util.ObjectTypeConverter;
  * <br/>
  * The description field is omitted, and the type field is implicitly set to Required.class.
  * <br/>
- * Required Arguments have to be present as an Argument when a Command is specified.
+ * Required Arguments must be present when their Command is specified.
  * <br/>
  * In this instance the Argument annotation could have been omitted, and the same configuration
  * would have been achieved.</p>

@@ -1,11 +1,20 @@
 import annotation.Command;
 import org.junit.Assert;
 import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import util.Bundle;
 import util.Scanner;
 
-import java.util.Arrays;
-import java.util.Set;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class ScannerTest {
 
@@ -41,4 +50,35 @@ public class ScannerTest {
     @Command()
     public void foo2() {}
 
+    @Test
+    public void test02() throws URISyntaxException {
+        Collection<URL> col = ClasspathHelper.forPackage("core");
+        System.out.println(Arrays.toString(col.toArray()));
+        URI uri = ClassLoader.getSystemResource("core").toURI();
+        System.out.println(uri);
+        Package.getPackages();
+    }
+
+    @Test
+    public void test03() {
+        Package.getPackages();
+    }
+
+    public Set<String> findAllPackages() {
+        List<ClassLoader> classLoaderList = new LinkedList<>();
+        classLoaderList.add(ClasspathHelper.contextClassLoader());
+        classLoaderList.add(ClasspathHelper.staticClassLoader());
+        classLoaderList.add(ClassLoader.getSystemClassLoader());
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setScanners(new SubTypesScanner(false), new ResourcesScanner())
+                .setUrls(ClasspathHelper.forClassLoader(classLoaderList.toArray(new ClassLoader[0])))
+                .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(".*")))
+        );
+        Set<Class<?>> classes = reflections.getSubTypesOf(Object.class);
+        Set<String> packageNameSet = new TreeSet<String>();
+        for (Class<?> classInstance : classes) {
+            packageNameSet.add(classInstance.getPackage().getName());
+        }
+        return packageNameSet;
+    }
 }

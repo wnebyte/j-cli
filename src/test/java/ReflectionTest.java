@@ -1,4 +1,5 @@
-import util.StringTypeConverter;
+import core.TypeConverter;
+import exception.runtime.ParseException;
 import exception.config.NoDefaultConstructorException;
 import core.Console;
 import core.IConsole;
@@ -6,16 +7,30 @@ import org.junit.Assert;
 import org.junit.Test;
 import sample.SampleController;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.*;
 import java.util.List;
 
 import static util.ReflectionUtil.*;
 
 public class ReflectionTest {
+
+    public static class StringTypeConverter implements TypeConverter<String> {
+
+        @Override
+        public String convert(String value) throws ParseException {
+            return value;
+        }
+
+        @Override
+        public String defaultValue() {
+            return null;
+        }
+
+        @Override
+        public boolean isArray() {
+            return false;
+        }
+    }
 
     @Test
     public void test00() throws NoDefaultConstructorException {
@@ -55,4 +70,43 @@ public class ReflectionTest {
     public void foo(List<String> myList, String myString) {
 
     }
+
+    @Test
+    public void test03() throws NoDefaultConstructorException {
+        Object rt = newInstance(this.getClass());
+
+        for (Class<?> cls : rt.getClass().getDeclaredClasses()) {
+            Object newInstance;
+
+            if (isNested(cls)) {
+                if (isStatic(cls)) {
+                    newInstance = newInstance(cls);
+                }
+                else {
+                    // Todo: would need all the outer classes as args
+                    newInstance = newInstance(cls, rt);
+                }
+            }
+            else {
+                newInstance = newInstance(cls);
+            }
+
+            System.out.println(newInstance);
+        }
+    }
+
+    public static class StaticNestedClass {
+
+        public StaticNestedClass() {
+
+        }
+    }
+
+    public class NestedClass {
+
+        public NestedClass() {
+
+        }
+    }
+
 }

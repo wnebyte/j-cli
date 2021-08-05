@@ -16,13 +16,15 @@ import java.util.stream.Collectors;
 import static util.ReflectionUtil.isNested;
 import static util.ReflectionUtil.isStatic;
 
-public class Shell {
+public final class Shell {
 
     /** Annotation processor */
     private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
 
     /** Commands */
     private Map<String, core.Command> commands;
+
+    private Map<Pattern, core.Command> testCommands;
 
     /** Configuration object */
     protected final ConfigurationBuilder config;
@@ -46,7 +48,7 @@ public class Shell {
     }
 
     /**
-     * Builds the shell in accordance with the properties of the specified <code>ConfigurationBuilder</code>.
+     * Builds the Shell in accordance with the specified Configuration.
      */
     private void build() {
         Scanner scanner = new Scanner();
@@ -78,13 +80,15 @@ public class Shell {
 
         Set<core.Command> commands = scanner.getScanned().stream().map(method -> {
             try {
-                if (isNested(method.getDeclaringClass())) {
+                Class<?> cls = method.getDeclaringClass();
+                if ((isNested(cls)) && !(isStatic(cls))) {
                     throw new ConfigException(
-                            "\n\tA Command may not be declared within a nested class."
+                            "\n\tA Command may not be declared within a nested class that is non static."
                     );
                 }
                 Object object = isStatic(method) ?
-                        null : tracker.addClass(method.getDeclaringClass());
+                        null :
+                        tracker.addClass(cls);
                 return new core.Command(object, method);
             }
             catch (ConfigException e) {
@@ -103,7 +107,7 @@ public class Shell {
 
     /**
      * Accepts input from the user.
-     * @param input the input to match against a registered <code>Command</code>.
+     * @param input the input to match against a known <code>Command</code>.
      */
     public final void accept(String input) {
         try {
@@ -118,9 +122,9 @@ public class Shell {
     }
 
     /**
-     * Calls {@link Shell#accept(String)} in a continuous loop until the shell reads 'exit'.<br/>
-     * @throws IllegalStateException if no {@linkplain core.IConsole} implementation has been specified via
-     * this object's <code>ConfigurationBuilder</code>.
+     * Attempts to read from the specified {@link IConsole} until it returns <code>null</code> or "exit",
+     * and calls {@link Shell#accept(String)}, in a continuous loop.
+     * @throws IllegalStateException if no IConsole implementation has been specified.
      */
     public final void run() {
         IConsole console = config.getConsole();
@@ -144,11 +148,10 @@ public class Shell {
     }
 
     /**
-     * Handles a <code>UnknownCommandException</code> at "runtime" in accordance with the settings specified by this
-     * class's <code>ConfigurationBuilder</code> object.
+     * Handles an {@link UnknownCommandException} in accordance with the specified Configuration.
      * @param input the input received from the user.
      */
-    protected void handleUnknownCommandException(String input) {
+    private void handleUnknownCommandException(String input) {
         IConsole console = config.getConsole();
         Consumer<String> handler = config.getNoSuchCommandHandler();
         Function<String, String> formatter = config.getUnknownCommandOutputFormatter();
@@ -162,11 +165,10 @@ public class Shell {
     }
 
     /**
-     * Handles a <code>ParseException</code> at "runtime" in accordance with the settings specified by this
-     * class's <code>ConfigurationBuilder</code> object.
-     * @param e the thrown <code>ParseException</code>.
+     * Handles a {@link ParseException} in accordance with the specified Configuration.
+     * @param e the thrown ParseException.
      */
-    protected void handleParseException(ParseException e) {
+    private void handleParseException(ParseException e) {
         IConsole console = config.getConsole();
         Consumer<ParseException> handler = config.getParseExceptionHandler();
         Function<ParseException, String> formatter = config.getParseExceptionOutputFormatter();
@@ -180,18 +182,29 @@ public class Shell {
     }
 
     /**
-     * Attempts to match the specified input with a known <code>Command</code>.
+     * Attempts to match the specified input with a known Command.
      * @param input the input received from the user.
-     * @return The <code>Command</code> associated with the specified input, if one exists,
-     * otherwise throws an <code>UnknownCommandException</code>.
+     * @return The Command associated with the specified input, if one exists,
+     * otherwise throws an UnknownCommandException.
      */
-    protected core.Command match(String input) throws UnknownCommandException {
+    private core.Command match(String input) throws UnknownCommandException {
         return commands.entrySet().stream().filter(kv -> Pattern.compile(kv.getKey()).matcher(input).matches())
                 .findFirst().orElseThrow(UnknownCommandException::new)
                 .getValue();
     }
 
-    public Set<String> getCommandKeys() {
+    private core.Command matchTest(final String input) throws UnknownCommandException {
+        for (Map.Entry<Pattern, core.Command> kv : testCommands.entrySet()) {
+            if (kv.getKey().matcher(input).matches()) {
+                return kv.getValue();
+            }
+        }
+        throw new UnknownCommandException(
+                "UnknownCommand"
+        );
+    }
+
+    public final Set<String> getCommandKeys() {
         return commands.keySet();
     }
 
@@ -201,20 +214,22 @@ public class Shell {
             String name
     ) {
         IConsole console = config.getConsole();
-        Consumer<Collection<core.Command>> handler = config.getHelpHandler();
-        Function<Collection<core.Command>, String> formatter = config.getHelpOutputFormatter();
+        Consumer<core.Command> handler = config.getHelpHandler();
+        Function<core.Command, String> formatter = config.getHelpOutputFormatter();
 
+        // if a handler has been set
         if (handler != null) {
-            handler.accept(commands.values().stream()
-                    .filter(command -> command.getDeclaringClass() != this.getClass())
-                    .filter(command -> name == null || command.getName().equals(name) || command.getPrefix().equals(name))
-                    .collect(Collectors.toList()));
+            commands.values().stream()
+                    .filter(command -> (command.getDeclaringClass() != this.getClass()) &&
+                            (name == null || command.getName().equals(name) || command.getPrefix().equals(name)))
+                    .forEach(handler);
         }
+        // else if a console has been set
         else if (console != null) {
-            console.println(formatter.apply(commands.values().stream()
-                    .filter(command -> command.getDeclaringClass() != this.getClass())
-                    .filter(command -> name == null || command.getName().equals(name) || command.getPrefix().equals(name))
-                    .collect(Collectors.toList())));
+            commands.values().stream()
+                    .filter(command -> (command.getDeclaringClass() != this.getClass()) &&
+                            (name == null || command.getName().equals(name) || command.getPrefix().equals(name)))
+                    .forEach(command -> console.println(formatter.apply(command)));
         }
     }
 
@@ -225,50 +240,4 @@ public class Shell {
     ) {
         help(name);
     }
-
-    /*
-    @Command(name = "--help")
-    private void help() {
-        IConsole console = config.getConsole();
-        Consumer<Collection<core.Command>> handler = config.getHelpHandler();
-        Function<Collection<core.Command>, String> formatter = config.getHelpOutputFormatter();
-
-        if (handler != null) {
-            handler.accept(commands.values().stream()
-                    .filter(c -> c.getDeclaringClass() != this.getClass()).collect(Collectors.toList()));
-        }
-        else if (console != null) {
-            console.println(formatter.apply(commands.values().stream()
-                    .filter(c -> c.getDeclaringClass() != this.getClass()).collect(Collectors.toList())));
-        }
-    }
-
-    @Command(name = "--help")
-    private void help(@Argument(name = "n", type = Positional.class) String n) {
-        IConsole console = config.getConsole();
-        Consumer<Collection<core.Command>> handler = config.getHelpHandler();
-        Function<Collection<core.Command>, String> formatter = config.getHelpOutputFormatter();
-
-        if (handler != null) {
-            handler.accept(commands.values().stream().filter(c -> c.getName().replace("-", "").equals(n))
-                    .collect(Collectors.toList()));
-        }
-        else if (console != null) {
-            console.println(
-                    formatter.apply(commands.values().stream().filter(c -> c.getName().replace("-", "").equals(n))
-                            .collect(Collectors.toList()))
-            );
-        }
-    }
-
-    @Command(name = "-h")
-    private void h() {
-        help();
-    }
-
-    @Command(name = "-h")
-    private void h(@Argument(name = "n", type = Positional.class) String n) {
-        help(n);
-    }
-     */
 }

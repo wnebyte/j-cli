@@ -65,7 +65,7 @@ public final class StringUtil {
     /**
      * Generates a <code>String</code> consisting of the specified number of whitespace characters.
      */
-    public static String whitespace(int len) {
+    public static String genWhitespace(int len) {
         char[] chars = new char[len];
         Arrays.fill(chars, ' ');
         return new String(chars);
@@ -197,7 +197,8 @@ public final class StringUtil {
         for (int i = 0; i < array.length; i++) {
             char character = array[i];
 
-            if ((character == ',') && (evenNumberOfPrecedingQuotationChars(string, i))) {
+            if ((character == ',') &&
+                    (evenNumberOfPrecedingQuotationChars(string, i))) {
                 String element = string.substring(startIndex, i);
                 elements.add(element);
                 startIndex = i + 1;
@@ -214,12 +215,34 @@ public final class StringUtil {
         }
         char[] array = string.toCharArray();
         int counter = 0;
-
         for (int i = 0; i <= index; i++) {
             if (array[i] == '"') {
                 counter++;
             }
         }
         return counter % 2 == 0;
+    }
+
+    public static String
+    replaceFirstAndLast(final String value, final char firstCharacter, final char lastCharacter) {
+        if (value == null) {
+            return null;
+        }
+        int firstIndex = value.indexOf(firstCharacter);
+        int lastIndex = value.lastIndexOf(lastCharacter);
+
+        if ((firstIndex != -1) && (lastIndex != -1) && (firstIndex != lastIndex)) {
+            char[] array = new char[value.length() - 2];
+
+            int j = 0;
+            for (int i = 0; i < value.length(); i++) {
+                if ((i == firstIndex) || (i == lastIndex)) {
+                    continue;
+                }
+                array[j++] = value.charAt(i);
+            }
+            return new String(array);
+        }
+        return value;
     }
 }

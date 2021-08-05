@@ -36,7 +36,7 @@ public final class AnnotationProcessor {
             if (duplicate) {
                 throw new IllegalAnnotationException(
                         "\t\n" + "The named properties of a Command may not collide with those of another Command.\n" +
-                                 "Signature " + Arrays.toString(signature.toArray()) + " has already been generated."
+                                 "Command Signature " + Arrays.toString(signature.toArray()) + " has already been generated."
                 );
             }
             // assert that every non-positional argument has a distinct name
@@ -58,7 +58,7 @@ public final class AnnotationProcessor {
                     .append(permute(command.getArguments()))
                     .append("$");
 
-        //    System.out.println(keyBuilder.toString());
+            System.out.println(keyBuilder.toString());
 
             commands.put(keyBuilder.toString(), command);
         }
