@@ -28,3 +28,6 @@ out
 
 # Ignore .txt extensions
 .txt
+
+# Ignore heap-dumps folder
+heap-dumps

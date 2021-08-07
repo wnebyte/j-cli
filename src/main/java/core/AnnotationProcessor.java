@@ -29,7 +29,7 @@ public final class AnnotationProcessor {
             }
 
             // signature check
-            List<List<String>> signature = signatureOf(command);
+            Set<List<String>> signature = generateSignatures(command);
             boolean duplicate = !addSignature(signatures, signature);
 
             // assert that signature has not already been generated
@@ -40,12 +40,15 @@ public final class AnnotationProcessor {
                 );
             }
             // assert that every non-positional argument has a distinct name
-            if (!distinct(command.getArguments().stream()
+            List<String> names = command.getArguments().stream()
                     .filter(argument -> !(argument instanceof Positional))
                     .map(Argument::getName)
-                    .collect(Collectors.toList()))) {
+                    .collect(Collectors.toList());
+            if (!distinct(names)) {
                 throw new IllegalAnnotationException(
-                        "\t\n" + "The named properties of a Command must all be distinct."
+                        "\t\n" + "The named properties of a Command must all be distinct.\n" +
+                                command.getMethod() + " -> " +
+                                command.getName() + " " + Arrays.toString(names.toArray())
                 );
             }
 
@@ -58,8 +61,9 @@ public final class AnnotationProcessor {
                     .append(permute(command.getArguments()))
                     .append("$");
 
-            System.out.println(keyBuilder.toString());
+        //    System.out.println(keyBuilder.toString());
 
+            command.setSignature(signature);
             commands.put(keyBuilder.toString(), command);
         }
 
@@ -93,8 +97,8 @@ public final class AnnotationProcessor {
      * Generates a signature from the specified <code>Command</code>.
      * <p></p>
      */
-    private List<List<String>> signatureOf(final Command command) {
-        List<List<String>> sigOf = new ArrayList<>();
+    private Set<List<String>> generateSignatures(final Command command) {
+        Set<List<String>> signatures = new HashSet<>();
         List<String> signature = new ArrayList<>();
 
         if (command.hasPrefix()) {
@@ -119,13 +123,13 @@ public final class AnnotationProcessor {
         Set<Set<String>> powerSet = Sets.powerSet(set);
 
         for (Set<String> s : powerSet) {
-            sigOf.add(new ArrayList<>(signature) {{ addAll(s); }});
+            signatures.add(new ArrayList<>(signature) {{ addAll(s); }});
         }
 
-        return sigOf;
+        return signatures;
     }
 
-    private boolean addSignature(Set<List<String>> set, List<List<String>> list) {
+    private boolean addSignature(Set<List<String>> set, Set<List<String>> list) {
         for (List<String> element : list) {
             boolean duplicate = !set.add(element);
             if (duplicate) {

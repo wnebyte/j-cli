@@ -124,7 +124,8 @@ public final class StringUtil {
     }
 
     /**
-     * Used to split userInput.
+     * Splits the specified <code>String</code> by using the regex of a whitespace character that has an
+     * even number of preceding quotation characters.
      */
     public static List<String> splitByWhitespace(final String string) {
         List<String> elements = new ArrayList<>();
@@ -154,33 +155,22 @@ public final class StringUtil {
         return elements;
     }
 
-    public static boolean evenNumberOfPrecedingOccurrences(String str, int endIndex) {
-        if (str == null) {
+    public static boolean evenNumberOfPrecedingOccurrences(String string, int endIndex) {
+        if (string == null) {
             return true;
         }
-        char[] array = str.toCharArray();
+        char[] array = string.toCharArray();
         int counter = 0;
-        int secondCounter = 0;
 
         for (int i = 0; i <= endIndex; i++) {
             char character = array[i];
 
-            switch (character) {
-                case '"':
-                    counter++;
-                    break;
-                    /*
-                case '[':
-                    secondCounter++;
-                    break;
-                case ']':
-                    secondCounter--;
-                    break;
-                     */
+            if (character == '"') {
+                counter++;
             }
         }
 
-        return (counter % 2 == 0); // && (secondCounter == 0);
+        return (counter % 2 == 0);
     }
 
     /**

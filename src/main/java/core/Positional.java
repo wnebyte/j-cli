@@ -53,6 +53,7 @@ public final class Positional extends Argument {
     }
 
     public String toString() {
-        return getName().concat(getTypeConverter().isArray() ? "[]" : "");
+       // return getName().concat(getTypeConverter().isArray() ? "[]" : "");
+        return "[*".concat(getTypeConverter().isArray() ? "[...]" : "").concat("]");
     }
 }

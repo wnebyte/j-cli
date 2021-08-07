@@ -6,8 +6,10 @@ import exception.config.ConfigException;
 import exception.config.IllegalAnnotationException;
 import exception.runtime.ParseException;
 import exception.runtime.UnknownCommandException;
+import util.CollectionUtil;
 import util.InstanceTracker;
 import util.Scanner;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -18,13 +20,9 @@ import static util.ReflectionUtil.isStatic;
 
 public final class Shell {
 
-    /** Annotation processor */
-    private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
-
-    /** Commands */
     private Map<String, core.Command> commands;
 
-    private Map<Pattern, core.Command> testCommands;
+    private final Map<Pattern, core.Command> testCommands = new HashMap<>();
 
     /** Configuration object */
     protected final ConfigurationBuilder config;
@@ -51,6 +49,7 @@ public final class Shell {
      * Builds the Shell in accordance with the specified Configuration.
      */
     private void build() {
+        AnnotationProcessor annotationProcessor = new AnnotationProcessor();
         Scanner scanner = new Scanner();
         InstanceTracker tracker = (config.getObjects() != null) ?
                 new InstanceTracker(config.getObjects()) :
@@ -76,6 +75,7 @@ public final class Shell {
             scanner.removeIf(method -> method.getDeclaringClass() == this.getClass());
         } else {
             tracker.addObject(this);
+            scanner.scanClasses(Set.of(Shell.class));
         }
 
         Set<core.Command> commands = scanner.getScanned().stream().map(method -> {
@@ -99,6 +99,13 @@ public final class Shell {
 
         try {
             this.commands = annotationProcessor.process(commands);
+
+            for (Map.Entry<String, core.Command> kv : this.commands.entrySet()) {
+
+                if (testCommands.put(Pattern.compile(kv.getKey()), kv.getValue()) != null) {
+                    System.err.println("Map Collision!");
+                }
+            }
         }
         catch (IllegalAnnotationException e) {
             e.printStackTrace();
@@ -151,7 +158,7 @@ public final class Shell {
      * Handles an {@link UnknownCommandException} in accordance with the specified Configuration.
      * @param input the input received from the user.
      */
-    private void handleUnknownCommandException(String input) {
+    private void handleUnknownCommandException(final String input) {
         IConsole console = config.getConsole();
         Consumer<String> handler = config.getNoSuchCommandHandler();
         Function<String, String> formatter = config.getUnknownCommandOutputFormatter();
@@ -161,6 +168,14 @@ public final class Shell {
         }
         else if (console != null) {
             console.printerr(formatter.apply(input));
+
+            if (config.isAutoComplete()) {
+                core.Command command = getBestGuess(input);
+
+                if (command != null) {
+                    console.println(config.getHelpOutputFormatter().apply(command));
+                }
+            }
         }
     }
 
@@ -187,31 +202,55 @@ public final class Shell {
      * @return The Command associated with the specified input, if one exists,
      * otherwise throws an UnknownCommandException.
      */
+    /*
     private core.Command match(String input) throws UnknownCommandException {
         return commands.entrySet().stream().filter(kv -> Pattern.compile(kv.getKey()).matcher(input).matches())
                 .findFirst().orElseThrow(UnknownCommandException::new)
                 .getValue();
     }
+     */
 
-    private core.Command matchTest(final String input) throws UnknownCommandException {
+    private core.Command match(final String input) throws UnknownCommandException {
         for (Map.Entry<Pattern, core.Command> kv : testCommands.entrySet()) {
             if (kv.getKey().matcher(input).matches()) {
                 return kv.getValue();
             }
         }
-        throw new UnknownCommandException(
-                "UnknownCommand"
-        );
+        throw new UnknownCommandException();
     }
 
     public final Set<String> getCommandKeys() {
-        return commands.keySet();
+        return testCommands.keySet().stream().map(new Function<Pattern, String>() {
+            @Override
+            public String apply(Pattern pattern) {
+                return pattern.toString();
+            }
+        }).collect(Collectors.toSet());
     }
 
-    @Command(name = "--help", description = "help command")
+    private core.Command getBestGuess(final String input) {
+        float max = 0f;
+        core.Command cmd = null;
+
+        for (core.Command command : testCommands.values()) {
+            float tmp = command.getLikeness(input);
+            if (max < tmp) {
+                max = tmp;
+                cmd = command;
+            }
+        }
+
+        return cmd;
+    }
+
+    @Command(name = "--help")
     private void help(
-            @Argument(name = "-n", type = Optional.class)
-            String name
+            @Argument(name = "-name", type = Optional.class, description = "name of command")
+            String name,
+            @Argument(name = "-prefix", type = Optional.class, description = "prefix of command")
+            String prefix,
+            @Argument(name = "-args", type = Optional.class, description = "args of command")
+            String[] args
     ) {
         IConsole console = config.getConsole();
         Consumer<core.Command> handler = config.getHelpHandler();
@@ -219,25 +258,30 @@ public final class Shell {
 
         // if a handler has been set
         if (handler != null) {
-            commands.values().stream()
+            testCommands.values().stream()
                     .filter(command -> (command.getDeclaringClass() != this.getClass()) &&
-                            (name == null || command.getName().equals(name) || command.getPrefix().equals(name)))
+                            (name == null || command.getName().equals(name)))
                     .forEach(handler);
         }
         // else if a console has been set
         else if (console != null) {
-            commands.values().stream()
-                    .filter(command -> (command.getDeclaringClass() != this.getClass()) &&
-                            (name == null || command.getName().equals(name) || command.getPrefix().equals(name)))
-                    .forEach(command -> console.println(formatter.apply(command)));
-        }
-    }
+            Collection<core.Command> commands = this.testCommands.values();
 
-    @Command(name = "-h")
-    private void h(
-            @Argument(name = "-n", type = Optional.class)
-            String name
-    ) {
-        help(name);
+            if (name != null) {
+                commands = commands.stream()
+                        .filter(command -> command.getName().equals(name)).collect(Collectors.toList());
+            }
+            if (prefix != null) {
+                commands = commands.stream()
+                        .filter(command -> command.getPrefix().equals(prefix)).collect(Collectors.toList());
+            }
+            if ((args != null) && (args.length != 0)) {
+                commands = commands.stream()
+                        .filter(command -> CollectionUtil.intersection(Arrays.asList(args), command.getArguments()
+                                .stream().map(core.Argument::getName).collect(Collectors.toList()))
+                                .size() == args.length).collect(Collectors.toList());
+            }
+            commands.forEach(command -> console.println(formatter.apply(command)));
+        }
     }
 }

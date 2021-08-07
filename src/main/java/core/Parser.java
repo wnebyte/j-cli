@@ -1,6 +1,7 @@
 package core;
 
 import exception.runtime.ParseException;
+import util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -10,12 +11,14 @@ import java.util.stream.Collectors;
 
 import static util.StringUtil.splitByWhitespace;
 
-public final class Parser {
+/**
+ * Class presents operations for parsing input.
+ */
+final class Parser {
 
     private final Command command;
 
     private final String input;
-
 
     public Parser(Command command, String input) {
         this.command = command;
@@ -30,12 +33,7 @@ public final class Parser {
         }
         List<Positional> positionalArguments = // list of positional arguments
                 arguments.stream().filter(arg -> arg instanceof Positional)
-                        .map(new Function<Argument, Positional>() {
-                            @Override
-                            public Positional apply(Argument argument) {
-                                return (Positional) argument;
-                            }
-                        })
+                        .map(argument -> (Positional) argument)
                         .collect(Collectors.toList());
         LinkedList<String> values = process(splitByWhitespace(input)); // list of user input
 
@@ -86,11 +84,15 @@ public final class Parser {
         return args;
     }
 
-    private LinkedList<String> process(List<String> values) {
+    private LinkedList<String> process(final List<String> values) {
         if (command.hasPrefix()) {
             values.remove(0);
         }
         values.remove(0);
         return new LinkedList<>(values);
+    }
+
+    static List<String> split(final String input) {
+        return StringUtil.splitByWhitespace(input);
     }
 }

@@ -49,6 +49,9 @@ public final class Required extends Argument {
      * @return a <code>String</code> representation of this Argument.
      */
     public String toString() {
-        return getName().concat(getTypeConverter().isArray() ? "[]" : "");
+       // return getName().concat(getTypeConverter().isArray() ? "[]" : "");
+        return "[".concat(getName())
+                .concat(getTypeConverter().isArray() ? " [...]" : "")
+                .concat("]");
     }
 }

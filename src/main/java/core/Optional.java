@@ -65,6 +65,8 @@ public final class Optional extends Argument {
      * {@inheritDoc}
      */
     public String toString() {
-        return "(".concat(getName()).concat(getTypeConverter().isArray() ? "[]" : "").concat(")");
+       // return "(".concat(getName()).concat(getTypeConverter().isArray() ? "[]" : "").concat(")");
+        return "(".concat(getName())
+                .concat(getTypeConverter().isArray() ? "[...]" : "").concat(")");
     }
 }

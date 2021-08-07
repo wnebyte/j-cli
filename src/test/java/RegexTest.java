@@ -95,4 +95,26 @@ public class RegexTest {
         Pattern pattern = Pattern.compile(regex);
         System.out.println(pattern.matcher("array").matches());
     }
+
+    @Test
+    public void test10() {
+        String regex = "^cmd\\s-a\\s" + "([^\\s\"]*|\"[^\"]*\")" + "$";
+        Pattern pattern = Pattern.compile(regex);
+
+        String input = "cmd -a testy";
+        System.out.println(pattern.matcher(input).matches());
+
+
+    }
+
+    // "\\[([^\\s\"]*|\"[^\"]*\")*\\]"
+    @Test
+    public void test11() {
+        String regex = "\\[\\s?(([^\\s\"]*|\"[^\"]*\")\\s?)*\\s?\\]";
+        Pattern pattern = Pattern.compile(regex);
+        String test = "[ \"element 1\",\"element 2\" ]";
+        test = "[ element1, element2 ]";
+        System.out.println(pattern.matcher(test).matches());
+        System.out.println(Arrays.toString(TypeConverter.arraySplit(test)));
+    }
 }

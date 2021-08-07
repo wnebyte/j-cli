@@ -1,5 +1,6 @@
 import org.junit.Test;
 import util.Splitter;
+import util.StringUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +57,21 @@ public class SplitterTest {
         String input = "foo \"test first element\" \"test second element\"";
         String value = input.split("\\s")[index + 1];
         System.out.println(value);
+    }
+
+    @Test
+    public void test06() {
+        String input = "cmd -a \"-b hej -c 'some value' -d ['element 1','element2']\" -e val";
+        System.out.println(Arrays.toString(StringUtil.splitByWhitespace(input).toArray()));
+        System.out.println(Arrays.toString(StringUtil.splitByWhitespace(
+                "-b hej -c 'some value' -d ['element 1','element2']"
+        ).toArray()));
+    }
+
+    @Test
+    public void test07() {
+        String input = "-name 'first name' -age 27";
+        System.out.println(Arrays.toString(StringUtil.splitByWhitespace(input).toArray()));
     }
 
 }

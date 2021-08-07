@@ -7,9 +7,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import util.AnnotationUtil;
+import util.CollectionUtil;
 import util.StringUtil;
 
 import static util.ReflectionUtil.isBoolean;
@@ -32,6 +35,9 @@ public final class Command {
     private final String name;
 
     private final String description;
+
+    // lateinit
+    private Set<List<String>> signature;
 
     /**
      * Constructs a new Command instance using the specified Object and Method.
@@ -58,6 +64,7 @@ public final class Command {
         this.name = StringUtil.normalizeName(AnnotationUtil.getName(method));
         this.description = AnnotationUtil.getDescription(method);
         this.arguments = createArguments();
+        this.arguments.sort(Argument.getComparator());
     }
 
     /**
@@ -102,6 +109,29 @@ public final class Command {
             getMethod().invoke(getOwner(), args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
+        }
+    }
+
+    float getLikeness(final String input) {
+        List<String> words = Parser.split(input);
+        return signature.stream()
+                .map(signature -> CollectionUtil.intersections(signature, words))
+                .max(Comparator.comparingDouble(value -> value))
+                .orElse(0f);
+    }
+
+    /**
+     * Lateinit initializer.
+     */
+    void setSignature(final Set<List<String>> signature) {
+        if (signature != null) {
+            if (this.signature == null) {
+                this.signature = signature;
+            } else {
+                throw new IllegalStateException(
+                        "Signature has already been initialized."
+                );
+            }
         }
     }
 

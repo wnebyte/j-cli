@@ -7,7 +7,6 @@ import util.StringUtil;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This class is used to specify configuration options for an instance of the {@link Shell} class.
@@ -39,56 +38,63 @@ public class ConfigurationBuilder {
 
     private Consumer<Command> helpHandler;
 
+    /**
+     * Default implementation for the HelpOutputFormatter <code>Function</code>.
+     */
     private Function<Command, String> helpOutputFormatter = new Function<Command, String>() {
         @Override
         public String apply(Command command) {
-            String ln0 = (command.hasDescription()) ?
-                    command.getDescription().concat("\n").concat(command.toString()) :
-                    command.toString();
-            int len = command.toString().length();
+            StringBuilder output = new StringBuilder();
+            output.append("Usage: ").append(command.toString())
+                    .append(command.hasDescription() ? "\nDesc: ".concat(command.getDescription()) : "");
 
-            String lnr = command.getArguments().stream().map(new Function<Argument, String>() {
+            if (!command.getArguments().isEmpty()) {
+                int maxFirst  = maxFirst(command.getArguments());
+                int maxSecond = maxSecond(command.getArguments());
+                output.append("\n\n").append("Arguments: ").append("\n");
+
+                for (Argument argument : command.getArguments()) {
+                    String toString = argument.toString();
+                    String whitespace = StringUtil
+                            .genWhitespace((maxFirst + 1) - toString.length());
+                    String ln = new StringBuilder().append(" ").append(toString).append(whitespace)
+                            .append(argument.getDescription()).toString();
+                    output.append(ln);
+                    whitespace = StringUtil
+                            .genWhitespace((maxSecond + 1) - ln.length());
+                    output.append(whitespace).append("<").append(argument.getType().getSimpleName()).append(">")
+                            .append("\n");
+                }
+            } else {
+                output.append("\n");
+            }
+
+            return output.toString();
+        };
+
+        private int maxFirst(final List<Argument> arguments) {
+            return arguments.stream().map(Argument::toString)
+                    .max(Comparator.comparingInt(String::length)).orElse("").length();
+        }
+
+        private int maxSecond(final List<Argument> arguments) {
+            int max = maxFirst(arguments);
+
+            return arguments.stream().map(new Function<Argument, String>() {
                 @Override
                 public String apply(Argument argument) {
-                    return StringUtil.genWhitespace(len).concat(argument.getName())
-                            .concat(argument.getDescription());
+                    String toString = argument.toString();
+                    String whitespace = StringUtil.genWhitespace((max + 1) - toString.length());
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(" ")
+                            .append(toString)
+                            .append(whitespace)
+                            .append(argument.getDescription());
+                    return builder.toString();
                 }
-            }).collect(Collectors.joining("\n"));
-
-            return ln0.concat("\n").concat(lnr);
+            }).max(Comparator.comparingInt(String::length)).orElse("").length();
         }
     };
-
-    /*
-    private Consumer<Collection<Command>> helpHandler;
-
-    private Function<Collection<core.Command>, String> helpOutputFormatter = new Function<>() {
-        // default implementation
-        @Override
-        public String apply(Collection<Command> commands) {
-            StringBuilder output = new StringBuilder();
-            int max = commands.stream().mapToInt(command -> command.toString().length()).max()
-                    .orElse(0) + 1;
-            int i = 0;
-
-            for (Command cmd : commands) {
-                String whitespace = whitespace(max - cmd.toString().length());
-                output.append(cmd).append(whitespace).append(cmd.getDescription());
-                String whitespaceln = whitespace(max);
-
-                cmd.getArguments().forEach(arg -> {
-                    output.append("\n").append(whitespaceln).append(arg.getName()).append(" ")
-                            .append(arg.getType().getSimpleName().toUpperCase()).append(" ")
-                            .append(arg.getDescription());
-                });
-                if (i++ != commands.size() - 1) {
-                    output.append("\n");
-                }
-            }
-            return new String(output);
-        }
-    };
-     */
 
     private Set<Object> objects;
 
@@ -105,6 +111,8 @@ public class ConfigurationBuilder {
     private boolean nullifyScanPackages = false;
 
     private boolean nullifyHelpCommands = false;
+
+    private boolean autoComplete = true;
 
     public ConfigurationBuilder() {
     }
@@ -201,27 +209,6 @@ public class ConfigurationBuilder {
         }
         return this;
     }
-    /*
-    public final ConfigurationBuilder
-    setHelpOutputFormatter(final Function<Collection<Command>, String> formatter) {
-        if (formatter != null) {
-            this.helpOutputFormatter = formatter;
-        }
-        return this;
-    }
-     */
-
-    /**
-     * Configure the Shell to scan the specified packages. By default all packages are scanned.
-     */
-    /*
-    public final ConfigurationBuilder setScanPackages(final String... packages) {
-        if ((packages != null) && (packages.length != 0)) {
-            this.packages = new HashSet<>(Arrays.asList(packages));
-        }
-        return this;
-    }
-     */
 
     /**
      * Configure the Shell to scan the declared classes of the specified Objects for Command annotated Java Methods.
@@ -270,6 +257,11 @@ public class ConfigurationBuilder {
      */
     public final ConfigurationBuilder nullifyHelpCommands() {
         this.nullifyHelpCommands = true;
+        return this;
+    }
+
+    public final ConfigurationBuilder disableAutoComplete() {
+        this.autoComplete = false;
         return this;
     }
 
@@ -332,5 +324,9 @@ public class ConfigurationBuilder {
 
     public boolean isNullifyHelpCommands() {
         return nullifyHelpCommands;
+    }
+
+    public boolean isAutoComplete() {
+        return autoComplete;
     }
 }

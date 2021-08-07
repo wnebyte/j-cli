@@ -48,7 +48,7 @@ public class ParseTest {
     @Test
     public void test03() {
         final String input = "-a \"this is a [[[] sentence\"";
-        final String split = new ArgumentSplitter().setName("-a").setValue(input).split();
+        final String split = new ArgumentSplitter().setName("-a").setValue(input).split().get();
         final String test = new Splitter().setContent(input).setDelimiter("-a").split();
         System.out.println(split);
         System.out.println(test);
@@ -58,8 +58,21 @@ public class ParseTest {
     public void test04() {
         final String input = "-a [[,]]]";
         final String split = new Splitter().setContent(input).setDelimiter("-a").split();
-        final String test = new ArgumentSplitter().setName("-a").setValue(input).split();
+        final String test = new ArgumentSplitter().setName("-a").setValue(input).split().get();
         System.out.println(split);
         System.out.println(test);
+    }
+
+    // Todo: only normalize first and last index?
+    @Test
+    public void test05() {
+        String input = "cmd -a \"test\" -person \"-a 5 -b \"hej\" [\"element 1\",\"element 2\"]\"";
+        String value = new ArgumentSplitter()
+                .setName("-person")
+                .setValue("-person \"-a 5 -b \"hej\" [\"element 1\",\"element 2\"]\"")
+                .split()
+                .normalize(false)
+                .get();
+        System.out.println(value);
     }
 }
