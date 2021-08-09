@@ -2,6 +2,7 @@ package core;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
@@ -10,11 +11,11 @@ import static util.AnnotationUtil.*;
 
 public final class AnnotationProcessor {
 
-    public final Map<String, Command> process(final Set<Command> transientCommands)
+    public final Map<Pattern, Command> process(final Set<Command> transientCommands)
             throws IllegalAnnotationException
     {
         // commands
-        Map<String, Command> commands = new HashMap<>(transientCommands.size());
+        Map<Pattern, Command> commands = new HashMap<>(transientCommands.size());
         // signatures
         Set<List<String>> signatures = new HashSet<>(transientCommands.size());
 
@@ -61,12 +62,13 @@ public final class AnnotationProcessor {
                     .append(permute(command.getArguments()))
                     .append("$");
 
-        //    System.out.println(keyBuilder.toString());
+          //  System.out.println(keyBuilder.toString());
 
             command.setSignature(signature);
-            commands.put(keyBuilder.toString(), command);
+            commands.put(Pattern.compile(keyBuilder.toString()), command);
         }
 
+        signatures = null;
         return commands;
     }
 

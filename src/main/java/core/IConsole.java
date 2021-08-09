@@ -13,6 +13,60 @@ public interface IConsole {
     String read();
 
     /**
+     * Prints the specified String.
+     * @param out the output to be appended to the console.
+     */
+    void print(String out);
+
+    /**
+     * Prints the specified int.
+     * @param out the output to be appended to the console.
+     */
+    void print(int out);
+
+    /**
+     * Prints the specified double.
+     * @param out the output to be appended to the console.
+     */
+    void print(double out);
+
+    /**
+     * Prints the specified float.
+     * @param out the output to be appended to the console.
+     */
+    void print(float out);
+
+    /**
+     * Prints the specified char.
+     * @param out the output to be appended to the console.
+     */
+    void print(char out);
+
+    /**
+     * Prints the specified long.
+     * @param out the output to be appended to the console.
+     */
+    void print(long out);
+
+    /**
+     * Prints the specified boolean.
+     * @param out the output to be appended to the console.
+     */
+    void print(boolean out);
+
+    /**
+     * Prints the specified char[].
+     * @param out the output to be appended to the console.
+     */
+    void print(char[] out);
+
+    /**
+     * Prints the specified Object.
+     * @param out the output to be appended to the console.
+     */
+    void print(Object out);
+
+    /**
      * Prints the specified String on a new line.
      * @param out output to be appended to the console.
      */

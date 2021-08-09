@@ -1,9 +1,8 @@
+package core;
+
 import annotation.Argument;
 import annotation.Command;
-import core.*;
-import org.junit.Test;
-import javax.swing.text.html.Option;
-import java.util.Arrays;
+import org.openjdk.jmh.annotations.*;
 
 /**
  * Memory Performance Test Class.
@@ -15,16 +14,6 @@ import java.util.Arrays;
  */
 @SuppressWarnings("unused")
 public class PerformanceTest {
-
-    private final Shell shell = new Shell(new ConfigurationBuilder()
-            .setConsole(new Console())
-            .setScanObjects(this)
-            .nullifyScanPackages()
-    );
-
-    public void test() {
-        shell.accept("test45 100 arg1 1500 arg2 55 arg3 300 arg4 999");
-    }
 
     @Command
     public void test00(

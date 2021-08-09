@@ -38,4 +38,6 @@ public @interface Controller {
      * @return the prefix.
      */
     String name() default "";
+
+    char separator() default ' ';
 }

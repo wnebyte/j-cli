@@ -1,5 +1,7 @@
 plugins {
     id 'java-library'
+    id "me.champeau.gradle.jmh" version "0.5.0"
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 group 'com.github.wnebyte'
@@ -30,6 +32,20 @@ sourceSets {
             includes = []
         }
     }
+    jmh {
+        java {
+            srcDirs = ["src/jmh/java"]
+        }
+        resources {
+            srcDirs = ["src/jmh/resources"]
+        }
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('j-shell')
+    archiveClassifier.set('')
+    archiveVersion.set('1.0')
 }
 
 repositories {
@@ -38,6 +54,9 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    jmh group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.28'
+    jmh group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.28'
+    jmh group: 'org.reflections', name: 'reflections', version: '0.9.11'
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.11'
 }
 

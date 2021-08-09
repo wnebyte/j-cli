@@ -49,8 +49,8 @@ public final class CollectionUtil {
 
     /**
      * Determines to which percentage <code>c1</code> intersects with <code>c2</code>.
-     * @return the number of intersections in/of the specified <code>Collections</code>, divided
-     * by the size of the second <code>Collection</code>, as a float.
+     * @return the number of intersections in the specified <code>Collections</code>, divided
+     * by the average size of the Collections, as a float.
      */
     public static <T> float intersections(final Collection<T> c1, final Collection<T> c2) {
         float value = 0f;
@@ -62,6 +62,6 @@ public final class CollectionUtil {
                 value++;
             }
         }
-        return value / c2.size();
+        return value / ((c1.size() + c2.size()) / 2.0f);
     }
 }

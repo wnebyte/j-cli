@@ -112,6 +112,7 @@ public final class Command {
         }
     }
 
+    /*
     float getLikeness(final String input) {
         List<String> words = Parser.split(input);
         return signature.stream()
@@ -119,6 +120,35 @@ public final class Command {
                 .max(Comparator.comparingDouble(value -> value))
                 .orElse(0f);
     }
+     */
+
+
+    float getLikeness(final String input) {
+        List<String> words = Parser.split(input);
+        float val = 0.0f;
+
+        if (hasPrefix()) {
+
+            if (1 < words.size() && words.get(0).equals(getPrefix())) {
+                val += 0.5f;
+            }
+            if (2 < words.size() && words.get(1).equals(getName())) {
+                val += 0.75f;
+            }
+        } else {
+
+            if (1 < words.size() && words.get(0).equals(getName())) {
+                val += 0.75f;
+            }
+        }
+
+        val += signature.stream()
+                .map(signature -> CollectionUtil.intersections(signature, words))
+                .max(Comparator.comparingDouble(value -> value))
+                .orElse(0f);
+        return val;
+    }
+
 
     /**
      * Lateinit initializer.
