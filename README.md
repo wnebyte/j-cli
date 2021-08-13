@@ -3,7 +3,7 @@ java library
 
 ## Table of Contents
 - [About](#about)
-- [Sample](#sample)
+- [Sample](#com.github.wnebyte.jshell.sample)
 - [Build](#build)
 - [Documentation](#documentation)
 - [Licence](#licence)
@@ -24,7 +24,7 @@ Just annotate the Java Methods you'd like mapped as Commands.<br/>
     ) {
         // code
     }
-@Command is the only required annotation.<br/>
+@Command is the only required com.github.wnebyte.jshell.annotation.<br/>
 The resulting Command will have the same name as the annotated Java Method, <br/>
 and the Arguments will have the same name as their respective Java Parameter,
 if the proper [compiler options](#build) have been specified, otherwise 
@@ -64,7 +64,7 @@ That's it!
         console.println("out");
     }
     
-You can give each Command declared in a particular class a prefix by supplying the @Controller annotation 
+You can give each Command declared in a particular class a prefix by supplying the @Controller com.github.wnebyte.jshell.annotation 
 on the class level.<br/>
 If you have configured the Shell with an instance of the IConsole interface 
 (or an interface which extends the IConsole interface), the same instance can be injected into 
