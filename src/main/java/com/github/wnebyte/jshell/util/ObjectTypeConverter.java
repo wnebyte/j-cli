@@ -3,7 +3,7 @@ package com.github.wnebyte.jshell.util;
 import com.github.wnebyte.jshell.TypeConverter;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 
-public class ObjectTypeConverter implements TypeConverter<Object> {
+public final class ObjectTypeConverter implements TypeConverter<Object> {
 
     @Override
     public Object convert(String value) throws ParseException {

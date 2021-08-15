@@ -4,9 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.github.wnebyte.jshell.Required;
-import com.github.wnebyte.jshell.Optional;
-import com.github.wnebyte.jshell.Positional;
+
 import com.github.wnebyte.jshell.TypeConverter;
 import com.github.wnebyte.jshell.util.ObjectTypeConverter;
 
@@ -71,6 +69,7 @@ import com.github.wnebyte.jshell.util.ObjectTypeConverter;
  * </p>
  * @see Command
  * @see Controller
+ * @see Type
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})

@@ -130,5 +130,11 @@ public interface IConsole {
      * Registers a Consumer to be called when new input is appended to the console.
      * @param onInputReceived the Consumer to be registered.
      */
+    @SuppressWarnings("EmptyMethod")
     void setOnInputReceived(Consumer<String> onInputReceived);
+
+    /**
+     * Clears the console of text.
+     */
+    void clear();
 }

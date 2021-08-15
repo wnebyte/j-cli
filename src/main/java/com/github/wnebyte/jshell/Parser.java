@@ -6,7 +6,6 @@ import com.github.wnebyte.jshell.util.StringUtil;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.wnebyte.jshell.util.StringUtil.splitByWhitespace;

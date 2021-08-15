@@ -13,7 +13,7 @@ import static com.github.wnebyte.jshell.util.AnnotationUtil.*;
  * maps regular expressions to Commands, where each Command can not match against more than one of the
  * built regular expressions.
  */
-final class AnnotationProcessor {
+public final class AnnotationProcessor {
 
     /**
      * Processes a <code>Set</code> of Commands.
@@ -74,7 +74,6 @@ final class AnnotationProcessor {
             commands.put(Pattern.compile(keyBuilder.toString()), command);
         }
 
-        signatures = null;
         return commands;
     }
 

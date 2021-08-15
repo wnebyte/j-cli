@@ -4,14 +4,14 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import static java.lang.System.in;
 
-public class Console implements IConsole {
+public final class Console implements IConsole {
 
-    private static final Scanner SC = new Scanner(in);
+    private final Scanner scanner = new Scanner(in);
 
     @Override
     public String read() {
-        if (SC.hasNextLine()) {
-            return SC.nextLine();
+        if (scanner.hasNextLine()) {
+            return scanner.nextLine();
         }
         return null;
     }
@@ -114,5 +114,10 @@ public class Console implements IConsole {
     @Override
     public void setOnInputReceived(Consumer<String> onInputReceived) {
 
+    }
+
+    @Override
+    public void clear() {
+        System.out.println("\n\n\n\n\n");
     }
 }

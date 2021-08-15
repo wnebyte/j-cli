@@ -5,20 +5,26 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Scanner {
+/**
+ * This class declares methods for scanning for {@linkplain Command} annotated Java Methods.
+ */
+public final class Scanner {
 
     private final Set<Method> scanned = new HashSet<>();
 
     public Scanner() {}
 
-    public final void scanObjects(Set<Object> objects) {
+    /**
+     * Scans the specified Set.
+     * @param objects the objects to be scanned.
+     */
+    public final void scanObjects(final Set<Object> objects) {
         if (objects != null) {
             for (Object object : objects) {
                 scanned.addAll(Arrays.stream(object.getClass().getDeclaredMethods())
@@ -28,7 +34,11 @@ public class Scanner {
         }
     }
 
-    public final void scanBundle(Bundle bundle) {
+    /**
+     * Scans the specified Bundle.
+     * @param bundle the Bundle to be scanned.
+     */
+    public final void scanBundle(final Bundle bundle) {
         if (bundle != null) {
             scanned.addAll(Arrays.stream(bundle.getOwner().getClass().getDeclaredMethods())
                     .filter(method -> method.isAnnotationPresent(Command.class) &&
@@ -37,7 +47,11 @@ public class Scanner {
         }
     }
 
-    public final void scanClasses(Set<Class<?>> classes) {
+    /**
+     * Scans the specified classes.
+     * @param classes the classes to be scanned.
+     */
+    public final void scanClasses(final Set<Class<?>> classes) {
         if (classes != null) {
             for (Class<?> cl : classes) {
                 scanned.addAll(Arrays.stream(cl.getDeclaredMethods())
@@ -47,6 +61,10 @@ public class Scanner {
         }
     }
 
+    /**
+     * Scans the specified class.
+     * @param cls the class to be scanned.
+     */
     public final void scanClass(final Class<?> cls) {
         if (cls != null) {
             scanned.addAll(Arrays.stream(cls.getDeclaredMethods())
@@ -56,22 +74,33 @@ public class Scanner {
         }
     }
 
-    public final void scanURLS(Collection<String> urls) {
+    /**
+     * Scans the specified URLs.
+     * @param urls the URLs to be scanned.
+     */
+    public final void scanURLS(final Collection<String> urls) {
         scanned.addAll(new Reflections(new ConfigurationBuilder()
                 .setUrls(toURL(urls))
                 .setScanners(new MethodAnnotationsScanner()))
                 .getMethodsAnnotatedWith(Command.class));
     }
 
-    public final void removeIf(Predicate<Method> predicate) {
+    /**
+     * Removes any scanned Methods for which the specified predicate matches.
+     * @param predicate the predicate to test each scanned Method on.
+     */
+    public final void removeIf(final Predicate<Method> predicate) {
         scanned.removeIf(predicate);
     }
 
+    /**
+     * @return the scanned Methods.
+     */
     public final Set<Method> getScanned() {
         return scanned;
     }
 
-    private Collection<URL> toURL(Collection<String> collection) {
+    private Collection<URL> toURL(final Collection<String> collection) {
         List<URL> urls = new ArrayList<>();
         if (collection != null) {
             collection.forEach(string -> urls.addAll(ClasspathHelper.forPackage(string)));

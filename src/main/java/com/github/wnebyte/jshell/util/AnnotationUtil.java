@@ -8,7 +8,7 @@ import com.github.wnebyte.jshell.annotation.Controller;
 import com.github.wnebyte.jshell.annotation.Type;
 import com.github.wnebyte.jshell.exception.config.NoDefaultConstructorException;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
-import com.github.wnebyte.jshell.Required;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;

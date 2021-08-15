@@ -1,12 +1,13 @@
 package com.github.wnebyte.jshell.util;
 
+/*
+Is not used anymore
+ */
 public final class Splitter {
 
     private String content;
 
     private String delimiter;
-
-    private boolean isArray = true;
 
     public Splitter setContent(String content) {
         this.content = content;
@@ -19,7 +20,6 @@ public final class Splitter {
     }
 
     public Splitter isArray(boolean value) {
-        this.isArray = value;
         return this;
     }
 

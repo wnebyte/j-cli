@@ -3,19 +3,25 @@ java library
 
 ## Table of Contents
 - [About](#about)
-- [Sample](#com.github.wnebyte.jshell.sample)
+- [Sample](#sample)
+  - [The absolute minimum](#the-absolute-minimum)
+  - [Annotations](#annotations)
+  - [Shell](#shell)  
 - [Build](#build)
 - [Documentation](#documentation)
 - [Licence](#licence)
 
 ## About
 This java-library allows for the easy setup of a 
-Shell around an arbitrary Java Application, by mapping annotated Java Methods 
-to runtime accessible Command Objects.
+Shell around an arbitrary Java Application, 
+it works by mapping annotated Java Methods 
+to runtime accessible Command Objects.<br>
 
 ## Sample
 ### The absolute minimum
-Just annotate the Java Methods you'd like mapped as Commands.<br/>
+Just annotate the Java Methods you'd like mapped to Commands 
+with the @Command annotation, <br/>
+which is the only required annotation.<br/>
 
     @Command 
     public void foo(
@@ -24,21 +30,19 @@ Just annotate the Java Methods you'd like mapped as Commands.<br/>
     ) {
         // code
     }
-@Command is the only required com.github.wnebyte.jshell.annotation.<br/>
-The resulting Command will have the same name as the annotated Java Method, <br/>
-and the Arguments will have the same name as their respective Java Parameter,
-if the proper [compiler options](#build) have been specified, otherwise 
-they will receive the names arg0 and arg1.
+The resulting Command Object will have the same name as the annotated Java Method, <br/>
+and its Argument Objects will have the same names as their respective Java Parameters<br/>
+(that is if the proper [compiler options](#build) have been set, otherwise 
+their names will default to arg0 and arg1).
     
 Then construct and configure an instance of the Shell class.<br>
-It's recommended that you supply an instance of a class which implements the IConsole interface 
-to the Shell, so that the Shell can both read directly from and output text to the console. 
 
-    Shell shell = new Shell(new ConfigurationBuilder()
-            .setConsole(new Console()));
+    Shell shell = new Shell(new Configuration()
+            .setConsole(new Console())); // optional, but recommended
 
-Then call run, which is a blocking method which continuously reads from the console
-(if set), or call accept.
+Then call run -- which is a blocking method which continuously reads from the console
+(if set), <br/>
+or call accept -- which accepts a single String to be matched against a known Command.
 
     shell.run(); 
     // or 
@@ -46,7 +50,7 @@ Then call run, which is a blocking method which continuously reads from the cons
 
 That's it!
 
-### Basics+
+### Annotations
     @Controller(name = "prefix") 
     public class Contoller {
 
@@ -64,21 +68,22 @@ That's it!
         console.println("out");
     }
     
-You can give each Command declared in a particular class a prefix by supplying the @Controller com.github.wnebyte.jshell.annotation 
+You can give each Command declared in a particular class a prefix by supplying the @Controller annotation 
 on the class level.<br/>
 If you have configured the Shell with an instance of the IConsole interface 
 (or an interface which extends the IConsole interface), the same instance can be injected into 
-any object whose class declare(s) one or more non-static Commands, when reflectively instantiated by the Shell.<br/>
+any object whose class declare(s) one or more non-static @Command annotated Java Methods, when reflectively instantiated by the Shell, 
+by declaring the proper constructor<br/>
 (Does not work on instances that have been directly passed to the Shell via setScanObjects(Objects...) 
 seeing as they've already been instantiated). 
 
     @Command(name = "foo", description = "?")
     public void foo(
-            @Argument(name = "*", type = Positional.class)
+            @Argument(name = "*", type = Type.POSITIONAL)
             String p,
-            @Argument(name = "a", type = Required.class)
+            @Argument(name = "a", type = Type.REQUIRED)
             String a, 
-            @Argument(name = "b", type = Optional.class)
+            @Argument(name = "b", type = TYPE.OPTIONAL)
             String b,
             @Argument(typeConverter = PersonTypeConverter.class) 
             Person person
@@ -86,9 +91,11 @@ seeing as they've already been instantiated).
     
 You can explicitly set the name for every Controller, Command, and Argument.
 For the latter two you can also specify a description.<br>
-There are three types of arguments [see documentation for details]().<br/>
-You can also specify a user-defined TypeConverter to be used for a Type for which there is no built in 
-native support.
+You can also specify a user-defined TypeConverter to be used with a ParameterType 
+for which there is no built in support (there is built in support for primitives, wrapper classes, 
+and arrays where the component type is either a primitive or a wrapper class).
+
+### Shell
 
     Shell shell = new Shell(new ConfigurationBuilder()
             .setConsole(new Console())
@@ -100,7 +107,7 @@ native support.
                     "out"));
                     
 If you've configured the Shell with an IConsole implementation, you can set 
-various formatter functions -- they will allow you to 
+various formatter functions -- they allow you to 
 specify how certain output should be formatted.
 
     Shell shell = new Shell(new ConfigurationBuilder()
@@ -112,18 +119,20 @@ specify how certain output should be formatted.
                     System.out.println(command)));
 
 If you do not wish to configure the Shell with an IConsole implementation, you can 
-set handlers to handle these events for you.
+set handlers to handle these events for you instead.
 
     Shell shell = new Shell(new ConfigurationBuilder()
             .nullifyScanPackages()
             .setScanObjects(new MyClass(arg0, arg1), new MyOtherClass(arg2))
             .setScanClasses(FooOne.class, FooTwo.class));
     
-By default, all packages on the class-path are scanned for @Command annotated Methods. 
-By setting nullifyScanPackages - no packages are scanned. You can also directly pass 
-instantiated objects to the Shell - 
-to be scanned for and to be used to invoke any underlying annotated Methods, or specify that the Shell should scan a certain 
-set of Classes.
+By default, the Shell scans all the packages on the class-path for @Command annotated Java Methods.<br/>
+You can tell the Shell to not scan any packages by calling nullifyScanPackages. <br/>
+You can also directly pass 
+instantiated objects to the Shell,
+to be scanned for and to be used when invoking any underlying Java Methods, 
+or you can specify that the Shell should scan a certain 
+set of Classes for annotated Java Methods.
 
 ## Build
 
@@ -131,6 +140,11 @@ set of Classes.
     compileJava {
         options.compilerArgs.add("-parameters")
     }
+By setting the -parameters compiler arg, 
+the names of any local parameters found in any java files will be saved, 
+and therefore will be accessible at runtime.
 ## Documentation
+coming soon
 
 ## Licence
+tbd

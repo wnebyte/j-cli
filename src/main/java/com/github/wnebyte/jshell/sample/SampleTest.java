@@ -9,13 +9,8 @@ public class SampleTest {
     public static void main(String[] args) {
         Shell shell = new Shell(new Configuration()
                 .setConsole(new Console())
-                .setScanClasses(SampleTest.class)
-                .nullifyScanPackages()
-                .nullifySuggestCommand()
-                .nullifyHelpCommands()
         );
-        shell.printKeys();
-        shell.accept("init -a hello -b test");
+        shell.run();
     }
 
     @Command

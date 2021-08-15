@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("SameReturnValue")
 @State(Scope.Benchmark)
 public class MatchPerformanceTest {
 
@@ -14,7 +15,7 @@ public class MatchPerformanceTest {
 
     public HashMap<Pattern, String> patternHashMap;
 
-    public String input = "test45 1000 arg1 9090 arg2 5 arg3 400 arg4 2000";
+    public final String input = "test45 1000 arg1 9090 arg2 5 arg3 400 arg4 2000";
 
     @Setup(Level.Invocation)
     public void setup() {

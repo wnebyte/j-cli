@@ -69,7 +69,7 @@ public class Configuration {
             }
 
             return output.toString();
-        };
+        }
 
         private int maxFirst(final List<Argument> arguments) {
             return arguments.stream().map(Argument::toString)

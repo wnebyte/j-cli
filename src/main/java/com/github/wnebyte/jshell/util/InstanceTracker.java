@@ -6,7 +6,6 @@ import com.github.wnebyte.jshell.exception.config.NoReqConstructorException;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * This class provides methods and internals for tracking and instantiating Objects of distinct classes.

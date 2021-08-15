@@ -1,10 +1,9 @@
 package com.github.wnebyte.jshell.struct;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
+@SuppressWarnings("unused")
 public class BiImmutableMap<K, V> extends HashMap<K, V> {
 
     public BiImmutableMap() {
@@ -17,16 +16,6 @@ public class BiImmutableMap<K, V> extends HashMap<K, V> {
 
     public BiImmutableMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
-    }
-
-    @Override
-    public int size() {
-        return super.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return super.isEmpty();
     }
 
     @Override
@@ -78,27 +67,8 @@ public class BiImmutableMap<K, V> extends HashMap<K, V> {
     }
 
     @Override
-    public Set<K> keySet() {
-        return super.keySet();
-    }
-
-    @Override
-    public Collection<V> values() {
-        return super.values();
-    }
-
-    @Override
-    public Set<Entry<K, V>> entrySet() {
-        return super.entrySet();
-    }
-
-    @Override
     public boolean equals(Object o) {
         return super.equals(o);
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }
