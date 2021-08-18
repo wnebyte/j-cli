@@ -118,6 +118,6 @@ public final class Console implements IConsole {
 
     @Override
     public void clear() {
-        System.out.println("\n\n\n\n\n");
+        System.out.println("\n\n\n\n\n\n\n\n\n\n");
     }
 }

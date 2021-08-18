@@ -2,7 +2,6 @@ package com.github.wnebyte.jshell;
 
 import org.junit.Assert;
 import org.junit.Test;
-import com.github.wnebyte.jshell.util.Splitter;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -20,7 +19,7 @@ public class RegexTest {
     @Test
     public void test01() throws Exception {
         TypeConverter<Integer[]> typeConverter = TypeConverterRepository.getTypeConverter(Integer[].class);
-        Integer[] array = typeConverter.convert("[1 2 3 4 5]");
+        Integer[] array = typeConverter.convert("1,2,3,4,5");
         System.out.println(Arrays.toString(array));
     }
 
@@ -32,13 +31,6 @@ public class RegexTest {
         String a = userInput.split(delimiter.concat("\\s"), 2)[1];
         String b = a.split("\\s", 2)[0];
         System.out.println("a: " + a + "\nb: " + b);
-    }
-
-    @Test
-    public void test03() {
-        String a = "foo -a [ 1 2 3 ] -b com.github.wnebyte.jshell.test";
-        String split = new Splitter().setContent(a).setDelimiter("-a").isArray(true).split();
-        System.out.println(split);
     }
 
     @Test

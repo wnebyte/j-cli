@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+/*
 @SuppressWarnings("SameReturnValue")
 @State(Scope.Benchmark)
 public class MatchPerformanceTest {
@@ -58,3 +59,4 @@ public class MatchPerformanceTest {
         return 1;
     }
 }
+ */

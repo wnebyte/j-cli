@@ -40,8 +40,7 @@ public final class ArgumentSplitter {
     }
 
     public final ArgumentSplitter normalize(final boolean isArray) {
-        val = isArray ?
-                TypeConverter.normalizeArray(val) : TypeConverter.normalize(val);
+        val = isArray ? TypeConverter.normalizeArray(val) : TypeConverter.normalize(val);
         return this;
     }
 

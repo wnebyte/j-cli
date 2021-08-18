@@ -116,6 +116,10 @@ final class Parser {
         return new LinkedList<>(values);
     }
 
+    /**
+     * Splits the specified <code>input</code> into a List of "words".
+     * @see StringUtil#splitByWhitespace(String)
+     */
     static List<String> split(final String input) {
         return StringUtil.splitByWhitespace(input);
     }

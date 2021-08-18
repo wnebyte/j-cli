@@ -22,10 +22,10 @@ public class ScannerTest {
     @Test
     public void test00() {
         Scanner scanner = new Scanner();
-        scanner.scanClasses(Set.of(ScannerTest.class));
+        scanner.scanClasses(new HashSet<Class<?>>(){{add(ScannerTest.class);}});
         Assert.assertEquals(3, scanner.getScanned().size());
         scanner = new Scanner();
-        scanner.scanClasses(Set.of());
+        scanner.scanClasses(new HashSet<>());
         Assert.assertEquals(0, scanner.getScanned().size());
         scanner = new Scanner();
         scanner.scanClasses(null);
@@ -50,15 +50,6 @@ public class ScannerTest {
 
     @Command()
     public void foo2() {}
-
-    @Test
-    public void test02() throws URISyntaxException {
-        Collection<URL> col = ClasspathHelper.forPackage("com/github/wnebyte/jshell/core");
-        System.out.println(Arrays.toString(col.toArray()));
-        URI uri = ClassLoader.getSystemResource("com/github/wnebyte/jshell/core").toURI();
-        System.out.println(uri);
-        Package.getPackages();
-    }
 
     @Test
     public void test03() {

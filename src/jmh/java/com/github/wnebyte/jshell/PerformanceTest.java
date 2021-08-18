@@ -12,6 +12,7 @@ import com.github.wnebyte.jshell.annotation.Type;
  *    - 1 Required Argument
  *    - 3 Optional Arguments
  */
+/*
 @SuppressWarnings({"unused", "EmptyMethod"})
 public class PerformanceTest {
 
@@ -750,3 +751,4 @@ public class PerformanceTest {
     ) {
     }
 }
+ */

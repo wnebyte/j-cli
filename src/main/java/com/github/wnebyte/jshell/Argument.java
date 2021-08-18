@@ -8,7 +8,7 @@ import java.lang.reflect.Parameter;
 import java.util.Comparator;
 
 /**
- * This abstract class represents a Command-Argument mapped directly from a Java Method's
+ * This abstract class represents a Command Argument mapped directly from a Java Method's
  * Parameter.
  * @see com.github.wnebyte.jshell.annotation.Argument
  */
@@ -161,6 +161,13 @@ public abstract class Argument {
     }
 
     /**
+     * @return the index of this Argument.
+     */
+    int getIndex() {
+        return index;
+    }
+
+    /**
      * @return the TypeConverter for this Argument.
      */
     protected TypeConverter<?> getTypeConverter() {
@@ -168,10 +175,10 @@ public abstract class Argument {
     }
 
     /**
-     * @return the index of this Argument.
+     * @return the type of this Argument.
      */
-    int getIndex() {
-        return index;
+    public Class<?> getType() {
+        return type;
     }
 
     /**
@@ -193,13 +200,6 @@ public abstract class Argument {
      */
     public boolean hasDescription() {
         return (description != null) && !(description.equals(""));
-    }
-
-    /**
-     * @return the type of this Argument.
-     */
-    public Class<?> getType() {
-        return type;
     }
 
     /**

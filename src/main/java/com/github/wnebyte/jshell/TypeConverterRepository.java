@@ -23,7 +23,7 @@ public final class TypeConverterRepository {
             throws NoSuchTypeConverterException {
         if (cls == null) {
             throw new IllegalArgumentException(
-                    "The specified Class must not be null."
+                    "The specified class must not be null."
             );
         }
         if (TYPE_CONVERTERS.containsKey(cls)) {
@@ -31,7 +31,7 @@ public final class TypeConverterRepository {
         }
         else {
             throw new NoSuchTypeConverterException(
-                    "No TypeConverter of the specified Class is registered."
+                    "No TypeConverter for the specified class is registered."
             );
         }
     }

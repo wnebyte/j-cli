@@ -18,7 +18,7 @@ public class AnnotationUtilTest {
         String argName = getName(param);
         Assert.assertEquals("arg0", argName);
 
-        param = getParameter("com/github/wnebyte/jshell/test", 0, int.class);
+        param = getParameter("test", 0, int.class);
         argName = getName(param);
         Assert.assertEquals("arg0", argName);
     }

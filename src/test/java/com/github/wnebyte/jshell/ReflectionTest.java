@@ -38,15 +38,6 @@ public class ReflectionTest {
         Assert.assertTrue(object instanceof StringTypeConverter);
     }
 
-    @Test
-    public void test01() throws NoDefaultConstructorException {
-        Class<?> myClass = SampleController.class;
-        IConsole console = new Console();
-
-        Object object = newInstance(myClass, console);
-        Assert.assertTrue(object instanceof SampleController);
-    }
-
     @SuppressWarnings("unchecked")
     @Test
     public void test02() throws NoSuchMethodException {
@@ -106,6 +97,27 @@ public class ReflectionTest {
         public NestedClass() {
 
         }
+    }
+
+    @Test
+    public void test04() throws NoSuchMethodException {
+        Class<?>[] args = { int.class, int.class };
+        Method method = this.getClass().getDeclaredMethod("foo", args);
+        System.out.println(method);
+    }
+
+    /*
+    @Test(expected = NoSuchMethodException.class)
+    public void test05() throws NoSuchMethodException {
+        Class<?>[] args = { int.class, int.class };
+        Method method = this.getClass().getMethod("foo", args);
+        System.out.println(method);
+    }
+     */
+
+    @com.github.wnebyte.jshell.annotation.Command
+    private void foo(int a, int b) {
+
     }
 
 }

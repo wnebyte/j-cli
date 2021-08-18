@@ -3,7 +3,6 @@ package com.github.wnebyte.jshell;
 import org.junit.Assert;
 import org.junit.Test;
 import com.github.wnebyte.jshell.util.ArgumentSplitter;
-import com.github.wnebyte.jshell.util.Splitter;
 import com.github.wnebyte.jshell.util.StringUtil;
 
 import java.util.Arrays;
@@ -15,6 +14,7 @@ public class ParseTest {
      * Tests that an input String can be split correctly when input equals: <br/>
      * <code>"prefix command -a \"[ ]\" [\"element 1\",\"element 2\"]"</code>.
      */
+    /*
     @Test
     public void test00() {
         final String array = "[\"element 1\",\"element 2\"]";
@@ -29,6 +29,7 @@ public class ParseTest {
         Assert.assertEquals(split2, "\"element 1\",\"element 2\"");
         Assert.assertEquals(expected, splitInput);
     }
+     */
 
     /**
      * <code>"command -a \"[ [\" [\"element 1\",\"element 2\"]"</code>
@@ -47,6 +48,7 @@ public class ParseTest {
         Assert.assertEquals(4, splitInput.size());
     }
 
+    /*
     @Test
     public void test03() {
         final String input = "-a \"this is a [[[] sentence\"";
@@ -55,7 +57,9 @@ public class ParseTest {
         System.out.println(split);
         System.out.println(test);
     }
+     */
 
+    /*
     @Test
     public void test04() {
         final String input = "-a [[,]]]";
@@ -64,11 +68,12 @@ public class ParseTest {
         System.out.println(split);
         System.out.println(test);
     }
+     */
 
     // Todo: only normalize first and last index?
     @Test
     public void test05() {
-        String input = "cmd -a \"com.github.wnebyte.jshell.test\" -person \"-a 5 -b \"hej\" [\"element 1\",\"element 2\"]\"";
+        String input = "cmd -a \"test\" -person \"-a 5 -b \"hej\" [\"element 1\",\"element 2\"]\"";
         String value = new ArgumentSplitter()
                 .setName("-person")
                 .setValue("-person \"-a 5 -b \"hej\" [\"element 1\",\"element 2\"]\"")

@@ -51,7 +51,7 @@ public final class Required extends Argument {
     public String toString() {
        // return getName().concat(getTypeConverter().isArray() ? "[]" : "");
         return "[".concat(getName())
-                .concat(getTypeConverter().isArray() ? " [...]" : "")
+                .concat(getTypeConverter().isArray() ? "[...]" : "")
                 .concat("]");
     }
 }

@@ -42,4 +42,9 @@ public class SampleController {
    private void foo() {
 
    }
+
+   @Command(description = "clear the console")
+   public void clear() {
+        console.clear();
+   }
 }

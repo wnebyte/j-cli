@@ -74,29 +74,6 @@ public final class Command {
      * for the Type of one of the underlying Method's Parameters,
      * or if one of the Arguments have a specified TypeConverter class which can not be instantiated.
      */
-    /*
-    private List<Argument> createArguments() throws NoSuchTypeConverterException {
-        List<Argument> arguments = new ArrayList<>(method.getParameterCount());
-        int position = hasPrefix() ? 1 : 0;
-
-        for (int index = 0; index < method.getParameterCount(); index++) {
-            Parameter parameter = method.getParameters()[index];
-            Class<? extends Argument> type = AnnotationUtil.getType(parameter);
-
-            if ((type == Optional.class) || (isBoolean(parameter.getType()))) {
-                arguments.add(new Optional(parameter, index));
-            }
-            else if (type == Required.class) {
-                arguments.add(new Required(parameter, index));
-            }
-            else if (type == Positional.class) {
-                arguments.add(new Positional(parameter, index, position++));
-            }
-        }
-        return arguments;
-    }
-     */
-
     private List<Argument> createArguments() throws NoSuchTypeConverterException {
         List<Argument> arguments = new ArrayList<>(method.getParameterCount());
         Parameter[] parameters = method.getParameters();
@@ -136,6 +113,13 @@ public final class Command {
         }
     }
 
+    /**
+     * Determines to what degree the specified <code>input</code> matches this Command. <br/>
+     * The result will be in the range <code>0.0 <= result <= 2.25</code>
+     */
+    /*
+    This Command's signature field is used to determine the likeness.
+     */
     float getLikeness(final String input) {
         List<String> words = Parser.split(input);
         float val = 0.0f;
@@ -193,7 +177,7 @@ public final class Command {
     }
 
     /**
-     * @return the declaring Class of this Command's underlying Method.
+     * @return the declaring class of this Command's underlying Method.
      */
     Class<?> getDeclaringClass() {
         return method.getDeclaringClass();

@@ -102,7 +102,6 @@ public final class AnnotationProcessor {
 
     /**
      * Generates a <code>Set</code> of signatures from the specified <code>Command</code>.
-     * <p></p>
      */
     private Set<List<String>> generateSignatures(final Command command) {
         Set<List<String>> set = new HashSet<>();
@@ -136,11 +135,11 @@ public final class AnnotationProcessor {
 
     /**
      * Adds the elements of the 2nd <code>Set</code> to the 1st <code>Set</code>, and returns whether the
-     * union of the two is <code>equal</code> to zero.
+     * union of the two is <code>equal</code> to <code>0</code>.
      */
-    private boolean addSignature(final Set<List<String>> set1, final Set<List<String>> set2) {
-        for (List<String> element : set2) {
-            boolean exists = !set1.add(element);
+    private boolean addSignature(final Set<List<String>> s1, final Set<List<String>> s2) {
+        for (List<String> element : s2) {
+            boolean exists = !s1.add(element);
             if (exists) {
                 return false;
             }
@@ -161,15 +160,14 @@ public final class AnnotationProcessor {
         String str  = "(";
         int i = 0;
         // init set of unique permutations
-        Set<List<String>> set = powerSet(arguments);
-        for (List<String> permutation : set) {
+        Set<List<String>> powerSet = powerSet(arguments);
+        for (List<String> perm : powerSet) {
             // permutation as a string
-            String string = Arrays.toString(permutation.toArray());
+            String string = Arrays.toString(perm.toArray());
             // add opening and closing parenthesis around the permutation
-            str = str.concat("(").concat(string.substring(1, string.length() - 1))
-                    .concat(")");
+            str = str.concat("(").concat(string.substring(1, string.length() - 1)).concat(")");
             // add 'or' regex for every permutation but the last
-            if (i < set.size() - 1) {
+            if (i < powerSet.size() - 1) {
                 str = str.concat("|");
             }
             i++;
@@ -184,7 +182,7 @@ public final class AnnotationProcessor {
      * appropriate position.
      */
     /*
-    each element in the powerset has the same length -- the length of the specified list of arguments
+    each element in the returned powerset has the same length -- the length of the specified list of arguments
      */
     private Set<List<String>> powerSet(final List<Argument> arguments) {
         // init a set for all the regex-permutations

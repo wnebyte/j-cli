@@ -24,7 +24,7 @@ public final class StringUtil {
         }
         else {
             final List<Character> forbidden = Arrays.asList(
-                    ' ', '"', '[', ']', ','
+                    ' ', '"', '[', ']', ',', '\n'
             );
             StringBuilder builder = new StringBuilder();
             for (char character : s.toCharArray()) {

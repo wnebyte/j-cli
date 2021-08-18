@@ -8,46 +8,49 @@ import com.github.wnebyte.jshell.annotation.Controller;
 import com.github.wnebyte.jshell.annotation.Type;
 import com.github.wnebyte.jshell.exception.config.NoDefaultConstructorException;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+/**
+ * This class declares utility-methods for operating on the annotations declared in the
+ * {@linkplain com.github.wnebyte.jshell.annotation} package.
+ */
 public final class AnnotationUtil {
 
-    public static boolean isAnnotated(Class<?> objectClass) {
-        return (objectClass != null) && (objectClass.isAnnotationPresent(Controller.class));
+    public static boolean isAnnotated(final Class<?> cls) {
+        return (cls != null) && (cls.isAnnotationPresent(Controller.class));
     }
 
-    public static boolean isAnnotated(Method method) {
+    public static boolean isAnnotated(final Method method) {
         return (method != null) && (method.isAnnotationPresent(Command.class));
     }
 
-    public static boolean isAnnotated(Parameter parameter) {
+    public static boolean isAnnotated(final Parameter parameter) {
         return (parameter != null) && (parameter.isAnnotationPresent(Argument.class));
     }
 
-    public static boolean hasDefaultName(Parameter parameter) {
+    public static boolean hasDefaultName(final Parameter parameter) {
         return isAnnotated(parameter) && parameter.getAnnotation(Argument.class).name().equals("");
     }
 
-    public static String getName(Class<?> objectClass) {
-        if (objectClass == null) {
+    public static String getName(final Class<?> cls) {
+        if (cls == null) {
             throw new IllegalArgumentException(
                     "Class must not be null."
             );
         }
-        if (isAnnotated(objectClass)) {
-            Controller annotation = objectClass.getAnnotation(Controller.class);
+        if (isAnnotated(cls)) {
+            Controller annotation = cls.getAnnotation(Controller.class);
 
             return hasDefaultName(annotation) ?
-                    objectClass.getSimpleName().toLowerCase(Locale.ROOT) :
+                    cls.getSimpleName().toLowerCase(Locale.ROOT) :
                     annotation.name();
         }
         return "";
     }
 
-    public static String getName(Method method) {
+    public static String getName(final Method method) {
         if (!(isAnnotated(method))) {
             throw new IllegalArgumentException(
                     "Method is not annotated with @Command."
@@ -59,7 +62,7 @@ public final class AnnotationUtil {
 
     }
 
-    public static String getName(Parameter parameter) {
+    public static String getName(final Parameter parameter) {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."
@@ -75,30 +78,30 @@ public final class AnnotationUtil {
         }
     }
 
-    public static boolean hasDefaultName(Controller controller) {
+    public static boolean hasDefaultName(final Controller controller) {
         return (controller != null) && (controller.name().equals(""));
     }
 
-    public static boolean hasDefaultTypeConverter(Argument argument) {
+    public static boolean hasDefaultTypeConverter(final Argument argument) {
         return (argument != null) && (argument.typeConverter() == ObjectTypeConverter.class);
     }
 
-    public static boolean hasTypeConverter(Parameter parameter) {
+    public static boolean hasTypeConverter(final Parameter parameter) {
         return (isAnnotated(parameter)) &&
                 !(parameter.getAnnotation(Argument.class)
                         .typeConverter() == ObjectTypeConverter.class);
     }
 
-    public static boolean hasDefaultName(Method method) {
+    public static boolean hasDefaultName(final Method method) {
         return (isAnnotated(method)) &&
                 method.getAnnotation(Command.class).name().equals(Command.DEFAULT_NAME);
     }
 
-    public static boolean hasDefaultName(Argument argument) {
+    public static boolean hasDefaultName(final Argument argument) {
         return (argument != null) && (argument.name().equals(""));
     }
 
-    public static String getDescription(Method method) {
+    public static String getDescription(final Method method) {
         if (method == null) {
             throw new IllegalArgumentException(
                     "Method must not be null."
@@ -109,7 +112,7 @@ public final class AnnotationUtil {
                 Command.DEFAULT_DESCRIPTION;
     }
 
-    public static String getDescription(Parameter parameter) {
+    public static String getDescription(final Parameter parameter) {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."
@@ -120,7 +123,7 @@ public final class AnnotationUtil {
                 "";
     }
 
-    public static TypeConverter<?> getTypeConverter(Parameter parameter) throws NoSuchTypeConverterException {
+    public static TypeConverter<?> getTypeConverter(final Parameter parameter) throws NoSuchTypeConverterException {
         if (hasTypeConverter(parameter)) {
             Class<?> typeOf = parameter.getAnnotation(Argument.class).typeConverter();
             try {
@@ -134,7 +137,7 @@ public final class AnnotationUtil {
         return TypeConverterRepository.getTypeConverter(parameter.getType());
     }
 
-    public static Type getType(Parameter parameter) {
+    public static Type getType(final Parameter parameter) {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."

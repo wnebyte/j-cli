@@ -5,8 +5,8 @@ java library
 - [About](#about)
 - [Sample](#sample)
   - [The absolute minimum](#the-absolute-minimum)
-  - [Annotations](#annotations)
-  - [Shell](#shell)  
+  - [Annotations+](#annotations)
+  - [Shell.class](#shell)  
 - [Build](#build)
 - [Documentation](#documentation)
 - [Licence](#licence)
@@ -31,7 +31,7 @@ which is the only required annotation.<br/>
         // code
     }
 The resulting Command Object will have the same name as the annotated Java Method, <br/>
-and its Argument Objects will have the same names as their respective Java Parameters<br/>
+and its Argument Objects will have the same name as their respective Java Parameters<br/>
 (that is if the proper [compiler options](#build) have been set, otherwise 
 their names will default to arg0 and arg1).
     
@@ -46,11 +46,11 @@ or call accept -- which accepts a single String to be matched against a known Co
 
     shell.run(); 
     // or 
-    shell.accept(input);
+    shell.accept("foo a 75 b 25");
 
 That's it!
 
-### Annotations
+### Annotations+
     @Controller(name = "prefix") 
     public class Contoller {
 
@@ -90,14 +90,14 @@ seeing as they've already been instantiated).
     ) {}
     
 You can explicitly set the name for every Controller, Command, and Argument.
-For the latter two you can also specify a description.<br>
+For the latter two you can also specify a description.<br><br/>
 You can also specify a user-defined TypeConverter to be used with a ParameterType 
 for which there is no built in support (there is built in support for primitives, wrapper classes, 
 and arrays where the component type is either a primitive or a wrapper class).
 
 ### Shell
 
-    Shell shell = new Shell(new ConfigurationBuilder()
+    Shell shell = new Shell(new Configuration()
             .setConsole(new Console())
             .setUnknownCommandOutputFormatter(input -> 
                     "out")
@@ -110,7 +110,7 @@ If you've configured the Shell with an IConsole implementation, you can set
 various formatter functions -- they allow you to 
 specify how certain output should be formatted.
 
-    Shell shell = new Shell(new ConfigurationBuilder()
+    Shell shell = new Shell(new Configuration()
             .setUnknownCommandHandler(input -> 
                     System.out.println(input))
             .setParseExceptionHandler(e -> 
@@ -121,13 +121,13 @@ specify how certain output should be formatted.
 If you do not wish to configure the Shell with an IConsole implementation, you can 
 set handlers to handle these events for you instead.
 
-    Shell shell = new Shell(new ConfigurationBuilder()
+    Shell shell = new Shell(new Configuration()
             .nullifyScanPackages()
-            .setScanObjects(new MyClass(arg0, arg1), new MyOtherClass(arg2))
-            .setScanClasses(FooOne.class, FooTwo.class));
+            .setScanObjects(new Class1(arg1, arg2), new Class2(arg2))
+            .setScanClasses(Class1.class, Class2.class));
     
 By default, the Shell scans all the packages on the class-path for @Command annotated Java Methods.<br/>
-You can tell the Shell to not scan any packages by calling nullifyScanPackages. <br/>
+You can tell the Shell to not scan any packages by calling nullifyScanPackages. <br/><br/>
 You can also directly pass 
 instantiated objects to the Shell,
 to be scanned for and to be used when invoking any underlying Java Methods, 
