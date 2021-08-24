@@ -4,67 +4,65 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import com.github.wnebyte.jshell.TypeConverter;
 import com.github.wnebyte.jshell.util.ObjectTypeConverter;
 
 /**
- * Annotate any Parameters of your {@link Command} annotated Java Methods with this annotation to explicitly set their
- * name, description, type, and type converter.<br/>
- * Here are some examples of usage:<br><br/>
- * <code>
- *     {@literal @}Command<br/>
- *     public void foo({@literal @}Argument String argument) {<br/>
- *     <BLOCKQUOTE>// code</BLOCKQUOTE>
- *     }<br/>
- * </code>
- * <p>Here the name field is implicitly set to argument, or arg0 depending on compiler options.
- * <br/>
- * The description field is omitted, and the type field is implicitly set to Required.class.
- * <br/>
- * Required Arguments must be present when their Command is specified.
- * <br/>
- * In this instance the @Argument annotation could have been omitted, and the same configuration
+ * Annotate the Parameters of your {@link Command} annotated Java Method with this annotation to explicitly set their
+ * name, description, {@link Type}, and {@link TypeConverter}.<br>
+ * Here are some examples of usage:<br><br>
+ * <pre>
+ *{@literal @}Command
+ * public void foo(
+ *        {@literal @}Argument
+ *         String bar
+ * ) {
+ *     // code
+ * }
+ * </pre>
+ * <p>Here the name field is implicitly set to "bar", or "arg0" depending on compiler options.
+ * <br>
+ * The description field is omitted, and the type field is implicitly set to {@link Type#REQUIRED}.
+ * <br>
+ * In this instance the annotation could have been omitted, and the same configuration
  * would have been achieved.</p>
- * <br/>
- * <code>
- *     {@literal @}Command<br/>
- *     public void foo({@literal @}Argument(name = "argument", description = "desc",
- *     type = Type.OPTIONAL) String argument) {<br/>
- *     <BLOCKQUOTE>// code</BLOCKQUOTE>
- *     }<br/>
- * </code>
- * <p>Here the name field is explicitly set to argument.
- * <br/>
- * The description field is set to desc, and the type field is explicitly set to Optional.class.
- * <br/>
- * Optional Arguments may, or may not be present as an Argument when a Command is specified.</p>
- * <br/>
- * <code>
- *     {@literal @}Command<br/>
- *     public void foo({@literal @}Argument(type = Type.POSITIONAL) String argument) {<br/>
- *     <BLOCKQUOTE>// code</BLOCKQUOTE>
- *     }<br/>
- * </code>
- * <p>Here the name field is implicitly set to argument, or arg0 depending on compiler options, but the
- * name field is always ignored when the type field is set to Positional.class.
- * <br/>
- * Positional Arguments are identified by their position, and have to appear at the beginning of their Command's
- * Arguments, in the order in which they are declared in their respective Java Methods.</p>
- * <br/>
- * <code>
- *     {@literal @}Command<br/>
- *     public void foo({@literal @}Argument(typeConverter = FooTypeConverter.class) Foo foo) {<br/>
- *     <BLOCKQUOTE>// code</BLOCKQUOTE>
- *     }<br/>
- * </code>
+ * <br>
+ * <pre>
+ *{@literal @}Command
+ * public void foo(
+ *        {@literal @}Argument(
+ *                 name = "bar",
+ *                 description = "demonstration bar",
+ *                 type = Type.OPTIONAL
+ *         )
+ *         String bar
+ * ) {
+ *     // code
+ * }
+ * </pre>
+ * <p>Here the name field is explicitly set to "bar".
+ * <br>
+ * The description field is set to "demonstration bar",
+ * and the type field is explicitly set to {@link Type#OPTIONAL}.</p>
+ * <br>
+ * <pre>
+ *{@literal @}Command
+ * public void foo(
+ *        {@literal @}Argument(
+ *                 typeConverter = BarTypeConverter.class
+ *         )
+ *         Bar bar
+ * ) {
+ *     // code
+ * }
+ * </pre>
  * <p>A user-defined TypeConverter can be specified by setting the typeConverter field to a class
  * which implements the {@link TypeConverter} interface.
- * <br/>
- * Built in support for primitive types, wrapper classes, and arrays where the component type is either a
- * primitive type, or a wrapper class exists.
- * <br/>
- * The typeConverter field only needs to be specified if the type of the Java Parameter is not one of the
+ * <br>
+ * Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
+ * primitive type, or a wrapper class.
+ * <br>
+ * The field only needs to be specified if the type of the Java Parameter is not one of the
  * aforementioned.
  * </p>
  * @see Command
@@ -80,29 +78,28 @@ public @interface Argument {
     String DEFAULT_DESCRIPTION = "";
 
     /**
-     * Specify a name for the <code>Argument</code>.
-     * <br/>
-     * Defaults to the name of the Java Parameter, or arg0+ depending on compiler options.
-     * <br/>
-     * Normalization will remove the following characters: ...
-     * @return the name of the <code>Argument</code>.
+     * <p>Specify a name for this Argument.</p>
+     * Defaults to the name of annotated Java Parameter.
+     * @return the name of this Argument.
      */
     String name() default DEFAULT_NAME;
 
     /**
-     * Specify a description for the <code>Argument</code>.
-     * @return the description of the <code>Argument</code>.
+     * Specify a description for this Argument.
+     * @return the description of this Argument.
      */
     String description() default DEFAULT_DESCRIPTION;
 
     /**
-     *
+     * <p>Specify a Type for this Argument.</p>
+     * Defaults to {@link Type#REQUIRED}.
+     * @return the Type of this Argument.
      */
     Type type() default Type.REQUIRED;
 
     /**
-     * Specify a typeConverter for the <code>Argument</code>.
-     * @return the typeConverter of the <code>Argument</code>.
+     * Specify a TypeConverter for this Argument.
+     * @return the TypeConverter for this Argument.
      */
     Class<? extends TypeConverter> typeConverter() default ObjectTypeConverter.class;
 }

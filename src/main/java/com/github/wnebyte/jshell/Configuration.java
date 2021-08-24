@@ -13,23 +13,16 @@ import java.util.function.Function;
  */
 public class Configuration {
 
-    private IConsole console;
-
-    private Consumer<String> unknownCommandHandler;
-
-    private Function<String, String> unknownCommandOutputFormatter = new Function<String, String>() {
-        // default implementation
+    public static final Function<String, String> DEFAULT_UNKNOWN_COMMAND_FORMATTER
+            = new Function<String, String>() {
         @Override
         public String apply(String input) {
             return "'".concat(input).concat("'").concat(" is not recognized as an internal command.");
         }
     };
 
-    private Consumer<ParseException> parseExceptionHandler;
-
-    private Function<ParseException, String> parseExceptionOutputFormatter =
-            new Function<ParseException, String>() {
-        // default implementation
+    public static final Function<ParseException, String> DEFAULT_PARSE_EXCEPTION_FORMATTER
+            = new Function<ParseException, String>() {
         @Override
         public String apply(ParseException e) {
             return "could not convert '" + e.getValue() + "' into <"
@@ -37,10 +30,8 @@ public class Configuration {
         }
     };
 
-    private Consumer<Command> helpHandler;
-
-    private Function<Command, String> helpOutputFormatter = new Function<Command, String>() {
-        // default implementation
+    public static final Function<Command, String> DEFAULT_HELP_COMMAND_FORMATTER
+            = new Function<Command, String>() {
         @Override
         public String apply(Command command) {
             StringBuilder output = new StringBuilder();
@@ -95,6 +86,23 @@ public class Configuration {
         }
     };
 
+    private IConsole console;
+
+    private Consumer<String> unknownCommandHandler;
+
+    private Function<String, String> unknownCommandFormatter
+            = DEFAULT_UNKNOWN_COMMAND_FORMATTER;
+
+    private Consumer<ParseException> parseExceptionHandler;
+
+    private Function<ParseException, String> parseExceptionFormatter
+            = DEFAULT_PARSE_EXCEPTION_FORMATTER;
+
+    private Consumer<Command> helpHandler;
+
+    private Function<Command, String> helpCommandFormatter =
+            DEFAULT_HELP_COMMAND_FORMATTER;
+
     private Set<Object> objects;
 
     private final Set<String> packages = new HashSet<String>() {
@@ -117,10 +125,13 @@ public class Configuration {
     }
 
     /**
-     * <p>Configure the Shell to use the specified Console.</p>
-     * Does not have to be set, but the Shell will not be able to output text and/or handle certain events,
-     * it is recommended to set all the handlers if a Console is not specified.
-     * @param console the console to be used by the Shell to read and output text.
+     * Configure the Shell to use the specified Console.
+     * <p></p>
+     * If left unspecified the Shell will not be able to directly output any text, or read any text.
+     * <br>
+     * it is recommended to set all the Handlers if a Console is not set.
+     * @param console the console to be used by the Shell.
+     * @return this Configuration.
      */
     public final Configuration setConsole(final IConsole console) {
         this.console = console;
@@ -129,12 +140,13 @@ public class Configuration {
 
     /**
      * Configure the Shell to use the specified formatter when an UnknownCommandException is thrown,
-     * and setConsole() has been set, and the associated handler has not been set.
+     * and <code>setConsole()</code> has been set, and the associated handler has not been set.
      * @param formatter the formatter to be used.
+     * @return this Configuration.
      */
-    public final Configuration setUnknownCommandOutputFormatter(final Function<String, String> formatter) {
+    public final Configuration setUnknownCommandFormatter(final Function<String, String> formatter) {
         if (formatter != null) {
-            this.unknownCommandOutputFormatter = formatter;
+            this.unknownCommandFormatter = formatter;
         }
         return this;
     }
@@ -142,33 +154,32 @@ public class Configuration {
     /**
      * Configure the Shell to use the specified handler when an UnknownCommandException is thrown.
      * @param handler the handler to be used.
+     * @return this Configuration.
      */
     public final Configuration setUnknownCommandHandler(final Consumer<String> handler) {
-        if (handler != null) {
-            this.unknownCommandHandler = handler;
-        }
+        this.unknownCommandHandler = handler;
         return this;
     }
 
     /**
      * Configure the Shell to use the specified handler when a ParseException is thrown.
      * @param handler the handler to be used.
+     * @return this Configuration.
      */
     public final Configuration setParseExceptionHandler(final Consumer<ParseException> handler) {
-        if (handler != null) {
-            this.parseExceptionHandler = handler;
-        }
+        this.parseExceptionHandler = handler;
         return this;
     }
 
     /**
      * Configure the Shell to use the specified formatter when a ParseException is thrown,
-     * and setConsole() has been set, and the associated handler has not been set.
+     * and <code>setConsole()</code> has been set, and the associated handler has not been set.
      * @param formatter the formatter to be used.
+     * @return this Configuration.
      */
-    public final Configuration setParseExceptionOutputFormatter(final Function<ParseException, String> formatter) {
+    public final Configuration setParseExceptionFormatter(final Function<ParseException, String> formatter) {
         if (formatter != null) {
-            this.parseExceptionOutputFormatter = formatter;
+            this.parseExceptionFormatter = formatter;
         }
         return this;
     }
@@ -177,22 +188,22 @@ public class Configuration {
     /**
      * Configure the Shell to use the specified handler when the Shell's Help Command has been successfully matched.
      * @param handler the handler to be used.
+     * @return this Configuration.
      */
     public final Configuration setHelpHandler(final Consumer<Command> handler) {
-        if (handler != null) {
-            this.helpHandler = handler;
-        }
+        this.helpHandler = handler;
         return this;
     }
 
      /**
      * Configure the Shell to use the specified formatter when the Shell's Help Command has been successfully matched,
-     * and setConsole() has been set, and the associated handler has not been set.
+     * and <code>setConsole()</code> has been set, and the associated handler has not been set.
      * @param formatter the formatter to be used.
+     * @return this Configuration.
      */
-    public final Configuration setHelpOutputFormatter(final Function<Command, String> formatter) {
+    public final Configuration setHelpCommandFormatter(final Function<Command, String> formatter) {
         if (formatter != null) {
-            this.helpOutputFormatter = formatter;
+            this.helpCommandFormatter = formatter;
         }
         return this;
     }
@@ -202,7 +213,8 @@ public class Configuration {
      * {@linkplain com.github.wnebyte.jshell.annotation.Command} annotated Java Methods.</p>
      * The specified Objects will also be used when the Shell invokes any underlying annotated
      * Java Methods.
-     * @param objects the Objects whose classes are to be scanned.
+     * @param objects the Objects who are to be scanned.
+     * @return this Configuration.
      */
     public final Configuration setScanObjects(final Object... objects) {
         if ((objects != null) && (objects.length != 0)) {
@@ -213,6 +225,11 @@ public class Configuration {
 
     /**
      * Configure the Shell to scan the specified Bundle.
+     * @param bundle to be set.
+     * @return this Configuration.
+     */
+    /*
+    Test related class and method.
      */
     public final Configuration setScanBundles(final Bundle bundle) {
         if (bundle != null) {
@@ -225,6 +242,7 @@ public class Configuration {
      * Configure the Shell to scan the specified classes for
      * {@linkplain com.github.wnebyte.jshell.annotation.Command} annotated Java Methods.
      * @param classes the classes to be scanned.
+     * @return this Configuration.
      */
     public final Configuration setScanClasses(final Class<?>... classes) {
         if ((classes != null) && (classes.length != 0)) {
@@ -236,6 +254,7 @@ public class Configuration {
     /**
      * Configure the Shell to abstain from scanning the class-path for
      * {@linkplain com.github.wnebyte.jshell.annotation.Command} annotated Java Methods.
+     * @return this Configuration.
      */
     public final Configuration nullifyScanPackages() {
         this.nullifyScanPackages = true;
@@ -243,7 +262,8 @@ public class Configuration {
     }
 
     /**
-     * Configure the Shell to not include it's Help Command.
+     * Configure the Shell to not include it's declared Help Command.
+     * @return this Configuration.
      */
     public final Configuration nullifyHelpCommands() {
         this.nullifyHelpCommands = true;
@@ -252,6 +272,7 @@ public class Configuration {
 
     /**
      * Configure the Shell to not suggest a Command when handling an UnknownCommandException.
+     * @return this Configuration.
      */
     public final Configuration nullifySuggestCommand() {
         this.suggestCommand = false;
@@ -260,11 +281,15 @@ public class Configuration {
 
     /**
      * Configure a TypeConverter to be registered.
+     * @param cls the Class which the specified TypeConverter is to be associated.
+     * @param typeConverter the TypeConverter to be associated with the specified Class.
+     * @param <T> the Type of the specified Class and TypeConverter.
+     * @return this Configuration.
      */
     public final <T> Configuration
-    registerTypeConverter(final Class<T> typeOf, final TypeConverter<T> typeConverter) {
-        if ((typeOf != null) && (typeConverter != null)) {
-            TypeConverterRepository.putIfAbsent(typeOf, typeConverter);
+    registerTypeConverter(final Class<T> cls, final TypeConverter<T> typeConverter) {
+        if ((cls != null) && (typeConverter != null)) {
+            TypeConverterRepository.putIfAbsent(cls, typeConverter);
         }
         return this;
     }
@@ -286,8 +311,8 @@ public class Configuration {
     /**
      * @return the formatter to be used by the Shell when an UnknownCommandException is thrown.
      */
-    public Function<String, String> getUnknownCommandOutputFormatter() {
-        return unknownCommandOutputFormatter;
+    public Function<String, String> getUnknownCommandFormatter() {
+        return unknownCommandFormatter;
     }
 
     /**
@@ -300,8 +325,8 @@ public class Configuration {
     /**
      * @return the formatter to be used by the Shell when a ParseException is thrown.
      */
-    public Function<ParseException, String> getParseExceptionOutputFormatter() {
-        return parseExceptionOutputFormatter;
+    public Function<ParseException, String> getParseExceptionFormatter() {
+        return parseExceptionFormatter;
     }
 
     /**
@@ -314,8 +339,8 @@ public class Configuration {
     /**
      * @return the formatter to be used by the Shell's Help Command.
      */
-    public Function<Command, String> getHelpOutputFormatter() {
-        return helpOutputFormatter;
+    public Function<Command, String> getHelpCommandFormatter() {
+        return helpCommandFormatter;
     }
 
     /**

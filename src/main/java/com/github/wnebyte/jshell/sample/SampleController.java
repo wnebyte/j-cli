@@ -2,10 +2,14 @@ package com.github.wnebyte.jshell.sample;
 
 import com.github.wnebyte.jshell.annotation.Command;
 import com.github.wnebyte.jshell.annotation.Argument;
+import com.github.wnebyte.jshell.annotation.Controller;
 import com.github.wnebyte.jshell.annotation.Type;
 import com.github.wnebyte.jshell.IConsole;
 import java.util.Arrays;
 
+@Controller(
+        name = "foo"
+)
 public class SampleController {
 
     private final IConsole console;
@@ -38,7 +42,20 @@ public class SampleController {
 
    }
 
-   @Command(name = "empty")
+   @Command
+   public void test(
+           @Argument(
+                   name = "this",
+                   description = "that"
+           )
+           String bar
+   ) {
+
+   }
+
+   @Command(
+           name = "empty"
+   )
    private void foo() {
 
    }

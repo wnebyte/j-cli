@@ -13,14 +13,14 @@ import java.lang.reflect.Parameter;
 public final class Required extends Argument {
 
     /**
-     * Constructs a new <code>Required</code> Argument, using the specified parameter, and with the specified index.
-     * @param parameter the parameter to be used when constructing a new instance.
+     * Constructs a new instance using the specified parameter and the specified index.
+     * @param parameter the parameter to map this instance from.
      * @param index the index of the specified parameter.
-     * @throws NoSuchTypeConverterException if there is no registered <code>TypeConverter</code> matching
-     * the type of the specified parameter, and no <code>TypeConverter</code> is specified through the
-     * parameters {@link com.github.wnebyte.jshell.annotation.Argument} com.github.wnebyte.jshell.annotation.
+     * @throws NoSuchTypeConverterException if there is no registered TypeConverter matching
+     * the type of the specified parameter, and no TypeConverter has been specified through the
+     * parameters <br/>{@link com.github.wnebyte.jshell.annotation.Argument} annotation.
      */
-    Required(Parameter parameter, int index) throws NoSuchTypeConverterException {
+    Required(final Parameter parameter, final int index) throws NoSuchTypeConverterException {
         super(parameter, index);
         setRegex(WHITESPACE_REGEX.concat(getName()).concat(getTypeConverter().isArray() ?
                 ARRAY_REGEX : DEFAULT_REGEX));
@@ -28,11 +28,11 @@ public final class Required extends Argument {
 
     /**
      * {@inheritDoc}
-     * @param input the key-value pair where the key is the name of this <code>Argument</code>, and the value
+     * @param input key-value pair where the key is the name of this Argument, and the value
      * is the value to be initialized, separated by a whitespace character.
-     * @return the initialized value as an <code>Object</code>.
-     * @throws ParseException if this <code>Argument</code>'s <code>TypeConverter</code> failed to convert the specified input, or a
-     * substring of it, into the desired Type.
+     * @return the initialized Object.
+     * @throws ParseException if this Argument's TypeConverter failed to convert the specified input
+     * into the desired Type.
      */
     @Override
     Object initialize(final String input) throws ParseException {
@@ -46,12 +46,35 @@ public final class Required extends Argument {
     }
 
     /**
-     * @return a <code>String</code> representation of this Argument.
+     * @return a String representation of this Argument.
      */
+    @Override
     public String toString() {
-       // return getName().concat(getTypeConverter().isArray() ? "[]" : "");
-        return "[".concat(getName())
-                .concat(getTypeConverter().isArray() ? "[...]" : "")
-                .concat("]");
+        return getName().concat(getTypeConverter().isArray() ? "[...]" : "");
+    }
+
+    /**
+     * Performs an equality check on the specified Object.
+     * @param o the Object to perform the equality check on.
+     * @return <code>true</code> if the two Objects "equal" one another,
+     * otherwise <code>false</code>.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof Required)) { return false; }
+        Required required = (Required) o;
+        return super.equals(required);
+    }
+
+    /**
+     * @return the hashCode of this Argument.
+     */
+    @Override
+    public int hashCode() {
+        int result = 45;
+        return result +
+                super.hashCode();
     }
 }

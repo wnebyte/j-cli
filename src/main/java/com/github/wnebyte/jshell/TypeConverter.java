@@ -4,40 +4,35 @@ import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.StringUtil;
 
 /**
- * This interface declares operations used for the purpose of converting a <code>String</code> into an
- * arbitrary <code>Type</code>.
- * @param <T> the <code>Type</code> to be converted into.
+ * This interface declares methods for converting a String into an
+ * arbitrary Type.
+ * @param <T> the Type the String should be converted into.
  */
 public interface TypeConverter<T> {
 
     /**
-     * Converts the specified <code>String</code> into an instance of the specified <code>Type</code>.
-     * @param value the value to be converted.
-     * @return the converted value as an instance of the specified <code>Type</code>.
-     * @throws ParseException if the conversion was unsuccessful.
+     * Converts the specified <code>value</code> into a new instance of the Class specified Type.
+     * @param value to be converted.
+     * @return a new instance of the Class specified Type.
+     * @throws ParseException if unsuccessful.
      */
     T convert(final String value) throws ParseException;
 
     /**
-     * @return a default value of the specified <code>Type</code>.
+     * @return a default value of the Class specified Type.
      */
     T defaultValue();
 
     /**
-     * @return whether the specified <code>Type</code> is an <code>Array</code>.
+     * @return whether the Class specified Type is an Array.
      */
     boolean isArray();
 
-    String WHITESPACE_REGEX = "\\s";
-
-    String DEFAULT_REGEX = WHITESPACE_REGEX + "([^\\s\"]*|\"[^\"]*\")";
-
-    String ARRAY_REGEX = WHITESPACE_REGEX + "\\[([^\\s\"\\[\\]]*|\"[^\"\\[\\]]*\")*\\]";
-
     /**
-     * Normalizes the specified value by removing any occurrences of quotation characters.
-     * @param value the value to be normalized.
-     * @return the normalized value, or a new <code>String</code> if the specified value was <code>null</code>.
+     * Normalizes the specified <code>value</code> by removing all occurrences of "\"".
+     * @param value to be normalized.
+     * @return the normalized <code>value</code>, or a new String if the specified <code>value</code>
+     * was <code>null</code>.
      */
     static String normalize(final String value) {
         if (value != null) {
@@ -47,10 +42,12 @@ public interface TypeConverter<T> {
     }
 
     /**
-     * Normalizes the specified value by removing the first occurrence of [ and the last occurrence of ].<br/>
-     * @param value the value to be normalized.
-     * @return the normalized value, or a new <code>String</code> if the specified value was <code>null</code>,
-     * or the specified <code>String</code> if both characters are not present.
+     * Normalizes the specified <code>value</code> by removing the first occurrence of "["
+     * and the last occurrence of "]".<br>
+     * @param value to be normalized.
+     * @return the normalized <code>value</code>, or a new String if the specified <code>value</code>
+     * was <code>null</code>,
+     * or the specified <code>value</code> if both characters are not present.
      */
     static String normalizeArray(final String value) {
         if (value != null) {
@@ -60,10 +57,10 @@ public interface TypeConverter<T> {
     }
 
     /**
-     * Splits the specified value after normalizing it using the regex of a comma character
-     * that has en even number of preceding quotation characters.
-     * @param value the value to be split.
-     * @return the split value.
+     * Splits the specified <code>value</code> on occurrences of ","
+     * that have an even number of preceding "\"" characters.
+     * @param value to be split.
+     * @return the split <code>value</code>.
      */
     static String[] arraySplit(final String value) {
         return StringUtil.splitByComma(value).toArray(new String[0]);

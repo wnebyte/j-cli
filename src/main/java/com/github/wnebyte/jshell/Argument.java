@@ -3,6 +3,7 @@ package com.github.wnebyte.jshell;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.AnnotationUtil;
+import com.github.wnebyte.jshell.util.ObjectUtil;
 import com.github.wnebyte.jshell.util.StringUtil;
 import java.lang.reflect.Parameter;
 import java.util.Comparator;
@@ -138,9 +139,8 @@ public abstract class Argument {
 
     /**
      * Sets the regular expression for this Argument.
-     * @param regex the regex to set for this Argument.
+     * @param regex the regex to be set.
      */
-    // lateinit for subclasses
     protected void setRegex(final String regex) {
         if (regex != null) {
             if (this.regex == null) {
@@ -205,7 +205,39 @@ public abstract class Argument {
     /**
      * @return a String representation of this Argument.
      */
+    @Override
     public String toString() {
         return getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof Argument)) { return false; }
+        Argument argument = (Argument) o;
+        return argument.index == this.index &&
+                ObjectUtil.equals(argument.name, this.name) &&
+                ObjectUtil.equals(argument.description, this.description) &&
+                ObjectUtil.equals(argument.type, this.type) &&
+                ObjectUtil.equals(argument.typeConverter, this.typeConverter) &&
+                ObjectUtil.equals(argument.regex, this.regex) &&
+                ObjectUtil.equals(argument.getClass(), this.getClass()) &&
+                super.equals(argument);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31;
+        return result +
+                12 +
+                ObjectUtil.hashCode(name) +
+                ObjectUtil.hashCode(description) +
+                ObjectUtil.hashCode(type) +
+                ObjectUtil.hashCode(typeConverter) +
+                ObjectUtil.hashCode(regex) +
+                ObjectUtil.hashCode(index) +
+                ObjectUtil.hashCode(getClass()) +
+                super.hashCode();
     }
 }

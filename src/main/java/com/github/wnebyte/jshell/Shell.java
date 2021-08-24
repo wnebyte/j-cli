@@ -155,7 +155,7 @@ public class Shell {
     protected void handleUnknownCommandException(final String input) {
         IConsole console = config.getConsole();
         Consumer<String> handler = config.getUnknownCommandHandler();
-        Function<String, String> formatter = config.getUnknownCommandOutputFormatter();
+        Function<String, String> formatter = config.getUnknownCommandFormatter();
 
         if (handler != null) {
             handler.accept(input);
@@ -164,9 +164,8 @@ public class Shell {
 
             if (config.isSuggestCommand()) {
                 Command command = getBestGuess(input);
-
                 if (command != null) {
-                    console.println(config.getHelpOutputFormatter().apply(command));
+                    console.println(config.getHelpCommandFormatter().apply(command));
                 } else {
                     console.printerr(formatter.apply(input));
                 }
@@ -178,13 +177,13 @@ public class Shell {
     }
 
     /**
-     * Handles a {@link ParseException} in accordance with the specified Configuration.
+     * Handles a {@linkplain ParseException} in accordance with the specified class Configuration.
      * @param e the thrown ParseException.
      */
     protected void handleParseException(final ParseException e) {
         IConsole console = config.getConsole();
         Consumer<ParseException> handler = config.getParseExceptionHandler();
-        Function<ParseException, String> formatter = config.getParseExceptionOutputFormatter();
+        Function<ParseException, String> formatter = config.getParseExceptionFormatter();
 
         if (handler != null) {
             handler.accept(e);
@@ -194,6 +193,12 @@ public class Shell {
         }
     }
 
+    /**
+     * Matches the specified input with a mapped <code>Command</code>.
+     * @param input the input to match against.
+     * @return the <code>Command</code> that matches the specified input.
+     * @throws UnknownCommandException if the specified input does not match any mapped <code>Command</code>.
+     */
     protected final Command match(final String input) throws UnknownCommandException {
         for (Map.Entry<Pattern, Command> kv : commands.entrySet()) {
             if (kv.getKey().matcher(input).matches()) {
@@ -203,6 +208,12 @@ public class Shell {
         throw new UnknownCommandException();
     }
 
+    /**
+     * Returns the <code>Command</code> that best matched the specified input.
+     * @param input the input to match against.
+     * @return the <code>Command</code> that best matches the specified input if there is one,
+     * otherwise returns <code>null</code>.
+     */
     protected Command getBestGuess(final String input) {
         float max = 0f;
         Command cmd = null;
@@ -218,57 +229,80 @@ public class Shell {
         return cmd;
     }
 
+    /**
+     * @return a view of the mapped <code>Commands</code>.
+     */
     protected final Collection<Command> getCommands() {
-        return commands.values();
+        return new ArrayList<>(commands.values());
     }
 
-    protected final Configuration getConfigurationBuilder() {
+    /**
+     * @return the <code>Configuration</code> that was used to build this Shell.
+     */
+    protected final Configuration getConfiguration() {
         return config;
     }
 
+    /**
+     * Prints the associated <code>Pattern</code> of every mapped <code>Command</code> to the standard
+     * output stream.
+     */
     public void printKeys() {
         commands.keySet().forEach(System.out::println);
     }
 
+    /**
+     * Shell's Help Command.
+     */
     @com.github.wnebyte.jshell.annotation.Command(
-            name = "--help", description = "lists all commands"
+            name = "--help", description = "help command"
     )
     private void help(
             @com.github.wnebyte.jshell.annotation.Argument(
-                    name = "-name", type = Type.OPTIONAL, description = "name of command"
+                    name = "-n", type = Type.OPTIONAL, description = "name of command"
             )
             String name,
-            @com.github.wnebyte.jshell.annotation.Argument
-                    (name = "-prefix", type = Type.OPTIONAL, description = "prefix of command"
-                    )
+            @com.github.wnebyte.jshell.annotation.Argument(
+                    name = "-p", type = Type.OPTIONAL, description = "prefix of command"
+            )
             String prefix,
             @com.github.wnebyte.jshell.annotation.Argument(
-                    name = "-args", type = Type.OPTIONAL, description = "args of command"
+                    name = "-a", type = Type.OPTIONAL, description = "args of command"
             )
             String[] args
     ) {
         IConsole console = config.getConsole();
-        Function<Command, String> formatter = config.getHelpOutputFormatter();
+        Consumer<Command> handler = config.getHelpHandler();
+        Function<Command, String> formatter = config.getHelpCommandFormatter();
 
-        if (console != null) {
-            Collection<Command> commands = this.commands.values();
-
-            if (name != null) {
-                commands = commands.stream()
-                        .filter(command -> command.getName().equals(name)).collect(Collectors.toList());
-            }
-            if (prefix != null) {
-                commands = commands.stream()
-                        .filter(command -> command.getPrefix().equals(prefix)).collect(Collectors.toList());
-            }
-            if ((args != null) && (args.length != 0)) {
-                List<String> argsAsList = Arrays.asList(args);
-                commands = commands.stream()
-                        .filter(command -> CollectionUtil.intersection(argsAsList, command.getArguments()
-                                .stream().map(Argument::getName).collect(Collectors.toList()))
-                                .size() == args.length).collect(Collectors.toList());
-            }
-            commands.forEach(command -> console.println(formatter.apply(command)));
+        if (handler != null) {
+            filter(getCommands(), prefix, name, Arrays.asList(args))
+                    .forEach(handler);
         }
+
+        else if (console != null) {
+            filter(getCommands(), prefix, name, Arrays.asList(args))
+                    .forEach(command -> console.println(formatter.apply(command)));
+        }
+    }
+
+    private Collection<Command> filter(
+            Collection<Command> commands, final String prefix, final String name, final List<String> args) {
+
+        if (name != null) {
+            commands = commands.stream()
+                    .filter(command -> command.getName().equals(name)).collect(Collectors.toList());
+        }
+        if (prefix != null) {
+            commands = commands.stream()
+                    .filter(command -> command.getPrefix().equals(prefix)).collect(Collectors.toList());
+        }
+        if ((args != null) && (args.size() != 0)) {
+            commands = commands.stream()
+                    .filter(command -> CollectionUtil.intersection(args, command.getArguments()
+                            .stream().map(Argument::getName).collect(Collectors.toList()))
+                            .size() == args.size()).collect(Collectors.toList());
+        }
+        return commands;
     }
 }

@@ -1,9 +1,5 @@
 package com.github.wnebyte.jshell;
 
-import com.github.wnebyte.jshell.annotation.Type;
-import com.github.wnebyte.jshell.exception.config.IllegalAnnotationException;
-import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
-import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -12,8 +8,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.github.wnebyte.jshell.annotation.Type;
+import com.github.wnebyte.jshell.exception.config.IllegalAnnotationException;
+import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
+import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.AnnotationUtil;
 import com.github.wnebyte.jshell.util.CollectionUtil;
+import com.github.wnebyte.jshell.util.ObjectUtil;
 import com.github.wnebyte.jshell.util.StringUtil;
 import static com.github.wnebyte.jshell.util.ReflectionUtil.isBoolean;
 import static com.github.wnebyte.jshell.util.AnnotationUtil.*;
@@ -40,18 +41,19 @@ public final class Command {
     private Set<List<String>> signature;
 
     /**
-     * Constructs a new Command instance using the specified Object and Method.
-     * @param owner the Object to which the specified Method belongs to.<br/>
-     *              Is expected to be <code>null</code> if the Method does not belong to an Object.
-     * @param method the Method that is to be mapped into a Command.
-     * @throws IllegalAnnotationException if the specified Method is not annotated with
-     * {@linkplain com.github.wnebyte.jshell.annotation.Command}.
-     * @throws NoSuchTypeConverterException if the {@linkplain TypeConverterRepository} lacks an implementation
-     * for the Type of one of the specified Method's Parameters,
+     * Constructs a new instance using the specified Object and Method.
+     * @param owner the Object to which the specified Method belongs to,
+     * or <code>null</code> if the Method is static.
+     * @param method the Method that is to be mapped to a Command.
+     * @throws IllegalAnnotationException if the specified Method is not annotated with <br/>
+     * {@link com.github.wnebyte.jshell.annotation.Command}.
+     * @throws NoSuchTypeConverterException if the {@link TypeConverterRepository} lacks an implementation
+     * for the Type of one of the specified Method's Parameters, <br/>
      * or if one of the Method's Arguments have a specified TypeConverter class which can not be
      * reflectively instantiated.
      */
-    Command(Object owner, Method method) throws IllegalAnnotationException, NoSuchTypeConverterException {
+    Command(final Object owner, final Method method)
+            throws IllegalAnnotationException, NoSuchTypeConverterException {
         if (!(isAnnotated(method))) {
             throw new IllegalAnnotationException(
                     "\t\nMethod: " + method.toGenericString() + " is not annotated with " +
@@ -68,8 +70,8 @@ public final class Command {
     }
 
     /**
-     * Initializes and returns the Arguments of this Command.
-     * @return this Command's Arguments.
+     * Constructs and returns this Command's List of Arguments.
+     * @return this Command's List of Arguments.
      * @throws NoSuchTypeConverterException if the {@linkplain TypeConverterRepository} lacks an implementation
      * for the Type of one of the underlying Method's Parameters,
      * or if one of the Arguments have a specified TypeConverter class which can not be instantiated.
@@ -97,10 +99,11 @@ public final class Command {
     }
 
     /**
-     * Attempts to execute this Command by parsing the specified input, and invoking this Command's
-     * underlying Method.
+     * Attempts to execute this Command by parsing the specified input and invoking the
+     * underlying Java Method.
      * @param input the input received from the user.
-     * @throws ParseException if one of this Command's Arguments failed to convert.
+     * @throws ParseException if one of this Command's Arguments failed to convert into its
+     * desired Type.
      */
     void execute(final String input) throws ParseException {
         Parser parser = new Parser(this, input);
@@ -114,11 +117,9 @@ public final class Command {
     }
 
     /**
-     * Determines to what degree the specified <code>input</code> matches this Command. <br/>
-     * The result will be in the range <code>0.0 <= result <= 2.25</code>
-     */
-    /*
-    This Command's signature field is used to determine the likeness.
+     * Returns to what degree the specified input matches this Command.<br/>
+     * @param input to compare against this Command's signature.
+     * @return a result in the range <code>0.0 <= result <= 2.25</code>
      */
     float getLikeness(final String input) {
         List<String> words = Parser.split(input);
@@ -146,9 +147,9 @@ public final class Command {
         return val;
     }
 
-
     /**
-     * Lateinit signature initializer.
+     * Sets this Command's signature.
+     * @param signature to be set.
      */
     void setSignature(final Set<List<String>> signature) {
         if (signature != null) {
@@ -191,7 +192,9 @@ public final class Command {
     }
 
     /**
-     * @return whether this Command has a prefix.
+     * Returns whether this Command has a prefix.
+     * @return <code>true</code> if this Command's prefix is non <code>null</code> and
+     * non <code>empty</code>, otherwise <code>false</code>.
      */
     public boolean hasPrefix() {
         return (getPrefix() != null) && !(getPrefix().equals(""));
@@ -219,7 +222,9 @@ public final class Command {
     }
 
     /**
-     * @return whether this Command has a description.
+     * Returns whether this Command has a description.
+     * @return <code>true</code> if this Command's description is non <code>null</code> and
+     * non <code>empty</code>, otherwise <code>false</code>.
      */
     public boolean hasDescription() {
         return (description != null) && !(description.equals(""));
@@ -228,32 +233,47 @@ public final class Command {
     /**
      * @return a String representation of this Command.
      */
+    @Override
     public String toString() {
         String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
         return prefix + getName() + " " +
                 getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));
     }
 
-    /*
-    void execute(final String input) throws ParseException {
-        Object[] args = new Object[getArguments().size()];
-
-        int i = 0;
-        for (Argument argument : getArguments()) {
-            try {
-                args[i++] = argument.initialize(input);
-            } catch (ParseException e) {
-                e.setCommand(this);
-                e.setArgument(argument);
-                e.setUserInput(input);
-                throw e;
-            }
-        }
-        try {
-            getMethod().invoke(getOwner(), args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Performs an equality check on the specified Object.
+     * @param o the Object to perform the equality check on.
+     * @return <code>true</code> if the two Objects "equal" one another,
+     * otherwise <code>false</code>.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof Command)) { return false; }
+        Command command = (Command) o;
+        return ObjectUtil.equals(command.owner, this.owner) &&
+                ObjectUtil.equals(command.method, this.method) &&
+                ObjectUtil.equals(command.arguments, this.arguments) &&
+                ObjectUtil.equals(command.prefix, this.prefix) &&
+                ObjectUtil.equals(command.name, this.name) &&
+                ObjectUtil.equals(command.description, this.description) &&
+                ObjectUtil.equals(command.signature, this.signature);
     }
-    */
+
+    /**
+     * @return the hashCode of this Command.
+     */
+    @Override
+    public int hashCode() {
+        int result = 98;
+        return result +
+                ObjectUtil.hashCode(owner) +
+                ObjectUtil.hashCode(method) +
+                ObjectUtil.hashCode(arguments) +
+                ObjectUtil.hashCode(prefix) +
+                ObjectUtil.hashCode(name) +
+                ObjectUtil.hashCode(description) +
+                ObjectUtil.hashCode(signature);
+    }
 }

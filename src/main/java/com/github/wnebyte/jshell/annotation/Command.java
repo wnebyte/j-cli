@@ -7,32 +7,28 @@ import java.lang.annotation.Target;
 import com.github.wnebyte.jshell.Shell;
 
 /**
- * Annotate your Java Methods with this com.github.wnebyte.jshell.annotation and they can be parsed, initialized, and invoked via an
- * instance of the {@link Shell} class at runtime.<br/>
- * Here are some examples of usage:<br/><br/>
- * <code>
- *     {@literal @}Command<br/>
- *     public void foo() {<br/>
- *     <BLOCKQUOTE>// code</BLOCKQUOTE>
- *     }<br/>
- * </code>
- * <p>Here the name field is implicitly set to the name of the method, foo.</p>
+ * Annotate your Java Methods with this annotation and they can be initialized, and invoked via an
+ * instance of the {@link Shell} class at runtime.<br>
+ * Here are some examples of usage:<br><br>
+ * <pre>
+ *{@literal @}Command
+ * public void foo() {
+ *     // code
+ * }
+ * </pre>
+ * <p>Here the name field is implicitly set to the name of the method, "foo".</p>
  * <br>
- * <code>
- *      {@literal @}Command(name = "foo")<br>
- *      public void foo() {<br>
- *      <BLOCKQUOTE>// code</BLOCKQUOTE>
- *      }<br>
- * </code>
- * <p>Here the name field is explicitly set to foo.</p>
- * <br/>
- * <code>
- *      {@literal @}Command(description = "desc")<br>
- *      public void foo() {<br>
- *      <BLOCKQUOTE>// code</BLOCKQUOTE>
- *      }<br>
- * </code>
- * <p>Here the description field is set to desc.</p>
+ * <pre>
+ *{@literal @}Command(
+ *         name = "foo",
+ *         description = "demonstration foo"
+ * )
+ * public void foo() {
+ *     // code
+ * }
+ * </pre>
+ * <p>Here the name field is explicitly set to "foo",
+ * and the description field is set to "demonstration foo".</p>
  * @see Argument
  * @see Controller
  */
@@ -45,18 +41,14 @@ public @interface Command {
     String DEFAULT_DESCRIPTION = "";
 
     /**
-     * Specify a name for the <code>Command</code>.
-     * <br/>
-     * Defaults to the name of the Java Method.
-     * <br/>
-     * Normalization will remove the following characters from the name: ...
+     * Specify a name for this Command, defaults to the name of the Java Method.
      * @return the name of the <code>Command</code>.
      */
     String name() default DEFAULT_NAME;
 
     /**
-     * Specify a description for the <code>Command</code>.
-     * @return the description of the <code>Command</code>.
+     * Specify a description for this Command.
+     * @return the description of this Command.
      */
     String description() default DEFAULT_DESCRIPTION;
 }

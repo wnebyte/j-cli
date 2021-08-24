@@ -1,11 +1,14 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java-library'
     id "me.champeau.gradle.jmh" version "0.5.0"
     id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
+def projectName = 'j-shell'
 group 'com.github.wnebyte'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 sourceCompatibility = "1.8";
 targetCompatibility = "1.8";
@@ -21,7 +24,6 @@ sourceSets {
         }
         resources {
             srcDirs = ["src/test/resources"]
-            includes = []
         }
     }
     jmh {
@@ -35,9 +37,13 @@ sourceSets {
 }
 
 shadowJar {
-    archiveBaseName.set('jshell')
+    archiveBaseName.set(projectName.concat('-fat'))
     archiveClassifier.set('')
-    archiveVersion.set('1.0')
+    archiveVersion.set(project.version)
+}
+
+javadoc {
+    source = sourceSets.main.allJava
 }
 
 repositories {
@@ -55,10 +61,14 @@ dependencies {
 jar{
     manifest{
         attributes(
-                "Name": "jshell",
-                "Implementation-Title": project.name,
-                "Implementation-Version": archiveVersion,
-                "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+                "Name": projectName,
+                "Implementation-Title": projectName,
+                "Implementation-Version": project.version,
+                "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
+                'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']}) " +
+                        "${System.properties['java.vm.version']}"
         )
     }
+    archiveBaseName.set(projectName)
 }

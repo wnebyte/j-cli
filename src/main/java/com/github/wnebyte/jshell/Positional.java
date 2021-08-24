@@ -3,6 +3,7 @@ package com.github.wnebyte.jshell;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.ArgumentSplitter;
+import com.github.wnebyte.jshell.util.ObjectUtil;
 
 import java.lang.reflect.Parameter;
 
@@ -17,14 +18,13 @@ public final class Positional extends Argument {
     private final int position;
 
     /**
-     * Constructs a new <code>Positional</code>, using the specified parameter, and with the specified index and
-     * position.
-     * @param parameter the parameter to be used when constructing a new instance.
+     * Constructs a new instance using the specified parameter, index, and position.
+     * @param parameter the parameter to map this instance from.
      * @param index the index of the specified parameter.
-     * @param position the position of the Argument, relative to any other positional Arguments.
-     * @throws NoSuchTypeConverterException if there is no registered <code>TypeConverter</code> matching
-     * the type of the specified parameter, and no <code>TypeConverter</code> is specified through the
-     * parameters {@link com.github.wnebyte.jshell.annotation.Argument} com.github.wnebyte.jshell.annotation.
+     * @param position the position relative to any other positional Arguments.
+     * @throws NoSuchTypeConverterException if there is no registered TypeConverter matching
+     * the type of the specified parameter, and no TypeConverter has been specified through the
+     * parameters <br/>{@link com.github.wnebyte.jshell.annotation.Argument} annotation.
      */
     Positional(Parameter parameter, int index, int position) throws NoSuchTypeConverterException {
         super(parameter, index, SYMBOL);
@@ -34,9 +34,9 @@ public final class Positional extends Argument {
 
     /**
      * {@inheritDoc}
-     * @param input the input in the form a value.
-     * @return the initialized value as an <code>Object</code>.
-     * @throws ParseException if this <code>Argument</code>'s <code>TypeConverter</code> failed to convert
+     * @param input value.
+     * @return the initialized Object.
+     * @throws ParseException if this Argument's TypeConverter failed to convert
      * the specified input into the desired Type.
      */
     @Override
@@ -52,8 +52,37 @@ public final class Positional extends Argument {
         return position;
     }
 
+    /**
+     * @return a String representation of this Argument.
+     */
     public String toString() {
-       // return getName().concat(getTypeConverter().isArray() ? "[]" : "");
-        return "[*".concat(getTypeConverter().isArray() ? "[...]" : "").concat("]");
+        return "*".concat(getTypeConverter().isArray() ? "[...]" : "");
+    }
+
+    /**
+     * Performs an equality check on the specified Object.
+     * @param o the Object to perform the equality check on.
+     * @return <code>true</code> if the two Objects "equal" one another,
+     * otherwise <code>false</code>.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        if (o == this) { return true; }
+        if (!(o instanceof Positional)) { return false; }
+        Positional positional = (Positional) o;
+        return positional.position == this.position &&
+                super.equals(positional);
+    }
+
+    /**
+     * @return the hashCode of this Argument.
+     */
+    @Override
+    public int hashCode() {
+        int result = 66;
+        return position +
+                result +
+                super.hashCode();
     }
 }
