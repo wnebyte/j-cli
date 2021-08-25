@@ -9,8 +9,8 @@ import java.lang.reflect.Parameter;
 import java.util.Comparator;
 
 /**
- * This abstract class represents a Command Argument mapped directly from a Java Method's
- * Parameter.
+ * This class represents an Argument mapped directly from the Parameter of a
+ * Java Method.
  * @see com.github.wnebyte.jshell.annotation.Argument
  */
 /*
@@ -92,7 +92,7 @@ public abstract class Argument {
      * the type of the specified parameter, and no TypeConverter has been specified through the
      * parameters {@link com.github.wnebyte.jshell.annotation.Argument} annotation.
      */
-    protected Argument(Parameter parameter, int index) throws NoSuchTypeConverterException {
+    protected Argument(final Parameter parameter, final int index) throws NoSuchTypeConverterException {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."
@@ -115,7 +115,8 @@ public abstract class Argument {
      * the type of the specified parameter, and no TypeConverter has been specified through the
      * parameters {@link com.github.wnebyte.jshell.annotation.Argument} annotation.
      */
-    protected Argument(Parameter parameter, int index, String name) throws NoSuchTypeConverterException {
+    protected Argument(final Parameter parameter, final int index, final String name)
+            throws NoSuchTypeConverterException {
         if (parameter == null) {
             throw new IllegalArgumentException(
                     "Parameter must not be null."

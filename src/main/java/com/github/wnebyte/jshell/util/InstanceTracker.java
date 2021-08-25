@@ -2,13 +2,13 @@ package com.github.wnebyte.jshell.util;
 
 import com.github.wnebyte.jshell.IConsole;
 import com.github.wnebyte.jshell.exception.config.NoReqConstructorException;
-
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Supplier;
 
 /**
- * This class provides methods and internals for tracking and instantiating Objects of distinct classes.
+ * This class declares methods for keeping track of and instantiating Objects belonging to
+ * distinct Classes.
  */
 public final class InstanceTracker {
 
@@ -17,36 +17,36 @@ public final class InstanceTracker {
     private IConsole injectable;
 
     /**
-     * Constructs a new <code>InstanceTracker</code> instance.
+     * Constructs a new instance.
      */
     public InstanceTracker() {
         this.objects = new HashSet<>();
     }
 
     /**
-     * Constructs a new <code>InstanceTracker</code> instance using the Objects that are of a distinct class present
-     * within the specified <code>Set</code>.
-     * @param objects the Objects to initialize this <code>InstanceTracker</code> with.
+     * Constructs a new instance using the specified Objects that are of a distinct class.
+     * @param objects to initialize the new instance with.
      */
     public InstanceTracker(final Set<Object> objects) {
         this.objects = ObjectUtil.requireNonNullElseGet(distinct(objects), HashSet::new);
     }
 
     /**
-     * Configure a specified <code>IConsole</code> to be injected into any available declared constructors of
-     * of the distinct classes of this class's tracked Objects.
-     * @param console the <code>IConsole</code> to be injected, if possible.
+     * Specify that the specified IConsole should be injected into any appropriate Constructors when
+     * instantiating new Objects.
+     * @param console the IConsole.
      */
     public final void setInjectable(final IConsole console) {
         this.injectable = console;
     }
 
     /**
-     * Tracks the specified Object if it is non <code>null</code>,
-     * and if the tracker is not already tracking an Object of the same class.
-     * @param object the Object to be tracked.
-     * @return true if there were no Objects of the same class already being tracked
-     * and the Object was successfully tracked, otherwise false.
+     * Adds the specified Object for tracking if it is non <code>null</code> and if this Class
+     * is not already tracking an Object of the same Class.
+     * @param object to be tracked.
+     * @return <code>true</code> if the Object was added successfully and there was no previous
+     * Object of the same Class being tracked,
+     * otherwise <code>false</code>.
      */
     public final boolean trackObject(final Object object) {
         if ((object != null) && (!(contains(object.getClass())))) {
@@ -57,21 +57,22 @@ public final class InstanceTracker {
     }
 
     /**
-     * Returns the Object that is of the specified class if one is tracked, otherwise constructs
-     * and returns a new instance of the specified class.
+     * Returns the Object that is of the specified Class if one is currently being tracked, otherwise constructs
+     * and returns a new instance of the specified Class.
      * @param cls the class of the Object.
-     * @return the tracked Object of the specified class if one exists, or a new instance of the specified class.
-     * @throws NoReqConstructorException if neither of the required constructors are declared in the specified class
-     * in the event of there being no tracked Object of the specified class.
+     * @return the tracked Object if one exists, otherwise a new instance of the specified Class.
+     * @throws NoReqConstructorException if no Object of the specified Class was being tracked and
+     * no appropriate Constructor was found.
      */
     public final Object getObject(final Class<?> cls) throws NoReqConstructorException {
         return contains(cls) ? get(cls) : newInstance(cls);
     }
 
     /**
-     * Determines whether an Object of the specified class is tracked.
-     * @param cls the class of the Object.
-     * @return true if an Object of the specified class is tracked, otherwise false.
+     * Returns whether an Object of the specified Class is currently being tracked.
+     * @param cls the Class of the Object.
+     * @return <code>true</code> if an Object of the specified Class is being tracked,
+     * otherwise <code>false</code>.
      */
     public boolean contains(final Class<?> cls) {
         return objects.stream().anyMatch(object -> object.getClass() == cls);
@@ -85,11 +86,11 @@ public final class InstanceTracker {
     }
 
     /**
-     * Constructs a new instance of the specified class.
-     * @param cls the class.
-     * @return the new instance.
+     * Constructs a new instance of the specified Class.
+     * @param cls the Class.
+     * @return a new instance.
      * @throws NoReqConstructorException if neither of the required constructors are declared in the specified
-     * class.
+     * Class.
      */
     private Object newInstance(final Class<?> cls) throws NoReqConstructorException {
         Object newInstance = null;
@@ -126,15 +127,13 @@ public final class InstanceTracker {
     }
 
     /**
-     * Removes any Objects that are of a duplicate class from the specified <code>Set</code>.
-     * @param objects the <code>Set</code>.
-     * @return the <code>Set</code>.
+     * Removes any Objects that are of a non distinct Class from the specified Set.
+     * @param objects the Set of Objects.
+     * @return a new Set.
      */
     private Set<Object> distinct(final Set<Object> objects) {
         Set<Class<?>> classes = new HashSet<>();
-        if (objects == null) {
-            return null;
-        }
+        if (objects == null) { return null; }
 
         for (Object object : new HashSet<>(objects)) {
             Class<?> cls = object.getClass();
@@ -150,10 +149,10 @@ public final class InstanceTracker {
     }
 
     /**
-     * Returns the tracked Object of the specified class, if one exists.
-     * @param cls the class.
-     * @return the Object.
-     * @throws IllegalStateException if no Object of the specified class is tracked.
+     * Returns the tracked Object that is of the specified Class if one exists.
+     * @param cls the Class.
+     * @return the Object if it exists, otherwise throws.
+     * @throws IllegalStateException if no Object of the specified class is currently being tracked.
      */
     private Object get(final Class<?> cls) throws IllegalStateException {
         return objects.stream().filter(object -> object.getClass() == cls).findFirst()

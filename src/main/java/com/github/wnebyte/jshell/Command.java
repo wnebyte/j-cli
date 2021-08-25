@@ -141,7 +141,7 @@ public final class Command {
         }
 
         val += signature.stream()
-                .map(signature -> CollectionUtil.intersections(signature, words))
+                .map(signature -> CollectionUtil.percentage(signature, words))
                 .max(Comparator.comparingDouble(value -> value))
                 .orElse(0f);
         return val;

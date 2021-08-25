@@ -3,29 +3,29 @@ package com.github.wnebyte.jshell.util;
 import java.util.function.Supplier;
 
 /**
- * This class declares utility-methods for operating on Objects.
+ * This class declares utility methods for working with Objects.
  */
 public final class ObjectUtil {
 
     /**
-     * Returns the specified value if it is non null, otherwise uses the specified
+     * Returns the specified value if it is non <code>null</code>, otherwise uses the specified
      * supplier to return a value.
      * @param value the value.
      * @param supplier the supplier.
-     * @param <T> the <code>Type</code> of the value.
-     * @return the value if non null, else a value supplied by the supplier.
+     * @param <T> the Type of the value.
+     * @return the value if it is non <code>null</code>, otherwise the value supplied by the supplier.
      */
     public static <T> T requireNonNullElseGet(final T value, final Supplier<T> supplier) {
         return value != null ? value : supplier.get();
     }
 
     /**
-     * Performs an equality check on the specified objects.
-     * @param t1 object.
-     * @param t2 object.
-     * @param <T> the Type of the objects.
+     * Performs an equality check on the specified Objects.
+     * @param t1 the first Object.
+     * @param t2 the second Object.
+     * @param <T> the Type of the Objects.
      * @return <code>t1.equals(t2)</code> if both objects are non <code>null</code>,
-     * otherwise returns whether both objects are <code>null</code>.
+     * otherwise returns whether both Objects are <code>null</code>.
      */
     public static <T> boolean equals(final T t1, final T t2) {
         if ((t1 != null) && (t2 != null)) {
@@ -35,11 +35,11 @@ public final class ObjectUtil {
     }
 
     /**
-     * Performs a hashCode operation on the specified object.
-     * @param t object.
-     * @param <T> the Type of the object.
-     * @return <code>0</code> if the specified object is <code>null</code>,
-     * otherwise <code>t.hashCode()</code>.
+     * Performs {@link Object#hashCode()} on the specified Object if it is non <code>null</code>.
+     * @param t the Object.
+     * @param <T> the Type of the Object.
+     * @return <code>t.hashCode()</code> if the Object is non <code>null</code>,
+     * otherwise <code>0</code>.
      */
     public static <T> int hashCode(final T t) {
         if (t == null) {

@@ -18,11 +18,14 @@ public final class Scanner {
 
     private final Set<Method> scanned = new HashSet<>();
 
+    /**
+     * Constructs a new instance.
+     */
     public Scanner() {}
 
     /**
-     * Scans the specified Set.
-     * @param objects the objects to be scanned.
+     * Scans the specified Set for {@link Command} annotated Java Methods.
+     * @param objects the Objects whose Classes are to be scanned.
      */
     public final void scanObjects(final Set<Object> objects) {
         if (objects != null) {
@@ -35,7 +38,7 @@ public final class Scanner {
     }
 
     /**
-     * Scans the specified Bundle.
+     * Scans the specified Bundle for {@link Command} annotated Java Methods.
      * @param bundle the Bundle to be scanned.
      */
     public final void scanBundle(final Bundle bundle) {
@@ -48,8 +51,8 @@ public final class Scanner {
     }
 
     /**
-     * Scans the specified classes.
-     * @param classes the classes to be scanned.
+     * Scans the specified Classes for {@link Command} annotated Java Methods.
+     * @param classes the Classes to be scanned.
      */
     public final void scanClasses(final Set<Class<?>> classes) {
         if (classes != null) {
@@ -62,8 +65,8 @@ public final class Scanner {
     }
 
     /**
-     * Scans the specified class.
-     * @param cls the class to be scanned.
+     * Scans the specified Class for {@link Command} annotated Java Methods.
+     * @param cls the Class to be scanned.
      */
     public final void scanClass(final Class<?> cls) {
         if (cls != null) {
@@ -75,7 +78,7 @@ public final class Scanner {
     }
 
     /**
-     * Scans the specified URLs.
+     * Scans the specified URLs for {@link Command} annotated Java Methods.
      * @param urls the URLs to be scanned.
      */
     public final void scanURLS(final Collection<String> urls) {
@@ -87,7 +90,7 @@ public final class Scanner {
 
     /**
      * Removes any scanned Methods for which the specified predicate matches.
-     * @param predicate the predicate to test each scanned Method on.
+     * @param predicate to test each scanned Method on.
      */
     public final void removeIf(final Predicate<Method> predicate) {
         scanned.removeIf(predicate);
@@ -100,6 +103,11 @@ public final class Scanner {
         return scanned;
     }
 
+    /**
+     * Transforms the specified String Collection into a URL Collection.
+     * @param collection to be transformed.
+     * @return a URL Collection.
+     */
     private Collection<URL> toURL(final Collection<String> collection) {
         List<URL> urls = new ArrayList<>();
         if (collection != null) {

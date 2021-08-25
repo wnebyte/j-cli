@@ -41,7 +41,8 @@ public @interface Command {
     String DEFAULT_DESCRIPTION = "";
 
     /**
-     * Specify a name for this Command, defaults to the name of the Java Method.
+     * <p>Specify a name for this Command.</p>
+     * Defaults to the name of the Java Method.
      * @return the name of the <code>Command</code>.
      */
     String name() default DEFAULT_NAME;

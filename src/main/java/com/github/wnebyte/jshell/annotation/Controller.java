@@ -35,9 +35,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Controller {
 
+    String DEFAULT_NAME = "";
+
     /**
      * Specify a name for this Controller.
      * @return the name of this Controller.
      */
-    String name() default "";
+    String name() default DEFAULT_NAME;
 }

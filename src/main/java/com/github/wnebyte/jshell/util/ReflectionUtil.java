@@ -1,14 +1,22 @@
 package com.github.wnebyte.jshell.util;
 
 import com.github.wnebyte.jshell.exception.config.NoDefaultConstructorException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * This class declares utility methods for working with Reflection.
+ */
 public final class ReflectionUtil {
 
+    /**
+     * Returns whether the specified Class is of a primitive/wrapper class Type.
+     * @param cls the Class.
+     * @return <code>true</code> if the Class is a primitive type or a wrapper class,
+     * otherwise <code>false</code>.
+     */
     public static boolean isPrimitive(final Class<?> cls) {
         return (cls != null) && (cls.isPrimitive() || new HashSet<Object>() {
             {
@@ -28,30 +36,71 @@ public final class ReflectionUtil {
         }.contains(cls));
     }
 
+    /**
+     * Returns <code>Collection.class.isAssignableFrom(cls)</code>.
+     * @param cls the Class.
+     * @return <code>Collection.class.isAssignableFrom(cls)</code>.
+     */
     public static boolean isCollection(final Class<?> cls) {
-        return (cls != null) && (cls.isAssignableFrom(Collection.class));
+        return (cls != null) && (Collection.class.isAssignableFrom(cls));
     }
 
+    /**
+     * Returns whether the specified Class is an array.
+     * @param cls the Class.
+     * @return <code>true</code> if the Class is an array,
+     * otherwise <code>false</code>.
+     */
     public static boolean isArray(final Class<?> cls) {
         return (cls != null) && (cls.isArray());
     }
 
+    /**
+     * Returns whether the specified Class is a boolean.
+     * @param cls the Class.
+     * @return <code>true</code> if the specified Class is a boolean,
+     * otherwise <code>false</code>.
+     */
     public static boolean isBoolean(final Class<?> cls) {
-        return (cls == boolean.class) || (cls == Boolean.class);
+        return (cls == boolean.class || cls == Boolean.class);
     }
 
+    /**
+     * Returns whether the specified Method is <code>static</code>.
+     * @param method the Method.
+     * @return <code>true</code> if the Method is <code>static</code>,
+     * otherwise <code>false</code>.
+     */
     public static boolean isStatic(final Method method) {
         return (method != null) && (Modifier.isStatic(method.getModifiers()));
     }
 
+    /**
+     * Returns whether the specified Class is <code>static</code>.
+     * @param cls the Class.
+     * @return <code>true</code> if the Class is <code>static</code>,
+     * otherwise <code>false</code>.
+     */
     public static boolean isStatic(final Class<?> cls) {
         return (cls != null) && (Modifier.isStatic(cls.getModifiers()));
     }
 
+    /**
+     * Returns whether the specified Class is a nested Class.
+     * @param cls the Class.
+     * @return <code>true</code> if the specified Class has a declaring Class,
+     * otherwise <code>false</code>.
+     */
     public static boolean isNested(final Class<?> cls) {
         return (cls != null) && (cls.getDeclaringClass() != null);
     }
 
+    /**
+     * Constructs and returns a new instance of the specified Class using its no args Constructor.
+     * @param cls the Class.
+     * @return a new instance of the specified Class.
+     * @throws NoDefaultConstructorException if no "no args" Constructor was found declared in the specified Class.
+     */
     public static Object newInstance(final Class<?> cls) throws NoDefaultConstructorException {
         if (cls == null) {
             return null;
@@ -65,31 +114,20 @@ public final class ReflectionUtil {
         }
     }
 
-    public static <T> Object newInstance(Class<?> cls, T arg) throws NoDefaultConstructorException {
+    /**
+     * Constructs and returns a new instance of the specified Class using the Constructor whose sole arg Type matches
+     * the Type of the specified Type parameter.
+     * @param cls the Class.
+     * @param arg the sole Constructor argument.
+     * @param <T> the Type of the sole Constructor argument.
+     * @return a new instance of the specified Class.
+     * @throws NoDefaultConstructorException if no such Constructor was found declared in the specified Class.
+     */
+    public static <T> Object newInstance(final Class<?> cls, final T arg) throws NoDefaultConstructorException {
         try {
             return cls.getConstructor(arg.getClass()).newInstance(arg);
         } catch (Exception e) {
             throw new NoDefaultConstructorException(e.getMessage());
         }
     }
-
-    /*
-    public static Set<Package> getPackages(ClassLoader classLoader) {
-        classLoader = Objects.requireNonNullElse(classLoader, ClassLoader.getSystemClassLoader());
-        return Set.of(classLoader.getDefinedPackages());
-    }
-
-    public static Set<Package> filterPackages(Set<Package> packages, String prefix) {
-        Pattern pattern = Pattern.compile(prefix + "(.*|)$");
-        Set<Package> filteredPackages = new HashSet<>();
-
-        for (Package pack : packages) {
-            if (pattern.matcher(pack.getName()).matches()) {
-                filteredPackages.add(pack);
-            }
-        }
-
-        return filteredPackages;
-     }
-     */
 }

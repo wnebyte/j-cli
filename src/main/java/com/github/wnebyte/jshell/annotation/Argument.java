@@ -79,7 +79,7 @@ public @interface Argument {
 
     /**
      * <p>Specify a name for this Argument.</p>
-     * Defaults to the name of annotated Java Parameter.
+     * Defaults to the name of Java Parameter.
      * @return the name of this Argument.
      */
     String name() default DEFAULT_NAME;

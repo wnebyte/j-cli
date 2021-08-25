@@ -1,41 +1,29 @@
 package com.github.wnebyte.jshell.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
+import java.util.*;
 
 /**
- * This class declares utility Methods for operating on Strings.
+ * This class declares utility methods for working with Strings.
  */
 public final class StringUtil {
 
     /**
-     * Returns the specified <code>String</code> not containing any of the characters:
-     * whitespace, double quotation,
-     * opening square bracket, closing square bracket, and comma.
+     * Normalized the specified String by removing any occurrences of the following characters: <br>
+     * <code>' ', '"', '[', ']', ',', '\n'</code>.<br>
+     * @param s to be normalized.
+     * @return the normalized String, or the specified String if it is <code>null</code>.
      */
     public static String normalize(final String s) {
-        String regex = "^[\\s\"\\[\\],]*$";
-        Pattern pattern = Pattern.compile(regex);
-
-        if (pattern.matcher(s).matches()) {
-            return s;
-        }
-        else {
-            final List<Character> forbidden = Arrays.asList(
-                    ' ', '"', '[', ']', ',', '\n'
-            );
-            StringBuilder builder = new StringBuilder();
-            for (char character : s.toCharArray()) {
-                if (!(forbidden.contains(character))) {
-                    builder.append(character);
-                }
-            }
-            return builder.toString();
-        }
+        return normalize(s, Arrays.asList(' ', '"', '[', ']', ',', '\n'));
     }
 
+    /**
+     * Normalizes the specified String by removing any occurrences of the specified Characters.
+     * @param s to be normalized.
+     * @param chars the Characters.
+     * @return the normalized String, or the specified String if it is <code>null</code> or the
+     * specified Characters are <code>null</code>.
+     */
     public static String normalize(final String s, final List<Character> chars) {
         if ((s == null) || (chars == null)) {
             return s;
@@ -50,7 +38,9 @@ public final class StringUtil {
     }
 
     /**
-     * Generates a <code>String</code> consisting of the specified number of whitespace characters.
+     * Generates and returns a String of whitespaces of the specified <code>len</code>.
+     * @param len the length of the String.
+     * @return a new String.
      */
     public static String generateWhitespaces(final int len) {
         char[] chars = new char[len];
@@ -59,39 +49,43 @@ public final class StringUtil {
     }
 
     /**
-     * Splits the specified <code>String</code> on each occurrence of a whitespace character
-     * that is preceded by an even number of double quotation characters.
+     * Splits the specified String on each occurrence of a whitespace character
+     * that is preceded by an even number of "\"" characters.
+     * @param s to be split.
+     * @return the result.
      */
     public static List<String> splitByWhitespace(final String s) {
         return split(s, ' ', '"');
     }
 
     /**
-     * Splits the specified <code>String</code> on each occurrence of a comma character that is preceded by
-     * an even number of double quotation characters.
+     * Splits the specified String on each occurrence of "," that is preceded by
+     * an even number of "\"" characters.
+     * @param s to be split.
+     * @return the result.
      */
     public static List<String> splitByComma(final String s) {
         return split(s, ',', '"');
     }
 
     /**
-     * Splits the specified String <code>s</code> on the specified char <code>by</code> when
-     * the the substring ending at the index of <code>by</code> has an even number of occurrences of the
-     * specified char <code>c</code>.
+     * Splits the specified String <code>s</code> on the specified char <code>splitOn</code> when
+     * the the substring ending at the index of <code>splitOn</code> has an even number of preceding
+     * occurrences of the specified char <code>c</code>.
      * @param s the String.
-     * @param by the delimiter to split on.
+     * @param splitOn the delimiter to split on.
      * @param c the char that has to occur an even number of times in the substring ending at the
-     *          index of <code>by</code> for the split to happen.
-     * @return the split String.
+     *          index of <code>splitOn</code> for the split to occur.
+     * @return the result.
      */
-    public static List<String> split(final String s, final char by, final char c) {
+    public static List<String> split(final String s, final char splitOn, final char c) {
         List<String> elements = new ArrayList<>();
         if (s == null) { return elements; }
         char[] arr = s.toCharArray();
         int start = 0;
 
         for (int i = 0; i < arr.length; i++) {
-            if ((arr[i] == by) && (occurrences(s.substring(start, i), c) % 2 == 0)) {
+            if ((arr[i] == splitOn) && (occurrences(s.substring(start, i), c) % 2 == 0)) {
                 elements.add(s.substring(start, i));
                 start = i + 1;
             }
@@ -101,11 +95,10 @@ public final class StringUtil {
     }
 
     /**
-     * Determines how many times the specified <code>char</code> occurs within the specified <code>String</code>.
-     * @param s the <code>String</code>.
-     * @param c the <code>char</code>.
-     * @return the number of occurrences of the specified <code>char</code> within the specified
-     * <code>String</code>.
+     * Determines the number of times the specified char occurs in the specified String.
+     * @param s the String
+     * @param c the char
+     * @return the result.
      */
     public static int occurrences(final String s, final char c) {
         int count = 0;
@@ -119,30 +112,52 @@ public final class StringUtil {
     }
 
     /**
-     * Removes the first occurrence of the specified <code>firstCharacter</code>, and the last
-     * occurrence of the specified <code>lastCharacter</code> if both are present within the specified
-     * <code>value</code>.
+     * Removes the first occurrence of the specified char <code>first</code> and the last
+     * occurrence of the specified char <code>last</code> if both are present within the specified
+     * String and they are not positioned at the same index.
+     * @param s the String.
+     * @param first the first char.
+     * @param last the second char.
+     * @return the result.
      */
     public static String
-    removeFirstAndLast(final String value, final char firstCharacter, final char lastCharacter) {
-        if (value == null) {
-            return null;
-        }
-        int firstIndex = value.indexOf(firstCharacter);
-        int lastIndex = value.lastIndexOf(lastCharacter);
+    removeFirstAndLast(final String s, final char first, final char last) {
+        if (s == null) { return null; }
+        int firstIndex = s.indexOf(first);
+        int lastIndex = s.lastIndexOf(last);
 
         if ((firstIndex != -1) && (lastIndex != -1) && (firstIndex != lastIndex)) {
-            char[] array = new char[value.length() - 2];
+            char[] array = new char[s.length() - 2];
 
             int j = 0;
-            for (int i = 0; i < value.length(); i++) {
+            for (int i = 0; i < s.length(); i++) {
                 if ((i == firstIndex) || (i == lastIndex)) {
                     continue;
                 }
-                array[j++] = value.charAt(i);
+                array[j++] = s.charAt(i);
             }
             return new String(array);
         }
-        return value;
+        return s;
     }
+
+    /*
+    unrelated functions
+    public static boolean contains(final String s, final String substring) {
+        if ((s == null) || (substring == null)) { return false; }
+        return substrings(s).contains(substring);
+    }
+
+    public static List<String> substrings(final String s) {
+        Set<String> substrings = new HashSet<>();
+        if (s == null) { return new ArrayList<>(substrings); }
+
+        for (int i = 0; i < s.length(); i++) {
+            for (int j = i + 1; j <= s.length(); j++) {
+                substrings.add(s.substring(i, j));
+            }
+        }
+        return new ArrayList<>(substrings);
+    }
+     */
 }
