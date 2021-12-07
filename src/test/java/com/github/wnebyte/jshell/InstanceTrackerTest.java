@@ -2,7 +2,6 @@ package com.github.wnebyte.jshell;
 
 import org.junit.Assert;
 import org.junit.Test;
-import com.github.wnebyte.jshell.util.InstanceTracker;
 
 import java.util.HashSet;
 

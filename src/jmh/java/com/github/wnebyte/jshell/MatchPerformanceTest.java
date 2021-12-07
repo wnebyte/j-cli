@@ -18,7 +18,7 @@ public class MatchPerformanceTest {
 
     public final String input = "test45 1000 arg1 9090 arg2 5 arg3 400 arg4 2000";
 
-    @Setup(Level.Invocation)
+    @Setup(Scope.Invocation)
     public void setup() {
         stringHashMap = new LinkedHashMap<>(50);
         patternHashMap = new LinkedHashMap<>(50);

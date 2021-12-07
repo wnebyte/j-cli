@@ -1,6 +1,7 @@
-package com.github.wnebyte.jshell.util;
+package com.github.wnebyte.jshell;
 
 import com.github.wnebyte.jshell.annotation.Command;
+import com.github.wnebyte.jshell.util.Bundle;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;

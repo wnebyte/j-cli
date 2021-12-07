@@ -99,4 +99,11 @@ public class StringUtilTest {
         String newArray = StringUtil.removeFirstAndLast(array, '[', ']');
         System.out.println(newArray);
     }
+
+    @Test
+    public void test12() {
+        String i = "";
+        List<String> list = StringUtil.splitByWhitespace(i);
+        System.out.println("size: " + list.size() + Arrays.toString(list.toArray()));
+    }
 }

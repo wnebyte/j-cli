@@ -10,11 +10,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import com.github.wnebyte.jshell.util.Bundle;
-import com.github.wnebyte.jshell.util.Scanner;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 
 public class ScannerTest {

@@ -70,7 +70,7 @@ public final class AnnotationProcessor {
                     .append(permute(command.getArguments()))
                     .append("$");
             // set command signature and compile pattern
-            command.setSignature(signature);
+            command.setSignatures(signature);
             commands.put(Pattern.compile(keyBuilder.toString()), command);
         }
 

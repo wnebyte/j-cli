@@ -1,7 +1,8 @@
-package com.github.wnebyte.jshell.util;
+package com.github.wnebyte.jshell;
 
-import com.github.wnebyte.jshell.IConsole;
 import com.github.wnebyte.jshell.exception.config.NoReqConstructorException;
+import com.github.wnebyte.jshell.util.ObjectUtil;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Supplier;

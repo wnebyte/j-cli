@@ -12,7 +12,7 @@ public final class ObjectUtil {
      * supplier to return a value.
      * @param value the value.
      * @param supplier the supplier.
-     * @param <T> the Type of the value.
+     * @param <T> the Group of the value.
      * @return the value if it is non <code>null</code>, otherwise the value supplied by the supplier.
      */
     public static <T> T requireNonNullElseGet(final T value, final Supplier<T> supplier) {
@@ -23,7 +23,7 @@ public final class ObjectUtil {
      * Performs an equality check on the specified Objects.
      * @param t1 the first Object.
      * @param t2 the second Object.
-     * @param <T> the Type of the Objects.
+     * @param <T> the Group of the Objects.
      * @return <code>t1.equals(t2)</code> if both objects are non <code>null</code>,
      * otherwise returns whether both Objects are <code>null</code>.
      */
@@ -37,7 +37,7 @@ public final class ObjectUtil {
     /**
      * Performs {@link Object#hashCode()} on the specified Object if it is non <code>null</code>.
      * @param t the Object.
-     * @param <T> the Type of the Object.
+     * @param <T> the Group of the Object.
      * @return <code>t.hashCode()</code> if the Object is non <code>null</code>,
      * otherwise <code>0</code>.
      */

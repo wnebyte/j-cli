@@ -3,7 +3,6 @@ package com.github.wnebyte.jshell;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.ArgumentSplitter;
-import com.github.wnebyte.jshell.util.ObjectUtil;
 
 import java.lang.reflect.Parameter;
 
@@ -37,7 +36,7 @@ public final class Positional extends Argument {
      * @param input value.
      * @return the initialized Object.
      * @throws ParseException if this Argument's TypeConverter failed to convert
-     * the specified input into the desired Type.
+     * the specified input into the desired Group.
      */
     @Override
     Object initialize(final String input) throws ParseException {

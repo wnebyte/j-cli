@@ -7,9 +7,6 @@ import com.github.wnebyte.jshell.annotation.Type;
 import com.github.wnebyte.jshell.IConsole;
 import java.util.Arrays;
 
-@Controller(
-        name = "foo"
-)
 public class SampleController {
 
     private final IConsole console;
@@ -45,8 +42,8 @@ public class SampleController {
    @Command
    public void test(
            @Argument(
-                   name = "this",
-                   description = "that"
+                   name = "bar",
+                   description = "arg"
            )
            String bar
    ) {

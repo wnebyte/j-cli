@@ -102,6 +102,21 @@ public final class AnnotationUtil {
     }
 
     /**
+     * Returns whether the specified Parameter is annotated with the
+     * {@link Argument} annotation and has a non default defaultValue.
+     * @param parameter the Parameter.
+     * @return <code>true</code> if the specified Parameter is annotated and has a non default
+     * defaultValue, otherwise <code>false</code>.
+     */
+    /*
+    public static boolean hasDefaultValue(final Parameter parameter) {
+        return (isAnnotated(parameter)) &&
+                !(parameter.getAnnotation(Argument.class)
+                        .defaultValue().equals(Argument.DEFAULT_DEFAULT_VALUE));
+    }
+     */
+
+    /**
      * Returns the {@link Controller#name()} for the specified Class if the annotation is present and
      * the name is non default, otherwise returns <code>cls.getSimpleName().toLowerCase()</code>.
      * @param cls the Class.
@@ -238,4 +253,23 @@ public final class AnnotationUtil {
         }
         return TypeConverterRepository.getTypeConverter(parameter.getType());
     }
+
+    /**
+     * Returns the {@link Argument#defaultValue()} for the specified Parameter if the annotation is present.
+     * @param parameter the Parameter.
+     * @return the defaultValue if the annotation is present,
+     * otherwise an empty String.
+     */
+    /*
+    public static String getDefaultValue(final Parameter parameter) {
+        if (parameter == null) {
+            throw new IllegalArgumentException(
+                    "Parameter must not be null"
+            );
+        }
+        return isAnnotated(parameter) ?
+                parameter.getAnnotation(Argument.class).defaultValue() :
+                Argument.DEFAULT_DEFAULT_VALUE;
+    }
+     */
 }

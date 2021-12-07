@@ -134,7 +134,7 @@ public abstract class Argument {
      * @param input the input to initialize.
      * @return the initialized value.
      * @throws ParseException if this Argument's TypeConverter fails to convert the specified input, or a
-     * substring of it into the desired Type.
+     * substring of it into the desired Group.
      */
     abstract Object initialize(final String input) throws ParseException;
 

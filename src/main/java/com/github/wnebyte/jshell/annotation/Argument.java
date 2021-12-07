@@ -33,7 +33,7 @@ import com.github.wnebyte.jshell.util.ObjectTypeConverter;
  *        {@literal @}Argument(
  *                 name = "bar",
  *                 description = "demonstration bar",
- *                 type = Type.OPTIONAL
+ *                 type = Group.OPTIONAL
  *         )
  *         String bar
  * ) {
@@ -91,9 +91,9 @@ public @interface Argument {
     String description() default DEFAULT_DESCRIPTION;
 
     /**
-     * <p>Specify a Type for this Argument.</p>
+     * <p>Specify a Group for this Argument.</p>
      * Defaults to {@link Type#REQUIRED}.
-     * @return the Type of this Argument.
+     * @return the Group of this Argument.
      */
     Type type() default Type.REQUIRED;
 

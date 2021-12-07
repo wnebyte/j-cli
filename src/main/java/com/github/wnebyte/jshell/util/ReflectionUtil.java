@@ -12,7 +12,7 @@ import java.util.*;
 public final class ReflectionUtil {
 
     /**
-     * Returns whether the specified Class is of a primitive/wrapper class Type.
+     * Returns whether the specified Class is of a primitive/wrapper class Group.
      * @param cls the Class.
      * @return <code>true</code> if the Class is a primitive type or a wrapper class,
      * otherwise <code>false</code>.
@@ -75,6 +75,10 @@ public final class ReflectionUtil {
         return (method != null) && (Modifier.isStatic(method.getModifiers()));
     }
 
+    public static boolean isNotStatic(final Class<?> cls) {
+        return !isStatic(cls);
+    }
+
     /**
      * Returns whether the specified Class is <code>static</code>.
      * @param cls the Class.
@@ -115,11 +119,11 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Constructs and returns a new instance of the specified Class using the Constructor whose sole arg Type matches
-     * the Type of the specified Type parameter.
+     * Constructs and returns a new instance of the specified Class using the Constructor whose sole arg Group matches
+     * the Group of the specified Group parameter.
      * @param cls the Class.
      * @param arg the sole Constructor argument.
-     * @param <T> the Type of the sole Constructor argument.
+     * @param <T> the Group of the sole Constructor argument.
      * @return a new instance of the specified Class.
      * @throws NoDefaultConstructorException if no such Constructor was found declared in the specified Class.
      */

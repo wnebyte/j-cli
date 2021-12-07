@@ -6,9 +6,8 @@ import com.github.wnebyte.jshell.exception.config.IllegalAnnotationException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.exception.runtime.UnknownCommandException;
 import com.github.wnebyte.jshell.util.CollectionUtil;
-import com.github.wnebyte.jshell.util.InstanceTracker;
 import com.github.wnebyte.jshell.util.ObjectUtil;
-import com.github.wnebyte.jshell.util.Scanner;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,8 +46,7 @@ public class Shell {
     }
 
     /**
-     * Builds this <code>Shell</code> using the settings defined in the constructors
-     * <code>Configuration</code>.
+     * Builds this Shell using the settings defined in the constructors Configuration.
      */
     private void build() {
         AnnotationProcessor annotationProcessor = new AnnotationProcessor();
@@ -77,6 +75,9 @@ public class Shell {
         } else {
             tracker.trackObject(this);
             scanner.scanClass(this.getClass());
+        }
+        if (config.getExcludedClasses() != null) {
+            scanner.removeIf(method -> config.getExcludedClasses().contains(method.getDeclaringClass()));
         }
 
         Set<Command> commands = scanner.getScanned().stream().map(method -> {
@@ -107,14 +108,22 @@ public class Shell {
     }
 
     /**
-     * Accepts input from the user.
-     * @param input the input to match against a known <code>Command</code>.
+     * <p>Accepts input from the user and attempt to match it against a known
+     * {@link com.github.wnebyte.jshell.annotation.Command}.</p>
+     * @param input the input to match against a known Command.
      */
     public void accept(final String input) {
         try {
             match(input).execute(input);
         }
         catch (UnknownCommandException e) {
+            if (Pattern.compile("[^\\s]+\\s--help").matcher(input).matches()) {
+                String name = input.split("\\s", 2)[0];
+                if (commands.values().stream().anyMatch(command -> command.getName().equals(name))) {
+                    help(name, null, null);
+                    return;
+                }
+            }
             handleUnknownCommandException(input);
         }
         catch (ParseException e) {
@@ -123,11 +132,11 @@ public class Shell {
     }
 
     /**
-     * Attempts to read from the specified {@link IConsole} until it returns <code>null</code> or "exit",
-     * and calls {@link Shell#accept(String)}, in a continuous loop.
-     * @throws IllegalStateException if no IConsole implementation has been specified.
+     * Continuously reads and accepts input from the user.
+     * @throws IllegalStateException if no IConsole implementation has been specified through
+     * the class level {@link Configuration}.
      */
-    public void run() {
+    public void read() {
         IConsole console = config.getConsole();
         boolean cont = true;
 
@@ -161,12 +170,13 @@ public class Shell {
             handler.accept(input);
         }
         else if (console != null) {
-
             if (config.isSuggestCommand()) {
-                Command command = getBestGuess(input);
+                Command command = mostLikelyCommand(input);
+
                 if (command != null) {
                     console.println(config.getHelpCommandFormatter().apply(command));
-                } else {
+                }
+                else {
                     console.printerr(formatter.apply(input));
                 }
             }
@@ -194,10 +204,10 @@ public class Shell {
     }
 
     /**
-     * Matches the specified input with a mapped <code>Command</code>.
+     * Matches the specified input against a known <code>Command</code>.
      * @param input the input to match against.
      * @return the <code>Command</code> that matches the specified input.
-     * @throws UnknownCommandException if the specified input does not match any mapped <code>Command</code>.
+     * @throws UnknownCommandException if the specified input does not match any known <code>Command</code>.
      */
     protected final Command match(final String input) throws UnknownCommandException {
         for (Map.Entry<Pattern, Command> kv : commands.entrySet()) {
@@ -209,12 +219,12 @@ public class Shell {
     }
 
     /**
-     * Returns the <code>Command</code> that best matched the specified input.
+     * Returns the Command that best matches the specified input.
      * @param input the input to match against.
-     * @return the <code>Command</code> that best matches the specified input if there is one,
+     * @return the Command that best matches the specified input if there is one,
      * otherwise returns <code>null</code>.
      */
-    protected Command getBestGuess(final String input) {
+    protected Command mostLikelyCommand(final String input) {
         float max = 0f;
         Command cmd = null;
 
@@ -276,18 +286,22 @@ public class Shell {
         Function<Command, String> formatter = config.getHelpCommandFormatter();
 
         if (handler != null) {
-            filter(getCommands(), prefix, name, Arrays.asList(args))
+            filter(getCommands(), prefix, name, args)
                     .forEach(handler);
         }
 
         else if (console != null) {
-            filter(getCommands(), prefix, name, Arrays.asList(args))
+            filter(getCommands(), prefix, name, args)
                     .forEach(command -> console.println(formatter.apply(command)));
         }
     }
 
     private Collection<Command> filter(
-            Collection<Command> commands, final String prefix, final String name, final List<String> args) {
+            Collection<Command> commands,
+            String prefix,
+            String name,
+            String[] args
+    ) {
 
         if (name != null) {
             commands = commands.stream()
@@ -297,11 +311,11 @@ public class Shell {
             commands = commands.stream()
                     .filter(command -> command.getPrefix().equals(prefix)).collect(Collectors.toList());
         }
-        if ((args != null) && (args.size() != 0)) {
+        if ((args != null) && (args.length != 0)) {
             commands = commands.stream()
-                    .filter(command -> CollectionUtil.intersection(args, command.getArguments()
+                    .filter(command -> CollectionUtil.intersection(Arrays.asList(args), command.getArguments()
                             .stream().map(Argument::getName).collect(Collectors.toList()))
-                            .size() == args.size()).collect(Collectors.toList());
+                            .size() == args.length).collect(Collectors.toList());
         }
         return commands;
     }

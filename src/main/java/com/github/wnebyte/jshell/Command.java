@@ -7,15 +7,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jshell.annotation.Type;
 import com.github.wnebyte.jshell.exception.config.IllegalAnnotationException;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
-import com.github.wnebyte.jshell.util.AnnotationUtil;
-import com.github.wnebyte.jshell.util.CollectionUtil;
-import com.github.wnebyte.jshell.util.ObjectUtil;
-import com.github.wnebyte.jshell.util.StringUtil;
+import com.github.wnebyte.jshell.util.*;
 import static com.github.wnebyte.jshell.util.ReflectionUtil.isBoolean;
 import static com.github.wnebyte.jshell.util.AnnotationUtil.*;
 
@@ -38,7 +36,7 @@ public final class Command {
     private final String description;
 
     // lateinit
-    private Set<List<String>> signature;
+    private Set<List<String>> signatures;
 
     /**
      * Constructs a new instance using the specified Object and Method.
@@ -48,7 +46,7 @@ public final class Command {
      * @throws IllegalAnnotationException if the specified Method is not annotated with <br/>
      * {@link com.github.wnebyte.jshell.annotation.Command}.
      * @throws NoSuchTypeConverterException if the {@link TypeConverterRepository} lacks an implementation
-     * for the Type of one of the specified Method's Parameters, <br/>
+     * for the Group of one of the specified Method's Parameters, <br/>
      * or if one of the Method's Arguments have a specified TypeConverter class which can not be
      * reflectively instantiated.
      */
@@ -73,7 +71,7 @@ public final class Command {
      * Constructs and returns this Command's List of Arguments.
      * @return this Command's List of Arguments.
      * @throws NoSuchTypeConverterException if the {@linkplain TypeConverterRepository} lacks an implementation
-     * for the Type of one of the underlying Method's Parameters,
+     * for the Group of one of the underlying Method's Parameters,
      * or if one of the Arguments have a specified TypeConverter class which can not be instantiated.
      */
     private List<Argument> createArguments() throws NoSuchTypeConverterException {
@@ -103,7 +101,7 @@ public final class Command {
      * underlying Java Method.
      * @param input the input received from the user.
      * @throws ParseException if one of this Command's Arguments failed to convert into its
-     * desired Type.
+     * desired Group.
      */
     void execute(final String input) throws ParseException {
         Parser parser = new Parser(this, input);
@@ -140,7 +138,7 @@ public final class Command {
             }
         }
 
-        val += signature.stream()
+        val += signatures.stream()
                 .map(signature -> CollectionUtil.percentage(signature, words))
                 .max(Comparator.comparingDouble(value -> value))
                 .orElse(0f);
@@ -149,12 +147,12 @@ public final class Command {
 
     /**
      * Sets this Command's signature.
-     * @param signature to be set.
+     * @param signatures to be set.
      */
-    void setSignature(final Set<List<String>> signature) {
-        if (signature != null) {
-            if (this.signature == null) {
-                this.signature = signature;
+    void setSignatures(final Set<List<String>> signatures) {
+        if (signatures != null) {
+            if (this.signatures == null) {
+                this.signatures = signatures;
             } else {
                 throw new IllegalStateException(
                         "Signature has already been initialized"
@@ -258,7 +256,7 @@ public final class Command {
                 ObjectUtil.equals(command.prefix, this.prefix) &&
                 ObjectUtil.equals(command.name, this.name) &&
                 ObjectUtil.equals(command.description, this.description) &&
-                ObjectUtil.equals(command.signature, this.signature);
+                ObjectUtil.equals(command.signatures, this.signatures);
     }
 
     /**
@@ -274,6 +272,7 @@ public final class Command {
                 ObjectUtil.hashCode(prefix) +
                 ObjectUtil.hashCode(name) +
                 ObjectUtil.hashCode(description) +
-                ObjectUtil.hashCode(signature);
+                ObjectUtil.hashCode(signatures);
     }
+
 }

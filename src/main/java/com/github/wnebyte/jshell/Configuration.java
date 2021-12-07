@@ -3,7 +3,6 @@ package com.github.wnebyte.jshell;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.Bundle;
 import com.github.wnebyte.jshell.util.StringUtil;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -121,6 +120,11 @@ public class Configuration {
 
     private boolean suggestCommand = true;
 
+    private Set<Class<?>> excludedClasses;
+
+    /**
+     * Creates a new instance.
+     */
     public Configuration() {
     }
 
@@ -252,6 +256,19 @@ public class Configuration {
     }
 
     /**
+     * Configure the Shell to exclude the specified classes when scanning for
+     * {@linkplain com.github.wnebyte.jshell.annotation.Command} annotated Java Methods.
+     * @param classes the classes to be excluded from scanning.
+     * @return this Configuration.
+     */
+    public final Configuration setExcludeClasses(final Class<?>... classes) {
+        if ((classes != null) && (classes.length != 0)) {
+            this.excludedClasses = new HashSet<>(Arrays.asList(classes));
+        }
+        return this;
+    }
+
+    /**
      * Configure the Shell to abstain from scanning the class-path for
      * {@linkplain com.github.wnebyte.jshell.annotation.Command} annotated Java Methods.
      * @return this Configuration.
@@ -283,7 +300,7 @@ public class Configuration {
      * Configure a TypeConverter to be registered.
      * @param cls the Class which the specified TypeConverter is to be associated.
      * @param typeConverter the TypeConverter to be associated with the specified Class.
-     * @param <T> the Type of the specified Class and TypeConverter.
+     * @param <T> the Group of the specified Class and TypeConverter.
      * @return this Configuration.
      */
     public final <T> Configuration
@@ -295,77 +312,90 @@ public class Configuration {
     }
 
     /**
-     * @return the Console to be used by the Shell.
+     * @return the IConsole to be used by the {@link Shell} class.
      */
     public IConsole getConsole() {
         return console;
     }
 
     /**
-     * @return the handler to be used by the Shell when an UnknownCommandException is thrown.
+     * @return Handler to be used by the {@link Shell} class to handle an
+     * <code>UnknownCommandException</code>.
      */
     public Consumer<String> getUnknownCommandHandler() {
         return unknownCommandHandler;
     }
 
     /**
-     * @return the formatter to be used by the Shell when an UnknownCommandException is thrown.
+     * @return Formatter to be used by the {@link Shell} class to format output in response to a
+     * thrown <code>UnknownCommandException</code>.
      */
     public Function<String, String> getUnknownCommandFormatter() {
         return unknownCommandFormatter;
     }
 
     /**
-     * @return the handler to be used by the Shell when a ParseException is thrown.
+     * @return Handler to be used by the {@link Shell} class to handle a
+     * <code>ParseException</code>.
      */
     public Consumer<ParseException> getParseExceptionHandler() {
         return parseExceptionHandler;
     }
 
     /**
-     * @return the formatter to be used by the Shell when a ParseException is thrown.
+     * @return Formatter to be used by the {@link Shell} class to format output in response to a
+     * thrown <code>ParseException</code>.
      */
     public Function<ParseException, String> getParseExceptionFormatter() {
         return parseExceptionFormatter;
     }
 
     /**
-     * @return the handler to be used by the Shell's Help Command.
+     * @return Handler to be used by the {@link Shell} class in response to its built in
+     * Help Command having been matched.
      */
     public Consumer<Command> getHelpHandler() {
         return helpHandler;
     }
 
     /**
-     * @return the formatter to be used by the Shell's Help Command.
+     * @return Formatter to be used by the {@link Shell} class to format output in response to its
+     * built in Help Command having been matched.
      */
     public Function<Command, String> getHelpCommandFormatter() {
         return helpCommandFormatter;
     }
 
     /**
-     * @return the Set of packages that are to be scanned.
+     * @return Set of packages that are to be scanned.
      */
     public Set<String> getPackages() {
         return packages;
     }
 
     /**
-     * @return the Set of Objects that are to be scanned.
+     * @return Set of Objects that are to be scanned.
      */
     public Set<Object> getObjects() {
         return objects;
     }
 
     /**
-     * @return the Set of classes that are to be scanned.
+     * @return Set of Classes that are to be scanned.
      */
     public Set<Class<?>> getClasses() {
         return classes;
     }
 
     /**
-     * @return the Bundle that is to be scanned.
+     * @return Set of Classes that are to be excluded from being scanned.
+     */
+    public Set<Class<?>> getExcludedClasses() {
+        return excludedClasses;
+    }
+
+    /**
+     * @return Bundle that is to be scanned.
      */
     public Bundle getBundle() { return bundle; }
 

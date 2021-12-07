@@ -3,7 +3,6 @@ package com.github.wnebyte.jshell;
 import com.github.wnebyte.jshell.exception.config.NoSuchTypeConverterException;
 import com.github.wnebyte.jshell.exception.runtime.ParseException;
 import com.github.wnebyte.jshell.util.ArgumentSplitter;
-
 import java.lang.reflect.Parameter;
 import static com.github.wnebyte.jshell.util.ReflectionUtil.isBoolean;
 
@@ -28,8 +27,7 @@ public final class Optional extends Argument {
                         :
                         getTypeConverter().isArray() ?
                                 "(\\s".concat(getName()).concat(ARRAY_REGEX).concat("|)") :
-                                "(\\s".concat(getName()).concat(DEFAULT_REGEX).concat("|)")
-                );
+                                "(\\s".concat(getName()).concat(DEFAULT_REGEX).concat("|)"));
     }
 
     /**
@@ -39,7 +37,7 @@ public final class Optional extends Argument {
      * or just the name of this Argument.
      * @return the initialized value.
      * @throws ParseException if this Argument's TypeConverter failed to convert the specified input
-     * into the desired Type.
+     * into the desired Group.
      */
     Object initialize(final String input) throws ParseException {
         if (input.contains(getName())) {

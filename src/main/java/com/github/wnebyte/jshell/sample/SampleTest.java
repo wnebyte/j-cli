@@ -1,10 +1,8 @@
 package com.github.wnebyte.jshell.sample;
 
-import com.github.wnebyte.jshell.*;
-import com.github.wnebyte.jshell.annotation.Argument;
-import com.github.wnebyte.jshell.annotation.Command;
-
-import java.util.function.Function;
+import com.github.wnebyte.jshell.Configuration;
+import com.github.wnebyte.jshell.Console;
+import com.github.wnebyte.jshell.Shell;
 
 public class SampleTest {
 
@@ -12,8 +10,9 @@ public class SampleTest {
         new Shell(new Configuration()
                 .setConsole(new Console())
                 .setScanClasses(SampleController.class)
+                .setExcludeClasses(SampleTest.class)
                 .nullifyScanPackages()
-        ).run();
+                .nullifySuggestCommand()
+        ).read();
     }
-
 }

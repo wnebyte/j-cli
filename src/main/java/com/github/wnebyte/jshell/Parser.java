@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 import static com.github.wnebyte.jshell.util.StringUtil.splitByWhitespace;
 
 /**
- * This package-private class declares methods for parsing input into a ready-to-be-invoked Command.
+ * This package-private class declares methods for parsing input into a ready-to-be-invoked Command.<br>
+ * Can logically be seen as part of the {@link Command} class.
  */
 final class Parser {
 
@@ -31,7 +32,7 @@ final class Parser {
      * or if the structure of the input is invalid.
      */
     /*
-    should only be called by the specified Command with the right input.
+    should only be called by an instance of the Command.class.
      */
     Object[] parse() throws ParseException {
         Object[] args = new Object[command.getMethod().getParameterCount()]; // array to be returned
@@ -61,7 +62,7 @@ final class Parser {
             }
         }
         /*
-        iterate the remaining input values and grep the argument whose name equals the value,
+        iterate the remaining values and grep the argument whose name equals the value,
         and initialize it.
          */
         for (int i = 0; i < values.size(); i++) {
@@ -70,7 +71,7 @@ final class Parser {
             Argument argument = arguments.stream()
                     .filter(arg -> arg.getName().equals(value))
                     .findFirst()
-                    .orElseThrow(() -> new ParseException("A logical error has occurred."));
+                    .orElseThrow(() -> new ParseException("A parsing error has occurred."));
             val = value.concat((i + 1) < values.size() ?
                     " ".concat(values.get(i + 1)) : "");
             i++;
@@ -85,7 +86,7 @@ final class Parser {
             }
         }
         /*
-        iterate any remaining arguments, and if they are optional initialize them with default values.
+        iterate any remaining arguments, and if they are optional initialize with empty string.
          */
         for (Argument argument : arguments) {
             if (argument instanceof Optional) {

@@ -1,7 +1,7 @@
 package com.github.wnebyte.jshell.annotation;
 
 /**
- * This enum represents the Type of an Argument belonging to a Command.
+ * This enum represents the Group of an Argument belonging to a Command.
  * <ul>
  *    <li>{@linkplain Type#REQUIRED}</li>
  *    <li>{@linkplain Type#OPTIONAL}</li>
@@ -26,7 +26,7 @@ public enum Type {
      *     <li>Does not have to be present when the Command is specified for the Command to match.</li>
      *     <li>Has no fixed position.</li>
      *     <li>Named.</li>
-     *     <li>If the associated TypeConverter is of Type boolean,
+     *     <li>If the associated TypeConverter is of Group boolean,
      *     the Argument is specified through the inclusion/exclusion of its name.</li>
      *     <li>Has a default value.</li>
      * </ol>

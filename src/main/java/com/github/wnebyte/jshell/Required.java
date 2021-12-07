@@ -32,7 +32,7 @@ public final class Required extends Argument {
      * is the value to be initialized, separated by a whitespace character.
      * @return the initialized Object.
      * @throws ParseException if this Argument's TypeConverter failed to convert the specified input
-     * into the desired Type.
+     * into the desired Group.
      */
     @Override
     Object initialize(final String input) throws ParseException {

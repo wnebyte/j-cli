@@ -33,4 +33,10 @@ public class TypeConverterTest {
         Assert.assertFalse(bool);
     }
 
+    @Test
+    public void test01() throws Exception {
+        TypeConverter<int[]> typeConverter = TypeConverterRepository.INT_ARRAY_TYPE_CONVERTER;
+
+    }
+
 }

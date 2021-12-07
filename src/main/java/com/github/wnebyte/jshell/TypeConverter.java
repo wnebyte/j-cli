@@ -5,26 +5,26 @@ import com.github.wnebyte.jshell.util.StringUtil;
 
 /**
  * This interface declares methods for converting a String into an
- * arbitrary Type.
- * @param <T> the Type the String should be converted into.
+ * arbitrary Group.
+ * @param <T> the Group the String should be converted into.
  */
 public interface TypeConverter<T> {
 
     /**
-     * Converts the specified <code>value</code> into a new instance of the Class specified Type.
+     * Converts the specified <code>value</code> into a new instance of the Class specified Group.
      * @param value to be converted.
-     * @return a new instance of the Class specified Type.
+     * @return a new instance of the Class specified Group.
      * @throws ParseException if unsuccessful.
      */
     T convert(final String value) throws ParseException;
 
     /**
-     * @return a default value of the Class specified Type.
+     * @return a default value of the Class specified Group.
      */
     T defaultValue();
 
     /**
-     * @return whether the Class specified Type is an Array.
+     * @return whether the Class specified Group is an Array.
      */
     boolean isArray();
 

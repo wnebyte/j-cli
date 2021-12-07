@@ -14,7 +14,7 @@ public final class TypeConverterRepository {
      * Returns the TypeConverter to which the specified Class is mapped,
      * or throws a NoSuchTypeConverterException if there is no mapping for the specified Class.
      * @param cls the Class whose associated TypeConverter is to be returned.
-     * @param <T> the Type of the specified Class.
+     * @param <T> the Group of the specified Class.
      * @return the TypeConverter to which the specified Class is mapped.
      * @throws NoSuchTypeConverterException if there is no mapping for the specified Class.
      */
@@ -42,7 +42,7 @@ public final class TypeConverterRepository {
      * <code>true</code>, else returns <code>false</code>.
      * @param cls Class which the specified TypeConverter is to be associated.
      * @param typeConverter TypeConverter to be associated with the specified Class.
-     * @param <T> Type of the specified Class.
+     * @param <T> Group of the specified Class.
      * @return <code>true</code> if there was no previous mapping for the specified Class,
      * else <code>false</code>.
      */
