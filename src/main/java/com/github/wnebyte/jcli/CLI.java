@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
+import com.github.wnebyte.jcli.processor.IMethodScanner;
 import com.github.wnebyte.jcli.processor.MethodTransformationBuilder;
 import com.github.wnebyte.jcli.processor.MethodScanner;
 import com.github.wnebyte.jcli.filter.CollisionFilter;
@@ -13,7 +14,7 @@ import com.github.wnebyte.jcli.util.Objects;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jshell.IConsole;
 
-public class CLI  {
+public class CLI {
 
     private final Configuration config;
 
@@ -21,21 +22,19 @@ public class CLI  {
 
     private final IConsole console;
 
+    public CLI() {
+        this(null);
+    }
+
     public CLI(Configuration config) {
         this.config = Objects.requireNonNullElseGet(config, Configuration::new);
         this.console = config.getConsole();
         this.commands = build();
     }
 
-    private CLI() {
-        throw new UnsupportedOperationException(
-                "This constructor is not supported."
-        );
-    }
-
     private Set<BaseCommand> build() {
-        MethodScanner scanner = new MethodScanner();
-        InstanceTracker tracker = new InstanceTracker(config.getDependencyContainer());
+        IMethodScanner scanner = new MethodScanner();
+        IInstanceTracker tracker = new InstanceTracker(config.getDependencyContainer());
         Set<Object> objects = config.getScanObjects();
         Set<Class<?>> classes = config.getScanClasses();
         Set<String> packages = config.getScanPackages();

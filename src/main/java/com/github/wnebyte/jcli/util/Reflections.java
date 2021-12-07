@@ -76,7 +76,7 @@ public final class Reflections {
         return (method != null) && (Modifier.isStatic(method.getModifiers()));
     }
 
-    public static boolean isNotStatic(Class<?> cls) {
+    public static boolean isNonStatic(Class<?> cls) {
         return !isStatic(cls);
     }
 

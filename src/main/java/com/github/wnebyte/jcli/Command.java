@@ -11,6 +11,7 @@ import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
+import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
 
 public class Command extends BaseCommand {
@@ -51,29 +52,35 @@ public class Command extends BaseCommand {
     private static List<Argument> resolveArgs(Method method, AbstractArgumentCollectionFactory factory) {
         Parameter[] params = method.getParameters();
 
-        for (Parameter param : params) {
-            Class<? extends Argument> sClass = Annotations.getSubClass(param);
-            if (sClass != null) {
-                factory.setSubClass(sClass);
+        try {
+            for (Parameter param : params) {
+                Class<? extends Argument> sClass = Annotations.getSubClass(param);
+                if (sClass != null) {
+                    factory.setSubClass(sClass);
+                }
+                String[] names = Annotations.getNames(param);
+                if (names != null) {
+                    factory.setNames(names);
+                }
+                String description = Annotations.getDescription(param);
+                if (description != null) {
+                    factory.setDescription(description);
+                }
+                factory.setType(param.getType());
+                TypeConverter<?> converter = Annotations.getTypeConverter(param);
+                if (converter != null) {
+                    factory.setTypeConverter(converter);
+                }
+                String defaultValue = Annotations.getDefaultValue(param);
+                if (defaultValue != null) {
+                    factory.setDescription(defaultValue);
+                }
+                factory.append();
             }
-            String[] names = Annotations.getNames(param);
-            if (names != null) {
-                factory.setNames(names);
-            }
-            String description = Annotations.getDescription(param);
-            if (description != null) {
-                factory.setDescription(description);
-            }
-            factory.setType(param.getType());
-            TypeConverter<?> converter = Annotations.getTypeConverter(param);
-            if (converter != null) {
-                factory.setTypeConverter(converter);
-            }
-            String defaultValue = Annotations.getDefaultValue(param);
-            if (defaultValue != null) {
-                factory.setDescription(defaultValue);
-            }
-            factory.append();
+        } catch (Exception e) {
+            throw new IllegalAnnotationException(
+                    e.getMessage()
+            );
         }
 
         return factory.get();
@@ -93,7 +100,7 @@ public class Command extends BaseCommand {
         return method;
     }
 
-    public Class<?> getDeclaringClass() {
+    protected Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
     }
 }

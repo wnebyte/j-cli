@@ -4,7 +4,7 @@ import java.util.Collection;
 import com.github.wnebyte.jcli.struct.ClassSet;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
 
-public class InstanceTracker {
+public class InstanceTracker implements IInstanceTracker {
 
     private final ClassSet set;
 

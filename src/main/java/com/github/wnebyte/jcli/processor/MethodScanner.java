@@ -12,7 +12,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
 
-public class MethodScanner implements ElementScanner<Method> {
+public class MethodScanner implements IMethodScanner {
 
     /* ----------- Fields ----------- */
 

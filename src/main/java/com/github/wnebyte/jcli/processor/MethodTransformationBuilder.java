@@ -3,15 +3,15 @@ package com.github.wnebyte.jcli.processor;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jarguments.util.Objects;
-import com.github.wnebyte.jcli.InstanceTracker;
+import com.github.wnebyte.jcli.IInstanceTracker;
 
 public class MethodTransformationBuilder {
 
-    private InstanceTracker tracker;
+    private IInstanceTracker tracker;
 
     private AbstractArgumentCollectionFactoryBuilder builder = new ArgumentCollectionFactoryBuilder();
 
-    public MethodTransformationBuilder setInstanceTracker(InstanceTracker tracker) {
+    public MethodTransformationBuilder setInstanceTracker(IInstanceTracker tracker) {
         this.tracker = tracker;
         return this;
     }

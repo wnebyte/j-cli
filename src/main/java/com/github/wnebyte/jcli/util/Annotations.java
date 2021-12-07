@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,27 +16,43 @@ import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.StubTypeConverter;
 import com.github.wnebyte.jcli.annotation.*;
 
+/**
+ * This is a utility class for the {@link com.github.wnebyte.jcli.annotation} package.
+ */
 public class Annotations {
 
-    /* ------------ @Controller Utility Functions ------------ */
+    /*
+    ####################################
+    #    @CONTROLLER UTILITY METHODS   #
+    ####################################
+    */
+
+    public static boolean isAnnotated(Class<?> cls) {
+        return cls != null && cls.isAnnotationPresent(Controller.class);
+    }
+
+    public static Scope getScope(Class<?> cls) {
+        if (isAnnotated(cls)) {
+            return cls.getAnnotation(Controller.class).value();
+        }
+        return null;
+    }
+
+    public static Scope getScopeOrDefaultValue(Class<?> cls, Scope scope) {
+        return Objects.requireNonNullElseGet(getScope(cls), () -> scope);
+    }
 
     public static boolean isTransient(Class<?> cls) {
-        Controller annotation = cls.getAnnotation(Controller.class);
-
-        if (annotation != null) {
-            return annotation.value() == Scope.TRANSIENT;
+        if (isAnnotated(cls)) {
+            return cls.getAnnotation(Controller.class).value() == Scope.TRANSIENT;
         }
-
         return false;
     }
 
     public static boolean isSingleton(Class<?> cls) {
-        Controller annotation = cls.getAnnotation(Controller.class);
-
-        if (annotation != null) {
-            return annotation.value() == Scope.SINGLETON;
+        if (isAnnotated(cls)) {
+            return cls.getAnnotation(Controller.class).value() == Scope.SINGLETON;
         }
-
         return false;
     }
 
@@ -46,29 +63,34 @@ public class Annotations {
         return null;
     }
 
-    public static boolean isAnnotated(Class<?> cls) {
-        return cls != null && cls.isAnnotationPresent(Controller.class);
+    /*
+    ####################################
+    #      @COMMAND UTILITY METHODS    #
+    ####################################
+    */
+
+    public static boolean isAnnotated(Method method) {
+        return method != null && method.isAnnotationPresent(Command.class);
     }
 
-    /* ------------ @Command Utility Functions ------------ */
+    public static boolean isNotAnnotated(Method method) {
+        return !isAnnotated(method);
+    }
 
     public static Set<String> getNames(Method method) {
-        HashSet<String> names = new HashSet<>();
-        method.setAccessible(true);
-
         if (isAnnotated(method)) {
+            HashSet<String> names = new HashSet<>();
             String name = method.getAnnotation(Command.class).name();
-            if (!Strings.isEmpty(name)) {
+            if (name.equals("")) {
+                names.add(method.getName().toLowerCase());
+            }
+            else {
                 String[] arr = name.replace(" ", "").split(",");
                 Collections.addAll(names, arr);
-                return names;
             }
+            return names;
         }
-        names.add(method.getName().toLowerCase());
-        return names;
-    }
 
-    public static Set<String> getNamesOrDefaultValue(Method method, Set<String> set) {
         return null;
     }
 
@@ -78,10 +100,6 @@ public class Annotations {
         }
 
         return null;
-    }
-
-    public static boolean isAnnotated(Method method) {
-        return method != null && method.isAnnotationPresent(Command.class);
     }
 
     /* ------------ @Argument Utility Functions ------------ */

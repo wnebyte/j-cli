@@ -18,7 +18,7 @@ public class Identifier {
     public Method getMethod() {
         for (Method method : cls.getDeclaredMethods()) {
             Set<String> names = Annotations.getNames(method);
-            if (names.contains(cmdName)) {
+            if (names != null && names.contains(cmdName)) {
                 return method;
             }
         }
