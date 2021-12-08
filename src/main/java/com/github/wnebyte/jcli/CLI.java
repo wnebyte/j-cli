@@ -1,5 +1,6 @@
 package com.github.wnebyte.jcli;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,7 +39,8 @@ public class CLI {
         Set<Object> objects = config.getScanObjects();
         Set<Class<?>> classes = config.getScanClasses();
         Set<String> packages = config.getScanPackages();
-        Set<Identifier> identifiers = config.getScanCommandIdentifiers();
+        Set<Identifier> identifiers = config.getScanIdentifiers();
+        Set<Method> methods = config.getScanMethods();
 
         if (objects != null) {
             scanner.scanObjects(objects);
@@ -52,6 +54,9 @@ public class CLI {
         }
         if (identifiers != null) {
             scanner.scanMethods(identifiers.stream().map(Identifier::getMethod).collect(Collectors.toSet()));
+        }
+        if (methods !=  null) {
+            scanner.scanMethods(methods);
         }
         if (config.isNullifyHelpCommand()) {
             scanner.removedScannedElementIf(m -> m.getDeclaringClass() == this.getClass());
@@ -90,7 +95,7 @@ public class CLI {
         }
     }
 
-    private BaseCommand getCommand(String input) throws UnknownCommandException {
+    protected BaseCommand getCommand(String input) throws UnknownCommandException {
         for (BaseCommand cmd : commands) {
             if (cmd.getPattern().matcher(input).matches()) {
                 return cmd;
@@ -106,7 +111,7 @@ public class CLI {
     }
 
     @Command(name = "--help, -h")
-    private void help() {
+    protected void help() {
         for (BaseCommand cmd : commands) {
             console.println(config.getHelpFormatter().apply(cmd));
         }

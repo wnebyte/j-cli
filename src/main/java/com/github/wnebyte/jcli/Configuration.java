@@ -234,7 +234,7 @@ public class Configuration {
         return packages;
     }
 
-    public Set<Identifier> getScanCommandIdentifiers() {
+    public Set<Identifier> getScanIdentifiers() {
         return identifiers;
     }
 

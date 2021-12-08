@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jcli.BaseCommand;
+import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 
 public class CollisionFilter implements Filter<BaseCommand> {
 
@@ -17,14 +18,16 @@ public class CollisionFilter implements Filter<BaseCommand> {
 
     @Override
     public boolean test(BaseCommand cmd) {
+        String prefix = cmd.getPrefix();
         Set<String> names = cmd.getNames();
         // check if command names have previously been processed.
-        boolean nameCollision = processed.stream().anyMatch(c -> intersection(c.getNames(), names));
+        boolean nameCollision = processed.stream()
+                .anyMatch(c -> c.getPrefix().equals(prefix) && intersection(c.getNames(), names));
 
         if (nameCollision) {
-            System.err.println(
-                    "Command containing one or more of the name(s): " + Arrays.toString(cmd.getNames().toArray()) +
-                            " has already been processed."
+            throw new IllegalAnnotationException(
+                    "Command with prefix: '" + prefix + "', and containing one or more of the name(s): "
+                            + Arrays.toString(cmd.getNames().toArray()) + " has already been processed."
             );
         }
 

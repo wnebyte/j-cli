@@ -3,29 +3,21 @@ package com.github.wnebyte.jcli;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
-import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
-import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
 
 public class Command extends BaseCommand {
 
-    private static final AbstractArgumentCollectionFactoryBuilder DEFAULT_FACTORY_BUILDER =
-            new ArgumentCollectionFactoryBuilder();
-
     private final Supplier<Object> objectSupplier;
 
     private final Method method;
-
-    public Command(Supplier<Object> objectSupplier, Method method) {
-        this(objectSupplier, method, DEFAULT_FACTORY_BUILDER.build());
-    }
 
     public Command(
             Supplier<Object> objectSupplier,
@@ -102,5 +94,27 @@ public class Command extends BaseCommand {
 
     protected Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (o == null)
+            return false;
+        if (!(o instanceof Command))
+            return false;
+        Command cmd = (Command) o;
+        return Objects.equals(cmd.objectSupplier, this.objectSupplier) &&
+                Objects.equals(cmd.method, this.method) &&
+                super.equals(cmd);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 55;
+        return 5 * result +
+                Objects.hashCode(objectSupplier) +
+                Objects.hashCode(method);
     }
 }

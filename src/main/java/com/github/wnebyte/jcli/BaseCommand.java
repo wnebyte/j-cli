@@ -1,6 +1,7 @@
 package com.github.wnebyte.jcli;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.github.wnebyte.jarguments.Argument;
@@ -60,5 +61,32 @@ public abstract class BaseCommand {
 
     public Set<String> getNames() {
         return names;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (o == null)
+            return false;
+        if (!(o instanceof BaseCommand))
+            return false;
+        BaseCommand cmd = (BaseCommand) o;
+        return Objects.equals(cmd.pattern, this.pattern) &&
+                Objects.equals(cmd.prefix, this.prefix) &&
+                Objects.equals(cmd.names, this.names) &&
+                Objects.equals(cmd.description, this.description) &&
+                Objects.equals(cmd.arguments, this.arguments);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 65;
+        return 2 * result +
+                Objects.hashCode(pattern) +
+                Objects.hashCode(prefix) +
+                Objects.hashCode(names) +
+                Objects.hashCode(description) +
+                Objects.hashCode(arguments);
     }
 }
