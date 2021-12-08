@@ -1,7 +1,8 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.parser;
 
 import java.util.LinkedList;
 import com.github.wnebyte.jarguments.ArgumentCollectionParser;
+import com.github.wnebyte.jcli.BaseCommand;
 
 public class BaseCommandParser extends ArgumentCollectionParser {
 

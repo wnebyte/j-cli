@@ -4,10 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
 import com.github.wnebyte.jarguments.Optional;
 import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jarguments.Required;
@@ -79,12 +77,11 @@ public class Annotations {
 
     public static Set<String> getNames(Method method) {
         if (isAnnotated(method)) {
-            HashSet<String> names = new HashSet<>();
+            Set<String> names = new LinkedHashSet<>();
             String name = method.getAnnotation(Command.class).name();
             if (name.equals("")) {
                 names.add(method.getName().toLowerCase());
-            }
-            else {
+            } else {
                 String[] arr = name.replace(" ", "").split(",");
                 Collections.addAll(names, arr);
             }
@@ -102,14 +99,23 @@ public class Annotations {
         return null;
     }
 
-    /* ------------ @Argument Utility Functions ------------ */
+    /*
+    ####################################
+    #     @ARGUMENT UTILITY METHODS    #
+    ####################################
+    */
 
     public static String[] getNames(Parameter param) {
         if (isAnnotated(param)) {
+            Set<String> names = new LinkedHashSet<>();
             String name = param.getAnnotation(Argument.class).name();
-            if (!Strings.isEmpty(name)) {
-                return name.replace(" ", "").split(",");
+            if (name.equals("")) {
+                names.add(param.getName().toLowerCase());
+            } else {
+                String[] arr = name.replace(" ", "").split(",");
+                Collections.addAll(names, arr);
             }
+            return names.toArray(new String[0]);
         }
 
         return new String[]{param.getName().toLowerCase()};
@@ -119,25 +125,19 @@ public class Annotations {
         if (isAnnotated(param)) {
             return param.getAnnotation(Argument.class).description();
         }
-        return null;
+        return "";
     }
 
     public static String getDefaultValue(Parameter param) {
         if (isAnnotated(param)) {
             String defaultValue = param.getAnnotation(Argument.class).defaultValue();
-            if (!Strings.isEmpty(defaultValue)) {
-                return defaultValue;
-            }
+            return defaultValue.equals("") ? null : defaultValue;
         }
         return null;
     }
 
     public static boolean isAnnotated(Parameter param) {
         return param != null && param.isAnnotationPresent(Argument.class);
-    }
-
-    public static Class<?> getType(Parameter param) {
-        return param.getType();
     }
 
     public static TypeConverter<?> getTypeConverter(Parameter param) {
@@ -162,24 +162,24 @@ public class Annotations {
 
     public static Class<? extends com.github.wnebyte.jarguments.Argument> getSubClass(Parameter param) {
         if (isAnnotated(param)) {
-            Group type = param.getAnnotation(Argument.class).group();
-            Class<? extends com.github.wnebyte.jarguments.Argument> sClass = null;
+            Group group = param.getAnnotation(Argument.class).group();
+            Class<? extends com.github.wnebyte.jarguments.Argument> sClass;
 
-            switch (type) {
-                case REQUIRED:
-                    sClass = Required.class;
-                    break;
+            switch (group) {
                 case OPTIONAL:
                     sClass = Optional.class;
                     break;
                 case POSITIONAL:
                     sClass = Positional.class;
                     break;
+                default:
+                    sClass = Required.class;
+                    break;
             }
 
             return sClass;
         }
 
-        return null;
+        return Required.class;
     }
 }

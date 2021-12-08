@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
+import com.github.wnebyte.jcli.pattern.BaseCommandPatternGenerator;
 
 public abstract class BaseCommand {
 

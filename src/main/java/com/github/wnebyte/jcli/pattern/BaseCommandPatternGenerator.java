@@ -1,8 +1,9 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.pattern;
 
 import java.util.regex.Pattern;
 
 import com.github.wnebyte.jarguments.ArgumentCollectionPatternGenerator;
+import com.github.wnebyte.jcli.BaseCommand;
 
 public class BaseCommandPatternGenerator extends ArgumentCollectionPatternGenerator {
 

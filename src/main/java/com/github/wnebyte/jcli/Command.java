@@ -2,16 +2,16 @@ package com.github.wnebyte.jcli;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
+import com.github.wnebyte.jcli.parser.BaseCommandParser;
 import com.github.wnebyte.jcli.util.Annotations;
+import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
 public class Command extends BaseCommand {
 
@@ -30,15 +30,23 @@ public class Command extends BaseCommand {
     }
 
     private static String resolvePrefix(Method method) {
-        return Annotations.getName(method.getDeclaringClass());
+        String prefix = Annotations.getName(method.getDeclaringClass());
+        return requireNonNullElseGet(prefix, () -> "");
     }
 
     private static Set<String> resolveNames(Method method) {
-        return Annotations.getNames(method);
+        Set<String> names = Annotations.getNames(method);
+        assert names != null;
+        return normalize(names);
     }
 
     private static String resolveDescription(Method method) {
-        return Annotations.getDescription(method);
+        String desc = Annotations.getDescription(method);
+        return requireNonNullElseGet(desc, () -> "");
+    }
+
+    private static Set<String> normalize(Set<String> names) {
+        return names;
     }
 
     private static List<Argument> resolveArgs(Method method, AbstractArgumentCollectionFactory factory) {
@@ -54,9 +62,9 @@ public class Command extends BaseCommand {
                 if (names != null) {
                     factory.setNames(names);
                 }
-                String description = Annotations.getDescription(param);
-                if (description != null) {
-                    factory.setDescription(description);
+                String desc = Annotations.getDescription(param);
+                if (desc != null) {
+                    factory.setDescription(requireNonNullElseGet(desc, () -> ""));
                 }
                 factory.setType(param.getType());
                 TypeConverter<?> converter = Annotations.getTypeConverter(param);
@@ -88,11 +96,11 @@ public class Command extends BaseCommand {
         }
     }
 
-    protected Method getMethod() {
+    public Method getMethod() {
         return method;
     }
 
-    protected Class<?> getDeclaringClass() {
+    public Class<?> getDeclaringClass() {
         return method.getDeclaringClass();
     }
 

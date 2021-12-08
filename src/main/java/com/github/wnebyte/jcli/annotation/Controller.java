@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Controller {
 
-    Scope value() default Scope.TRANSIENT;
+    Scope value() default Scope.SINGLETON;
 
     /**
      * Specify a name for this Controller.

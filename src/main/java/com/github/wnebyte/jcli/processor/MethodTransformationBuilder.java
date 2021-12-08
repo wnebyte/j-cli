@@ -3,7 +3,6 @@ package com.github.wnebyte.jcli.processor;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jarguments.util.Objects;
-import com.github.wnebyte.jcli.IInstanceTracker;
 
 public class MethodTransformationBuilder {
 
