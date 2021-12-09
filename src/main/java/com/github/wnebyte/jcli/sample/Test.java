@@ -10,19 +10,20 @@ public class Test {
 
     public static void main(String[] args) {
         CLI cli = new CLI(new Configuration()
-                .setScanPackages("com.github.wnebyte.jcli")
+                .nullifyScanPackages()
+                .setScanClasses(Test.class)
         );
-        cli.debug().forEach(cmd -> {
-            System.out.println(cmd.getPattern().toString());
-        });
+        cli.read();
     }
 
-    @Command(name = "foo")
-    public void foo(
-            @Argument(
-                    name = "-a, --a",
-                    group = Group.OPTIONAL
-            ) int a
+    @Command(description = "this is a description")
+    private void foo(
+            @Argument(group = Group.POSITIONAL, description = "array")
+            String c,
+            @Argument(name = "bar, -bar")
+            String a,
+            @Argument(group = Group.OPTIONAL, description = "adds some numbers")
+            int b
     ) {
 
     }

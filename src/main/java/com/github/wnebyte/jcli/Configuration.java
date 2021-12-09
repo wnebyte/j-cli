@@ -23,12 +23,7 @@ public class Configuration {
     */
 
     private static final Formatter<BaseCommand> DEFAULT_HELP_FORMATTER =
-            new Formatter<BaseCommand>() {
-        @Override
-        public String apply(BaseCommand cmd) {
-            return cmd.toString();
-        }
-    };
+            new HelpCommandFormatter();
 
     private static final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
             new Formatter<ParseException>() {

@@ -8,7 +8,7 @@ import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.processor.*;
-import com.github.wnebyte.jcli.filter.CollisionFilter;
+import com.github.wnebyte.jcli.filter.PostTransformationFilter;
 import com.github.wnebyte.jcli.util.Objects;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jshell.IConsole;
@@ -75,7 +75,7 @@ public class CLI {
                         .build()
                 )
                 .filter(Objects::nonNull)
-                .filter(new CollisionFilter())
+                .filter(new PostTransformationFilter())
                 .collect(Collectors.toSet());
         return commands;
     }
@@ -93,6 +93,14 @@ public class CLI {
         }
     }
 
+    public void read() {
+        String input;
+        do {
+            input = console.read();
+            accept(input);
+        } while ((input != null) && !(input.equals("exit")));
+    }
+
     protected BaseCommand getCommand(String input) throws UnknownCommandException {
         for (BaseCommand cmd : commands) {
             if (cmd.getPattern().matcher(input).matches()) {
@@ -102,10 +110,6 @@ public class CLI {
         throw new UnknownCommandException(
                 "'" + input + "' is not recognized as an internal command."
         );
-    }
-
-    public Collection<BaseCommand> debug() {
-        return commands;
     }
 
     @Command(name = "--help, -h")

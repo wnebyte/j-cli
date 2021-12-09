@@ -8,6 +8,7 @@ import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
+import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.parser.BaseCommandParser;
 import com.github.wnebyte.jcli.util.Annotations;
@@ -24,20 +25,21 @@ public class Command extends BaseCommand {
             Method method,
             AbstractArgumentCollectionFactory factory
     ) {
-        super(resolvePrefix(method), resolveNames(method), resolveDescription(method), resolveArgs(method, factory));
+        super(resolvePrefix(method, factory), resolveNames(method, factory), resolveDescription(method),
+                resolveArgs(method, factory));
         this.objectSupplier = objectSupplier;
         this.method = method;
     }
 
-    private static String resolvePrefix(Method method) {
+    private static String resolvePrefix(Method method, AbstractArgumentCollectionFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
-        return requireNonNullElseGet(prefix, () -> "");
+        return Strings.removeAll(requireNonNullElseGet(prefix, () -> ""), factory.getExcludeCharacters());
     }
 
-    private static Set<String> resolveNames(Method method) {
+    private static Set<String> resolveNames(Method method, AbstractArgumentCollectionFactory factory) {
         Set<String> names = Annotations.getNames(method);
         assert names != null;
-        return normalize(names);
+        return normalize(names, factory.getExcludeCharacters());
     }
 
     private static String resolveDescription(Method method) {
@@ -45,8 +47,20 @@ public class Command extends BaseCommand {
         return requireNonNullElseGet(desc, () -> "");
     }
 
-    private static Set<String> normalize(Set<String> names) {
-        return names;
+    private static Set<String> normalize(Set<String> names, Collection<Character> exclude) {
+        Set<String> normalized = new LinkedHashSet<>(names.size());
+
+        for (String s : names) {
+            s = Strings.removeAll(s, exclude);
+            if (s.equals("")) {
+                throw new IllegalAnnotationException(
+                        "The name of a Command may not be left empty after normalization. The following characters " +
+                                "are removed during normalization: " + Arrays.toString(exclude.toArray()) + "."
+                );
+            }
+            normalized.add(s);
+        }
+        return normalized;
     }
 
     private static List<Argument> resolveArgs(Method method, AbstractArgumentCollectionFactory factory) {
@@ -86,22 +100,17 @@ public class Command extends BaseCommand {
         return factory.get();
     }
 
-    public void run(String input) throws ParseException {
+    @Override
+    void run(String input) throws ParseException {
         Object[] args = new BaseCommandParser(this).parse(input);
 
         try {
+            method.setAccessible(true);
             method.invoke(objectSupplier.get(), args);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public Class<?> getDeclaringClass() {
-        return method.getDeclaringClass();
     }
 
     @Override

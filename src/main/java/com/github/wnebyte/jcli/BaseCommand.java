@@ -4,21 +4,22 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jcli.pattern.BaseCommandPatternGenerator;
 
 public abstract class BaseCommand {
 
-    protected Pattern pattern;
+    protected final Pattern pattern;
 
-    protected String prefix;
+    protected final String prefix;
 
-    protected Set<String> names;
+    protected final Set<String> names;
 
-    protected String description;
+    protected final String description;
 
-    protected List<Argument> arguments;
+    protected final List<Argument> arguments;
 
     protected BaseCommand(
             String prefix,
@@ -34,14 +35,14 @@ public abstract class BaseCommand {
                 .generatePattern();
     }
 
-    protected abstract void run(String input) throws ParseException;
+    abstract void run(String input) throws ParseException;
+
+    Pattern getPattern() {
+        return pattern;
+    }
 
     public List<Argument> getArguments() {
         return arguments;
-    }
-
-    public Pattern getPattern() {
-        return pattern;
     }
 
     public String getPrefix() {
@@ -49,7 +50,7 @@ public abstract class BaseCommand {
     }
 
     public boolean hasPrefix() {
-        return false;
+        return (prefix != null) && !(prefix.equals(""));
     }
 
     public String getDescription() {
@@ -57,7 +58,7 @@ public abstract class BaseCommand {
     }
 
     public boolean hasDescription() {
-        return false;
+        return (description != null) && !(description.equals(""));
     }
 
     public Set<String> getNames() {
@@ -89,5 +90,30 @@ public abstract class BaseCommand {
                 Objects.hashCode(names) +
                 Objects.hashCode(description) +
                 Objects.hashCode(arguments);
+    }
+
+    @Override
+    public String toString() {
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + String.join(" | ", getNames()) + " " +
+                getArguments().stream().map(Argument::toString).collect(Collectors.joining(" "));
+    }
+
+    public String toPaddedString() {
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + String.join(" | ", getNames()) + " " +
+                getArguments().stream().map(Argument::toPaddedString).collect(Collectors.joining(" "));
+    }
+
+    public String toDescriptiveString() {
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + String.join(" | ", getNames()) + " " +
+                getArguments().stream().map(Argument::toDescriptiveString).collect(Collectors.joining(" "));
+    }
+
+    public String toPaddedDescriptiveString() {
+        String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
+        return prefix + String.join(" | ", getNames()) + " " +
+                getArguments().stream().map(Argument::toPaddedDescriptiveString).collect(Collectors.joining(" "));
     }
 }

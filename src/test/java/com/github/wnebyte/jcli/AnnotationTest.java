@@ -78,6 +78,33 @@ public class AnnotationTest {
         );
     }
 
+    @Test(expected = IllegalAnnotationException.class)
+    public void testCommandNameNormalization00() throws NoSuchMethodException {
+        CLI cli = new CLI(new Configuration()
+                .nullifyScanPackages()
+                .nullifyHelpCommand()
+                .setScanMethods(this.getClass().getDeclaredMethod("cmdnorm01"))
+        );
+    }
+
+    @Test(expected = IllegalAnnotationException.class)
+    public void testCommandNameNormalization01() throws NoSuchMethodException {
+        CLI cli = new CLI(new Configuration()
+                .nullifyScanPackages()
+                .nullifyHelpCommand()
+                .setScanMethods(this.getClass().getDeclaredMethod("cmdnorm02"))
+        );
+    }
+
+    @Test(expected = IllegalAnnotationException.class)
+    public void testArgumentNameNormalization02() throws NoSuchMethodException {
+        CLI cli = new CLI(new Configuration()
+                .nullifyScanPackages()
+                .nullifyHelpCommand()
+                .setScanMethods(this.getClass().getDeclaredMethod("argnorm01", int.class))
+        );
+    }
+
     @Command
     private void argdup00(
             @Argument(name = "a")
@@ -136,6 +163,24 @@ public class AnnotationTest {
 
     @Command(name = "--help")
     private void help() {
+
+    }
+
+    @Command(name = ",")
+    private void cmdnorm01() {
+
+    }
+
+    @Command(name = "$['")
+    private void cmdnorm02() {
+
+    }
+
+    @Command(name = "argnorm01")
+    private void argnorm01(
+            @Argument(name = "$")
+            int a
+    ) {
 
     }
 

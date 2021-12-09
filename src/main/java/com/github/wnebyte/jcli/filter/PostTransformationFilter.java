@@ -8,11 +8,11 @@ import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 
-public class CollisionFilter implements Filter<BaseCommand> {
+public class PostTransformationFilter implements Filter<BaseCommand> {
 
     private final List<BaseCommand> processed;
 
-    public CollisionFilter() {
+    public PostTransformationFilter() {
         this.processed = new ArrayList<>();
     }
 
@@ -20,13 +20,20 @@ public class CollisionFilter implements Filter<BaseCommand> {
     public boolean test(BaseCommand cmd) {
         String prefix = cmd.getPrefix();
         Set<String> names = cmd.getNames();
+
+        if (names.isEmpty()) {
+            throw new IllegalAnnotationException(
+                    "A Command must consist of at least one name."
+            );
+        }
+
         // check if command names have previously been processed.
         boolean nameCollision = processed.stream()
                 .anyMatch(c -> c.getPrefix().equals(prefix) && intersection(c.getNames(), names));
 
         if (nameCollision) {
             throw new IllegalAnnotationException(
-                    "Command with prefix: '" + prefix + "', and containing one or more of the name(s): "
+                    "A Command with prefix: '" + prefix + "', and containing one or more of the name(s): "
                             + Arrays.toString(cmd.getNames().toArray()) + " has already been processed."
             );
         }
@@ -37,14 +44,14 @@ public class CollisionFilter implements Filter<BaseCommand> {
         boolean argNameCollision = intersection(args);
 
         if (argNameCollision) {
-            System.err.println(
+            throw new IllegalAnnotationException(
                     "One or more of the name(s): " + Arrays.toString(toArray(args)) +
                             " appear in multiple Arguments belonging to the same Command."
             );
         }
 
         processed.add(cmd);
-        return !nameCollision && !argNameCollision;
+        return true;
     }
 
     private static boolean intersection(Set<?> set1, Set<?> set2) {
