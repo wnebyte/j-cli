@@ -1,8 +1,7 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.util;
 
 import java.lang.reflect.Method;
 import java.util.Set;
-import com.github.wnebyte.jcli.util.Annotations;
 
 public class Identifier {
 

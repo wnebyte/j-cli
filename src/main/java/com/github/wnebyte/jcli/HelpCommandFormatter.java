@@ -8,9 +8,9 @@ import com.github.wnebyte.jarguments.Argument;
 
 public class HelpCommandFormatter implements Formatter<BaseCommand> {
 
-    private static final Function<BaseCommand, String> CMD_TO_STRING_FUNCTION = BaseCommand::toPaddedString;
+    private static final Formatter<BaseCommand> CMD_TO_STRING_FUNCTION = BaseCommand::toPaddedDescriptiveString;
 
-    private static final Function<Argument, String> ARG_TO_STRING_FUNCTION = Argument::toPaddedString;
+    private static final Formatter<Argument> ARG_TO_STRING_FUNCTION = Argument::toPaddedString;
 
     @Override
     public String apply(BaseCommand cmd) {
@@ -21,16 +21,17 @@ public class HelpCommandFormatter implements Formatter<BaseCommand> {
         if (!cmd.getArguments().isEmpty()) {
             int maxLength  = maxToStringLength(cmd.getArguments());
             int maxTotalLength = maxTotalLength(cmd.getArguments());
-            out.append("\n\n").append("Arguments: ").append("\n");
+            out.append("\n\n").append("OPTIONS: ").append("\n");
 
             for (Argument arg : cmd.getArguments()) {
                 String s = ARG_TO_STRING_FUNCTION.apply(arg);
                 String indent = indent((maxLength + 1) - s.length());
-                String ln = new StringBuilder().append(" ").append(s).append(indent)
+                String ln = new StringBuilder().append("\t").append(s).append(indent)
                         .append(arg.getDescription()).toString();
                 out.append(ln);
                 indent = indent((maxTotalLength + 1) - ln.length());
-                out.append(indent).append("<").append(arg.getType().getSimpleName()).append(">").append("\n");
+                out.append(indent).append("\n");
+               // out.append(indent).append("<").append(arg.getType().getSimpleName()).append(">").append("\n");
             }
         } else {
             out.append("\n");

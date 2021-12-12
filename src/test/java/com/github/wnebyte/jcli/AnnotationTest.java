@@ -4,6 +4,7 @@ import org.junit.Test;
 import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
+import com.github.wnebyte.jcli.util.Identifier;
 
 public class AnnotationTest {
 

@@ -10,7 +10,7 @@ public interface IInstanceTracker {
 
     int size();
 
-    Object get(Class<?> aClass);
+    Object get(Class<?> aClass) throws ReflectiveOperationException;
 
-    Object newInstance(Class<?> aClass);
+    Object newInstance(Class<?> aClass) throws ReflectiveOperationException;
 }

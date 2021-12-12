@@ -9,7 +9,7 @@ import org.junit.Test;
 public class DependencyContainerTest {
 
     @Test
-    public void testInjectFields() {
+    public void testInjectFields() throws ReflectiveOperationException {
         IDependencyContainer dependencyContainer = new DependencyContainer();
         dependencyContainer.registerDependency(String.class, "hello");
         ClassA cls = new ClassA();
@@ -18,7 +18,7 @@ public class DependencyContainerTest {
     }
 
     @Test
-    public void testInjectConstructor() {
+    public void testInjectConstructor() throws ReflectiveOperationException {
         IDependencyContainer dependencyContainer = new DependencyContainer();
         dependencyContainer.registerDependency(String.class, "hello");
         Object cls = dependencyContainer.newConstructorInjection(ClassB.class);

@@ -31,7 +31,7 @@ public class InstanceTracker implements IInstanceTracker {
      * Returns the <code>Object</code> that is of the specified <code>class</code> if one is being tracked, otherwise
      * constructs a new instance using this instance's {@link IDependencyContainer}, and tracks it.
      */
-    public Object get(Class<?> aClass) {
+    public Object get(Class<?> aClass) throws ReflectiveOperationException{
         Object object = set.get(aClass);
         if (object == null) {
             object = newInstance(aClass);
@@ -46,7 +46,7 @@ public class InstanceTracker implements IInstanceTracker {
      * Constructs and returns a new instance of the specified <code>class</code> using this instance's
      * {@link IDependencyContainer} (does not track the result).
      */
-    public Object newInstance(Class<?> aClass) {
+    public Object newInstance(Class<?> aClass) throws ReflectiveOperationException{
         Object newInstance = dependencyContainer.newInstance(aClass);
         return newInstance;
     }

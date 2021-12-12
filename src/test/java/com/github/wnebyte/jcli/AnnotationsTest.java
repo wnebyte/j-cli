@@ -1,5 +1,6 @@
 package com.github.wnebyte.jcli;
 
+import com.github.wnebyte.jcli.util.Identifier;
 import org.junit.Test;
 import org.junit.Assert;
 import java.lang.reflect.Method;

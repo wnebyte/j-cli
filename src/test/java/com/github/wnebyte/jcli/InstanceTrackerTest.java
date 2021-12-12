@@ -12,7 +12,7 @@ public class InstanceTrackerTest {
     public InstanceTrackerTest() { }
 
     @Test
-    public void test00() {
+    public void test00() throws ReflectiveOperationException {
         InstanceTracker tracker = new InstanceTracker(new DependencyContainer());
         tracker.add(this);
         Object object = tracker.get(this.getClass());
@@ -20,7 +20,7 @@ public class InstanceTrackerTest {
     }
 
     @Test
-    public void test01() {
+    public void test01() throws ReflectiveOperationException {
         InstanceTracker tracker = new InstanceTracker(new DependencyContainer());
         Object object = tracker.get(this.getClass());
         Assert.assertNotSame(this, object);

@@ -5,6 +5,7 @@ import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Group;
 import com.github.wnebyte.jcli.pattern.BaseCommandPatternGenerator;
+import com.github.wnebyte.jcli.util.Identifier;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -101,7 +102,7 @@ public class BaseCommandPatternGeneratorTest {
             String a,
             @Argument(name = "-b,--b", group = Group.REQUIRED)
             String b,
-            @Argument(name = "-c,--c", group = Group.OPTIONAL)
+            @Argument(name = "-c,--c")
             boolean c
     ) {
 

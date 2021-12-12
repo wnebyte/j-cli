@@ -74,8 +74,8 @@ import com.github.wnebyte.jcli.StubTypeConverter;
 public @interface Argument {
 
     /**
-     * <p>Specify a name for this Argument.</p>
-     * Defaults to the name of Java Parameter.
+     * <p>Specify a set of names for this Argument, separated with a comma character.</p>
+     * Defaults to the name of the Java Parameter.
      * @return the name of this Argument.
      */
     String name() default "";
@@ -86,11 +86,18 @@ public @interface Argument {
      */
     String description() default "";
 
+    /**
+     * Specify a default value for this (Optional) Argument.
+     * @return the default value of this (Optional) Argument.
+     */
     String defaultValue() default "";
+
+    String flagValue() default "";
 
     /**
      * <p>Specify a Group for this Argument.</p>
-     * Defaults to {@link Group#REQUIRED}.
+     * Defaults to {@link Group#REQUIRED}, unless the parameter is of type <code>boolean</code>,
+     * then {@link Group#FLAG} will be set.
      * @return the Group of this Argument.
      */
     Group group() default Group.REQUIRED;

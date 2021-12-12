@@ -1,6 +1,8 @@
 package com.github.wnebyte.jcli.processor;
 
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jcli.*;
@@ -9,49 +11,112 @@ import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
 import com.github.wnebyte.jcli.util.Reflections;
 import com.github.wnebyte.jcli.exception.ConfigException;
-import static com.github.wnebyte.jcli.util.Reflections.isNested;
-import static com.github.wnebyte.jcli.util.Reflections.isNonStatic;
+import static com.github.wnebyte.jcli.util.Reflections.*;
 
 public class MethodTransformation implements IMethodTransformation {
+
+    /*
+    ###########################
+    #          FIELDS         #
+    ###########################
+    */
 
     private final IInstanceTracker tracker;
 
     private final AbstractArgumentCollectionFactoryBuilder builder;
+
+    /**
+     * Stores unique hashes of transient controllers that have been successfully instantiated.
+     */
+    private final List<Integer> hashes = new LinkedList<>();
+
+    /*
+    ###########################
+    #       CONSTRUCTORS      #
+    ###########################
+    */
 
     public MethodTransformation(IInstanceTracker tracker, AbstractArgumentCollectionFactoryBuilder builder) {
         this.tracker = tracker;
         this.builder = builder;
     }
 
+    /*
+    ###########################
+    #          METHODS        #
+    ###########################
+    */
+
+    /**
+     * Maps the specified <code>Method</code> to an instance of {@link com.github.wnebyte.jcli.Command}.
+     * @param method to be mapped.
+     * @return a new Command instance.
+     * @throws ConfigException if the specified <code>Method</code> is not annotated
+     * with {@link com.github.wnebyte.jcli.annotation.Command}, or if its declaring class is both nested and
+     * non-static, or if its non-static and its declaring class could not be instantiated.
+     */
     @Override
     public Command apply(Method method) {
-        Class<?> cls = method.getDeclaringClass();
-        Scope scope = Annotations.getScopeOrDefaultValue(cls, Scope.SINGLETON);
-        Supplier<Object> objectSupplier;
+        final Class<?> cls = method.getDeclaringClass();
+        final Scope scope = Annotations.getScopeOrDefaultValue(cls, Scope.SINGLETON);
+        Supplier<Object> supplier;
 
         if (Annotations.isNotAnnotated(method)) {
             throw new IllegalAnnotationException(
-                    "Method: " + method + " is not annotated with @Command."
+                    String.format(
+                            "Method: %s is not annotated with com.github.wnebyte.jcli.annotation.Command.", method
+                    )
             );
         }
-
-        if ((isNested(cls)) && (isNonStatic(cls))) {
+        if (isNested(cls) && !isStatic(cls) && !isStatic(method)) {
             throw new ConfigException(
-                    "\n\tA Command may not be declared within a nested class that is not declared as static."
+                    String.format(
+                            "Non-static, Command annotated Method: %s is declared inside a nested class that is not " +
+                                    "declared as static.", method
+                    )
             );
         }
-
-        if (Reflections.isStatic(cls)) {
-            objectSupplier = () -> null;
+        if (Reflections.isStatic(method)) {
+            supplier = () -> null;
         }
         else if (scope == Scope.SINGLETON) {
-            Object object = tracker.get(cls);
-            objectSupplier = () -> object;
+            // the same object will be used for all subsequent invocations.
+            try {
+                Object object = tracker.get(cls);
+                supplier = () -> object;
+            } catch (ReflectiveOperationException e) {
+                throw new ConfigException(
+                        e.getMessage()
+                );
+            }
         }
         else {
-            objectSupplier = () -> tracker.newInstance(cls);
+            // scope is Scope.TRANSIENT
+            if (!hashes.contains(cls.hashCode())) {
+                try {
+                    // dry run to make sure objects can be successfully instantiated at 'runtime'.
+                    Object junk = tracker.newInstance(cls);
+                    hashes.add(cls.hashCode());
+                    junk = null;
+                } catch (ReflectiveOperationException e) {
+                    throw new ConfigException(
+                            e.getMessage()
+                    );
+                }
+            }
+            supplier = () -> {
+                try {
+                    return tracker.newInstance(cls);
+                } catch (ReflectiveOperationException e) {
+                    // should not be thrown seeing as the previous dry run was successful.
+                    throw new ConfigException(
+                            e.getMessage()
+                    );
+                }
+            };
         }
 
-        return new Command(objectSupplier, method, builder.build());
+        return new Command(supplier, method, builder.build());
     }
+
 }

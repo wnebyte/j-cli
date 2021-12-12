@@ -24,8 +24,7 @@ public class Configuration {
             = new Function<ParseException, String>() {
         @Override
         public String apply(ParseException e) {
-            return "could not convert '" + e.getValue() + "' into <"
-                    + e.getArgument().getType().getSimpleName() + ">";
+            return e.getMessage();
         }
     };
 

@@ -10,19 +10,65 @@ import java.util.Map;
 
 public class DependencyContainer implements IDependencyContainer {
 
+    /*
+    ###########################
+    #          FIELDS         #
+    ###########################
+    */
+
     private final Map<Class<?>, Object> dependencies;
+
+    /*
+    ###########################
+    #       CONSTRUCTORS      #
+    ###########################
+    */
 
     public DependencyContainer() {
         this.dependencies = new HashMap<>();
     }
 
+    /*
+    ###########################
+    #     STATIC UTILITIES    #
+    ###########################
+    */
+
+    private static Constructor<?> getInjectableConstructor(Class<?> cls) {
+        if (cls == null)
+            return null;
+        return Arrays.stream(cls.getDeclaredConstructors())
+                .filter(c -> c.isAnnotationPresent(Inject.class))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static Constructor<?> getNoArgsConstructor(Class<?> cls) {
+        if (cls == null)
+            return null;
+        return Arrays.stream(cls.getDeclaredConstructors())
+                .filter(c -> c.getParameterCount() == 0)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /*
+    ###########################
+    #          METHODS        #
+    ###########################
+    */
     @Override
     public <T, R extends T> void registerDependency(Class<T> abs, R impl) {
         dependencies.put(abs, impl);
     }
 
     @Override
-    public Object newInstance(Class<?> abs) {
+    public <T, R extends T> void unregisterDependency(Class<T> abs) {
+        dependencies.remove(abs);
+    }
+
+    @Override
+    public Object newInstance(Class<?> abs) throws ReflectiveOperationException {
         Object object = newConstructorInjection(abs);
         if (object != null) {
             injectFields(object);
@@ -31,43 +77,45 @@ public class DependencyContainer implements IDependencyContainer {
     }
 
     @Override
-    public Object newConstructorInjection(Class<?> abs) {
-        Constructor<?> cons = Arrays.stream(abs.getDeclaredConstructors())
-                .filter(c -> c.isAnnotationPresent(Inject.class))
-                .findFirst()
-                .orElse(Arrays.stream(abs.getConstructors())
-                        .filter(c -> c.getParameterCount() == 0)
-                        .findFirst()
-                        .orElse(null));
+    public Object newConstructorInjection(Class<?> abs) throws InstantiationException {
+        Constructor<?> cons = getInjectableConstructor(abs);
+        cons = (cons == null) ? getNoArgsConstructor(abs) : cons;
 
-        if (cons != null) {
+        if (cons == null) {
+            throw new InstantiationException(
+                    "Class: " + abs + " declares no appropriate constructor, " +
+                            "and can therefore not be instantiated."
+            );
+        }
+        else {
             cons.setAccessible(true);
             Object[] args = new Object[cons.getParameterCount()];
             int i = 0;
-            for (Class<?> argType : cons.getParameterTypes()) {
-                Object dependency = dependencies.get(argType);
+            for (Class<?> type : cons.getParameterTypes()) {
+                Object dependency = dependencies.get(type);
                 if (dependency != null) {
                     args[i++] = dependency;
                 } else {
-                    throw new IllegalArgumentException(
-                            "No object of type: " + argType.getSimpleName() +
-                                    " has been registered with this container."
+                    throw new InstantiationException(
+                            String.format(
+                                    "No Object of type: '%s' has been registered with this dependency container.%n",
+                                    type.getSimpleName()
+                            )
                     );
                 }
             }
             try {
                 return cons.newInstance(args);
             } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+                throw new InstantiationException(
+                        e.getMessage()
+                );
             }
         }
-
-        return null;
     }
 
     @Override
-    public void injectFields(Object object) {
+    public void injectFields(Object object) throws ReflectiveOperationException {
         Class<?> cls = object.getClass();
 
         for (Field field : cls.getDeclaredFields()) {
@@ -84,30 +132,14 @@ public class DependencyContainer implements IDependencyContainer {
                         e.printStackTrace();
                     }
                 } else {
-                    System.err.printf(
-                            "Group: '%s' has not been registered with this dependency container.%n",
-                            type.getSimpleName()
+                    throw new ReflectiveOperationException(
+                            String.format(
+                                    "No Object of type: '%s' has been registered with this dependency container.%n",
+                                    type.getSimpleName()
+                            )
                     );
                 }
             }
         }
-    }
-
-    private static Constructor<?> getInjectableConstructor(Class<?> cls) {
-        for (Constructor<?> cons : cls.getDeclaredConstructors()) {
-            if (cons.isAnnotationPresent(Inject.class)) {
-                return cons;
-            }
-        }
-        return null;
-    }
-
-    private static Constructor<?> getNoArgsConstructor(Class<?> cls) {
-        for (Constructor<?> cons : cls.getDeclaredConstructors()) {
-            if (cons.getParameterCount() == 0) {
-                return cons;
-            }
-        }
-        return null;
     }
 }

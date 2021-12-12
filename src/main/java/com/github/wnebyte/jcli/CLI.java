@@ -1,7 +1,6 @@
 package com.github.wnebyte.jcli;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.exception.ParseException;
@@ -9,9 +8,9 @@ import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.processor.*;
 import com.github.wnebyte.jcli.filter.PostTransformationFilter;
+import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.util.Objects;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
-import com.github.wnebyte.jshell.IConsole;
 
 public class CLI {
 
@@ -86,7 +85,12 @@ public class CLI {
             cmd.run(input);
         }
         catch (UnknownCommandException e) {
-            console.printerr(config.getUnknownCommandExceptionFormatter().apply(e));
+            BaseCommand cmd = commandHelp(input);
+            if (cmd != null) {
+                console.println(config.getHelpFormatter().apply(cmd));
+            } else {
+                console.printerr(config.getUnknownCommandExceptionFormatter().apply(e));
+            }
         }
         catch (ParseException e) {
             console.printerr(config.getParseExceptionFormatter().apply(e));
@@ -94,11 +98,15 @@ public class CLI {
     }
 
     public void read() {
-        String input;
-        do {
-            input = console.read();
-            accept(input);
-        } while ((input != null) && !(input.equals("exit")));
+        while (true) {
+            String input = console.read();
+
+            if (input != null) {
+                accept(input);
+            } else {
+                break;
+            }
+        }
     }
 
     protected BaseCommand getCommand(String input) throws UnknownCommandException {
@@ -110,6 +118,30 @@ public class CLI {
         throw new UnknownCommandException(
                 "'" + input + "' is not recognized as an internal command."
         );
+    }
+
+    protected BaseCommand commandHelp(String input) {
+        String[] arr = input.split("\\s");
+
+        if (arr[arr.length - 1].equals("--help")) {
+            BaseCommand cmd = null;
+
+            if (arr.length == 2) {
+                String name = arr[0];
+                cmd = commands.stream().filter(c -> c.getNames().contains(name))
+                        .findFirst().orElse(null);
+            }
+            else if (arr.length == 3) {
+                String prefix = arr[0];
+                String name = arr[1];
+                cmd = commands.stream().filter(c -> c.getPrefix().equals(prefix) && c.getNames().contains(name))
+                        .findFirst().orElse(null);
+            }
+
+            return cmd;
+        }
+
+        return null;
     }
 
     @Command(name = "--help, -h")

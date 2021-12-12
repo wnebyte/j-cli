@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+import com.github.wnebyte.jarguments.Flag;
 import com.github.wnebyte.jarguments.Optional;
 import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jarguments.Required;
@@ -136,6 +137,14 @@ public class Annotations {
         return null;
     }
 
+    public static String getFlagValue(Parameter param) {
+        if (isAnnotated(param)) {
+            String flagValue = param.getAnnotation(Argument.class).flagValue();
+            return flagValue.equals("") ? null : flagValue;
+        }
+        return null;
+    }
+
     public static boolean isAnnotated(Parameter param) {
         return param != null && param.isAnnotationPresent(Argument.class);
     }
@@ -172,6 +181,9 @@ public class Annotations {
                 case POSITIONAL:
                     sClass = Positional.class;
                     break;
+                case FLAG:
+                    sClass = Flag.class;
+                    break;
                 default:
                     sClass = Required.class;
                     break;
@@ -181,5 +193,26 @@ public class Annotations {
         }
 
         return Required.class;
+    }
+
+    public static Class<? extends com.github.wnebyte.jarguments.Argument> getSubClassOrDefaultValue(
+            Parameter param, Class<? extends com.github.wnebyte.jarguments.Argument> defaultValue
+    ) {
+        if (isAnnotated(param)) {
+            Group group = param.getAnnotation(Argument.class).group();
+
+            switch (group) {
+                case OPTIONAL:
+                    return Optional.class;
+                case POSITIONAL:
+                    return Positional.class;
+                case FLAG:
+                    return Flag.class;
+                case REQUIRED:
+                    return Required.class;
+            }
+        }
+
+        return defaultValue;
     }
 }

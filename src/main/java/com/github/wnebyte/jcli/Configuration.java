@@ -8,11 +8,10 @@ import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jarguments.converter.AbstractTypeConverterMap;
 import com.github.wnebyte.jarguments.converter.TypeConverterMap;
 import com.github.wnebyte.jarguments.exception.ParseException;
+import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.di.DependencyContainer;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
-import com.github.wnebyte.jcli.exception.UnknownCommandException;
-import com.github.wnebyte.jshell.Console;
-import com.github.wnebyte.jshell.IConsole;
+import com.github.wnebyte.jcli.util.Identifier;
 
 public class Configuration {
 
@@ -91,9 +90,10 @@ public class Configuration {
     ###########################
     */
 
-    public Configuration setConsole(IConsole console) {
-        if (console != null) {
+    public <T extends IConsole, R extends T> Configuration setConsole(Class<T> abs, R console) {
+        if (abs != null && console != null) {
             this.console = console;
+            registerDependency(abs, console);
         }
         return this;
     }

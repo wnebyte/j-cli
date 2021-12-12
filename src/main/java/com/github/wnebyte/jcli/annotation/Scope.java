@@ -2,15 +2,11 @@ package com.github.wnebyte.jcli.annotation;
 
 public enum Scope {
     /**
-     * Transient objects are always different; a new instance is provided to every controller and every service.
+     * Transient objects are always different; a new instance is provided to every controller.
      */
     TRANSIENT,
     /**
-     * Scoped objects are the same within a request, but different across different requests.
-     */
-    SCOPED,
-    /**
-     * Singleton objects are the same for every object and request.
+     * Singleton objects are the same for every subsequent invocation.
      */
     SINGLETON
 }

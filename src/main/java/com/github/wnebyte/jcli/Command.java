@@ -4,10 +4,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Supplier;
+
 import com.github.wnebyte.jarguments.Argument;
+import com.github.wnebyte.jarguments.Flag;
 import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
+import com.github.wnebyte.jarguments.util.Reflections;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.parser.BaseCommandParser;
@@ -16,20 +19,38 @@ import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
 public class Command extends BaseCommand {
 
-    private final Supplier<Object> objectSupplier;
+    /*
+    ###########################
+    #          FIELDS         #
+    ###########################
+    */
+
+    private final Supplier<Object> supplier;
 
     private final Method method;
 
+     /*
+    ###########################
+    #       CONSTRUCTORS      #
+    ###########################
+    */
+
     public Command(
-            Supplier<Object> objectSupplier,
+            Supplier<Object> supplier,
             Method method,
             AbstractArgumentCollectionFactory factory
     ) {
         super(resolvePrefix(method, factory), resolveNames(method, factory), resolveDescription(method),
                 resolveArgs(method, factory));
-        this.objectSupplier = objectSupplier;
+        this.supplier = supplier;
         this.method = method;
     }
+
+     /*
+    ###########################
+    #     UTILITY METHODS     #
+    ###########################
+    */
 
     private static String resolvePrefix(Method method, AbstractArgumentCollectionFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
@@ -68,18 +89,15 @@ public class Command extends BaseCommand {
 
         try {
             for (Parameter param : params) {
-                Class<? extends Argument> sClass = Annotations.getSubClass(param);
-                if (sClass != null) {
-                    factory.setSubClass(sClass);
-                }
+                Class<? extends Argument> sClass = Reflections.isBoolean(param.getType()) ?
+                        Flag.class : Annotations.getSubClass(param);
+                factory.setSubClass(sClass);
                 String[] names = Annotations.getNames(param);
                 if (names != null) {
                     factory.setNames(names);
                 }
                 String desc = Annotations.getDescription(param);
-                if (desc != null) {
-                    factory.setDescription(requireNonNullElseGet(desc, () -> ""));
-                }
+                factory.setDescription(requireNonNullElseGet(desc, () -> ""));
                 factory.setType(param.getType());
                 TypeConverter<?> converter = Annotations.getTypeConverter(param);
                 if (converter != null) {
@@ -87,7 +105,11 @@ public class Command extends BaseCommand {
                 }
                 String defaultValue = Annotations.getDefaultValue(param);
                 if (defaultValue != null) {
-                    factory.setDescription(defaultValue);
+                    factory.setDefaultValue(defaultValue);
+                }
+                String flagValue = Annotations.getFlagValue(param);
+                if (flagValue != null) {
+                    factory.setFlagValue(flagValue);
                 }
                 factory.append();
             }
@@ -100,13 +122,20 @@ public class Command extends BaseCommand {
         return factory.get();
     }
 
+     /*
+    ###########################
+    #         METHODS         #
+    ###########################
+    */
+
     @Override
     void run(String input) throws ParseException {
+        Object object = supplier.get();
         Object[] args = new BaseCommandParser(this).parse(input);
 
         try {
             method.setAccessible(true);
-            method.invoke(objectSupplier.get(), args);
+            method.invoke(object, args);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +151,7 @@ public class Command extends BaseCommand {
         if (!(o instanceof Command))
             return false;
         Command cmd = (Command) o;
-        return Objects.equals(cmd.objectSupplier, this.objectSupplier) &&
+        return Objects.equals(cmd.supplier, this.supplier) &&
                 Objects.equals(cmd.method, this.method) &&
                 super.equals(cmd);
     }
@@ -131,7 +160,7 @@ public class Command extends BaseCommand {
     public int hashCode() {
         int result = 55;
         return 5 * result +
-                Objects.hashCode(objectSupplier) +
+                Objects.hashCode(supplier) +
                 Objects.hashCode(method);
     }
 }
