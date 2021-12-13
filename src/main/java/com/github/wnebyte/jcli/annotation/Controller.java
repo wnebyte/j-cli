@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * <p>You can give each declared Command a prefix by specifying a
  * name on the Controller level.<br>
  * Here the name field is set to "foo".<br>
- * <b>Note</b> that static Commands will also receive the prefix if specified.</p>
+ * <b>Note</b> that static Commands will also receive the assigned prefix.</p>
  * <br>
  * <pre>
  *{@literal @}Controller(
@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * </pre>
  * <p>You can also specify how instances of your class are constructed and (re)used.
  * By specifying a value of type {@link Scope#SINGLETON} on the Controller level,
- * you're specifying that one object should be used for all subsequent Command invocations.<br>
+ * you've specified that one object should be used for all subsequent Command invocations.<br>
  * If instead a value of type {@link Scope#TRANSIENT} is specified, a new instance will be constructed
  * prior to each invocation.<br>
  * <b>Note</b> that your class will only be instantiated if it declares at least one non-static Command annotated

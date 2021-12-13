@@ -8,7 +8,7 @@ import com.github.wnebyte.jarguments.converter.TypeConverter;
 import com.github.wnebyte.jcli.StubTypeConverter;
 
 /**
- * Annotate the Parameters of your {@link Command} annotated Java Method with this annotation to explicitly set its
+ * Annotate the Parameters of your {@link Command} annotated Java Method with this annotation to explicitly set their
  * name, description, {@link Group}, and {@link TypeConverter}.<br>
  * Here are some examples of usage:<br><br>
  * <pre>
@@ -20,7 +20,7 @@ import com.github.wnebyte.jcli.StubTypeConverter;
  *     // code
  * }
  * </pre>
- * <p>Here the name field is implicitly set to "bar", or "arg0" depending on compiler options.
+ * <p>Here the name field is implicitly set to [ "bar" ], or [ "arg0" ] depending on compiler options.
  * <br>
  * The description field is omitted, and the group field is implicitly set to {@link Group#REQUIRED}.
  * <br>
@@ -31,19 +31,17 @@ import com.github.wnebyte.jcli.StubTypeConverter;
  *{@literal @}Command
  * public void foo(
  *        {@literal @}Argument(
- *                 name = "bar",
- *                 description = "demonstration bar",
- *                 group = Group.OPTIONAL
- *         )
- *         String bar
+ *                  name = "-b, --b"
+ *        )
+ *         boolean bar
  * ) {
  *     // code
  * }
  * </pre>
- * <p>Here the name field is explicitly set to "bar".
- * <br>
- * The description field is set to "demonstration bar",
- * and the group field is explicitly set to {@link Group#OPTIONAL}.</p>
+ * <p>Here the name field is explicitly set to [ "-b", "--b" ], and
+ * the description field is omitted. The group field is forcefully set to {@link Group#FLAG} due to the
+ * fact that the Parameter is of Type <code>boolean</code>.<br>
+ * <b>Note</b> that {@link Group#REQUIRED} is the default group for every other Type.</p>
  * <br>
  * <pre>
  *{@literal @}Command
@@ -56,14 +54,14 @@ import com.github.wnebyte.jcli.StubTypeConverter;
  *     // code
  * }
  * </pre>
- * <p>A user-defined TypeConverter can be specified by setting the typeConverter field to a class
- * which implements the {@link TypeConverter} interface.
+ * <p>A user-defined {@link TypeConverter} can be specified by assigning to the typeConverter field a class
+ * which implements the interface (<b>Note</b> that said class is required to have a no-args Constructor).
  * <br>
  * Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
  * primitive type, or a wrapper class.
  * <br>
  * This field only needs to be specified if the type of the Java Parameter is not one of the
- * aforementioned.
+ * aforementioned, and limitations exists for types that have one or more parameterized types.
  * </p>
  * @see Command
  * @see Controller
@@ -74,7 +72,7 @@ import com.github.wnebyte.jcli.StubTypeConverter;
 public @interface Argument {
 
     /**
-     * <p>Specify a set of names for this Argument, separated with a comma character.</p>
+     * <p>Specify a set of names for this Argument, separated by a comma character.</p>
      * Defaults to the name of the Java Parameter.
      * @return the name of this Argument.
      */
@@ -87,11 +85,15 @@ public @interface Argument {
     String description() default "";
 
     /**
-     * Specify a default value for this (Optional) Argument.
-     * @return the default value of this (Optional) Argument.
+     * Specify a default value for this (Optional/Flag) Argument.
+     * @return the default value of this Argument.
      */
     String defaultValue() default "";
 
+    /**
+     * Specify a flag value for this (Flag) Argument.
+     * @return the flag value of this Argument.
+     */
     String flagValue() default "";
 
     /**
@@ -104,7 +106,7 @@ public @interface Argument {
 
     /**
      * Specify a TypeConverter for this Argument.
-     * @return the TypeConverter for this Argument.
+     * @return the TypeConverter belonging to this Argument.
      */
     Class<? extends TypeConverter> typeConverter() default StubTypeConverter.class;
 }
