@@ -48,12 +48,12 @@ public class MethodTransformation implements IMethodTransformation {
     */
 
     /**
-     * Maps the specified <code>Method</code> to an instance of {@link com.github.wnebyte.jcli.Command}.
-     * @param method to be mapped.
+     * Constructs a new instance of <code>Command</code> from the specified <code>Method</code>.
+     * @param method the Method to be mapped.
      * @return a new Command instance.
      * @throws ConfigException if the specified <code>Method</code> is not annotated
      * with {@link com.github.wnebyte.jcli.annotation.Command}, or if its declaring class is both nested and
-     * non-static, or if its non-static and its declaring class could not be instantiated.
+     * non-static, or if it is non-static and its declaring class could not be instantiated.
      */
     @Override
     public Command apply(Method method) {
