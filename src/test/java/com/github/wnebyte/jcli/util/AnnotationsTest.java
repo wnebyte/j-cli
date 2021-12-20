@@ -1,4 +1,4 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.util;
 
 import com.github.wnebyte.jcli.util.Identifier;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import com.github.wnebyte.jcli.util.Annotations;
 import com.github.wnebyte.jarguments.Optional;
 import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jarguments.Required;
-import com.github.wnebyte.jarguments.converter.TypeConverter;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
 
 public class AnnotationsTest {
 

@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.github.wnebyte.jarguments.converter.TypeConverter;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jcli.StubTypeConverter;
 
 /**

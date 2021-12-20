@@ -1,5 +1,7 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.annotation;
 
+import com.github.wnebyte.jcli.CLI;
+import com.github.wnebyte.jcli.conf.Configuration;
 import org.junit.Test;
 import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;

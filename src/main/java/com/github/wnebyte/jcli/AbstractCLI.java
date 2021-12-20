@@ -3,6 +3,7 @@ package com.github.wnebyte.jcli;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import com.github.wnebyte.jcli.conf.Configuration;
 import com.github.wnebyte.jcli.processor.IInstanceTracker;
 import com.github.wnebyte.jcli.processor.IMethodScanner;
 import com.github.wnebyte.jcli.processor.InstanceTracker;

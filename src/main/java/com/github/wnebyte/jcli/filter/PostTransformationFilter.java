@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
+import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 
 public class PostTransformationFilter implements Filter<BaseCommand> {
 
-    private final List<BaseCommand> processed;
+    private final List<BaseCommand> mapped;
 
     public PostTransformationFilter() {
-        this.processed = new ArrayList<>();
+        this.mapped = new ArrayList<>();
     }
 
     @Override
@@ -27,30 +29,20 @@ public class PostTransformationFilter implements Filter<BaseCommand> {
             );
         }
 
-        // check if command names have previously been processed.
-        boolean nameCollision = processed.stream()
+        // check if command names have previously been mapped.
+        boolean nameCollision = mapped.stream()
                 .anyMatch(c -> c.getPrefix().equals(prefix) && intersection(c.getNames(), names));
 
         if (nameCollision) {
             throw new IllegalAnnotationException(
-                    "A Command with prefix: '" + prefix + "', and containing one or more of the name(s): "
-                            + Arrays.toString(cmd.getNames().toArray()) + " has already been processed."
+                    String.format(
+                            "A Command with prefix: %s and one or more of the names: %s has already been mapped.",
+                            prefix, Arrays.toString(names.toArray())
+                    )
             );
         }
 
-        // Todo: is caught by the factory.
-        List<Argument> args = cmd.getArguments();
-        // check if any command arguments have the same name(s).
-        boolean argNameCollision = intersection(args);
-
-        if (argNameCollision) {
-            throw new IllegalAnnotationException(
-                    "One or more of the name(s): " + Arrays.toString(toArray(args)) +
-                            " appear in multiple Arguments belonging to the same Command."
-            );
-        }
-
-        processed.add(cmd);
+        mapped.add(cmd);
         return true;
     }
 
@@ -65,6 +57,8 @@ public class PostTransformationFilter implements Filter<BaseCommand> {
     }
 
     private static boolean intersection(List<Argument> args) {
+        args = args.stream().filter(arg -> !(arg instanceof Positional)).collect(Collectors.toList());
+
         for (int i = 0; i < args.size(); i++) {
             Argument first = args.get(i);
 

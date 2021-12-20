@@ -1,14 +1,6 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.io;
 
-/**
- * This interface represents a console and declares operations for printing and reading to and from it.
- */
-public interface IConsole {
-
-    /**
-     * @return input read from the console.
-     */
-    String read();
+public interface IWriter {
 
     /**
      * Prints the specified String.
@@ -123,9 +115,4 @@ public interface IConsole {
      * @param out output to be appended to the console.
      */
     void printerr(String out);
-
-    /**
-     * Clears the console of text.
-     */
-    void clear();
 }

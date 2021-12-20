@@ -1,34 +1,34 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.pattern;
 
-import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
+import org.junit.Test;
 import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;
+import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
+import com.github.wnebyte.jcli.BaseCommand;
+import com.github.wnebyte.jcli.BaseTestClass;
 import com.github.wnebyte.jcli.annotation.Group;
-import com.github.wnebyte.jcli.pattern.BaseCommandPatternGenerator;
 import com.github.wnebyte.jcli.util.Identifier;
 import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.regex.Pattern;
 
-public class BaseCommandPatternGeneratorTest {
+public class BaseCommandPatternGeneratorTest extends BaseTestClass {
 
     @Test
     public void testPattern00() {
         BaseCommand cmd = new com.github.wnebyte.jcli.Command(
                 () -> this,
                 new Identifier(this.getClass(), "foo0").getMethod(),
-                new ArgumentCollectionFactoryBuilder().build()
+                new ArgumentFactoryBuilder().build()
         );
-        Pattern pattern = new BaseCommandPatternGenerator(cmd).generatePattern();
+        Pattern pattern = new BaseCommandPatternGenerator(cmd).getPattern();
         Assert.assertTrue(pattern.matcher("foo0").matches());
         cmd = new com.github.wnebyte.jcli.Command(
                 () -> this,
                 new Identifier(this.getClass(), "foo1").getMethod(),
-                new ArgumentCollectionFactoryBuilder().build()
+                new ArgumentFactoryBuilder().build()
         );
-        pattern = new BaseCommandPatternGenerator(cmd).generatePattern();
-        Assert.assertTrue(matches(pattern,
+        pattern = new BaseCommandPatternGenerator(cmd).getPattern();
+        Assert.assertTrue(super.allMatch(pattern,
                 "foo1 -a hello -b test",
                 "foo1 -b test -a hello",
                 "foo1 --a hello -b test",
@@ -44,7 +44,7 @@ public class BaseCommandPatternGeneratorTest {
                 "foo1 -a \"hello there\"",
                 "foo1 -a \"hello there 'how are you'\""
                 ));
-        Assert.assertFalse(matches(cmd.getPattern(),
+        Assert.assertTrue(super.noneMatch(pattern,
                 "foo1 -a hello -b test ",
                 " foo1 -a hello -b test",
                 "foo -a hello -b test",
@@ -59,30 +59,17 @@ public class BaseCommandPatternGeneratorTest {
 
     @Test
     public void testPattern01() {
-        BaseCommand cmd = new com.github.wnebyte.jcli.Command(
-                () -> this,
-                new Identifier(this.getClass(), "foo2").getMethod(),
-                new ArgumentCollectionFactoryBuilder().build()
-        );
-        Pattern pattern = new BaseCommandPatternGenerator(cmd).generatePattern();
-        Assert.assertTrue(matches(pattern,
+        BaseCommand cmd = newInstance(this, "foo2");
+        Pattern pattern = new BaseCommandPatternGenerator(cmd).getPattern();
+        Assert.assertTrue(super.allMatch(pattern,
                 "foo2 'this is a positional argument' -b \"this is a required argument\" -c",
                 "foo2 'this is a positional argument' -b \"this is a required argument\"",
                 "foo2 'this is a positional argument' -c -b \"this is a required argument\""
         ));
-        Assert.assertFalse(matches(pattern,
+        Assert.assertTrue(super.allMatch(pattern,
                 "foo2 -c 'this is a positional argument' -b \"this is a required argument\"",
                 "foo2 -b \"this is a required argument\" -c 'this is a positional argument'"
                 ));
-    }
-
-    private boolean matches(Pattern pattern, String... input) {
-        for (String s : input) {
-            boolean matches = pattern.matcher(s).matches();
-            if (!matches)
-                return false;
-        }
-        return true;
     }
 
     @Command(name = "foo0")

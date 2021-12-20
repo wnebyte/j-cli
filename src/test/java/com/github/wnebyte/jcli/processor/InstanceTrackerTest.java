@@ -1,7 +1,6 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.processor;
 
 import com.github.wnebyte.jcli.di.DependencyContainer;
-import com.github.wnebyte.jcli.processor.InstanceTracker;
 import org.junit.Assert;
 import org.junit.Test;
 

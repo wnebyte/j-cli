@@ -4,16 +4,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Supplier;
-
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.Flag;
-import com.github.wnebyte.jarguments.converter.TypeConverter;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
-import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactory;
+import com.github.wnebyte.jarguments.factory.AbstractArgumentFactory;
 import com.github.wnebyte.jarguments.util.Reflections;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
-import com.github.wnebyte.jcli.parser.BaseCommandParser;
+import com.github.wnebyte.jcli.parser.CommandParser;
 import com.github.wnebyte.jcli.util.Annotations;
 import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
@@ -29,7 +28,7 @@ public class Command extends BaseCommand {
 
     private final Method method;
 
-     /*
+    /*
     ###########################
     #       CONSTRUCTORS      #
     ###########################
@@ -38,7 +37,7 @@ public class Command extends BaseCommand {
     public Command(
             Supplier<Object> supplier,
             Method method,
-            AbstractArgumentCollectionFactory factory
+            AbstractArgumentFactory factory
     ) {
         super(resolvePrefix(method, factory), resolveNames(method, factory), resolveDescription(method),
                 resolveArgs(method, factory));
@@ -46,18 +45,18 @@ public class Command extends BaseCommand {
         this.method = method;
     }
 
-     /*
+    /*
     ###########################
     #     UTILITY METHODS     #
     ###########################
     */
 
-    private static String resolvePrefix(Method method, AbstractArgumentCollectionFactory factory) {
+    private static String resolvePrefix(Method method, AbstractArgumentFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
         return Strings.removeAll(requireNonNullElseGet(prefix, () -> ""), factory.getExcludeCharacters());
     }
 
-    private static Set<String> resolveNames(Method method, AbstractArgumentCollectionFactory factory) {
+    private static Set<String> resolveNames(Method method, AbstractArgumentFactory factory) {
         Set<String> names = Annotations.getNames(method);
         assert names != null;
         return normalize(names, factory.getExcludeCharacters());
@@ -84,7 +83,7 @@ public class Command extends BaseCommand {
         return normalized;
     }
 
-    private static List<Argument> resolveArgs(Method method, AbstractArgumentCollectionFactory factory) {
+    private static List<Argument> resolveArgs(Method method, AbstractArgumentFactory factory) {
         Parameter[] params = method.getParameters();
 
         try {
@@ -94,7 +93,7 @@ public class Command extends BaseCommand {
                 factory.setSubClass(sClass);
                 String[] names = Annotations.getNames(param);
                 if (names != null) {
-                    factory.setNames(names);
+                    factory.setName(names);
                 }
                 String desc = Annotations.getDescription(param);
                 factory.setDescription(requireNonNullElseGet(desc, () -> ""));
@@ -122,7 +121,7 @@ public class Command extends BaseCommand {
         return factory.get();
     }
 
-     /*
+    /*
     ###########################
     #         METHODS         #
     ###########################
@@ -131,8 +130,8 @@ public class Command extends BaseCommand {
     @Override
     void run(String input) throws ParseException {
         Object object = supplier.get();
-        Object[] args = new BaseCommandParser(this).parse(input);
-
+        Object[] args = new CommandParser(this)
+                .parse(input);
         try {
             method.setAccessible(true);
             method.invoke(object, args);

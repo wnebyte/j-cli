@@ -1,16 +1,16 @@
 package com.github.wnebyte.jcli.processor;
 
-import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.function.Supplier;
-import com.github.wnebyte.jarguments.factory.AbstractArgumentCollectionFactoryBuilder;
+import java.lang.reflect.Method;
+import com.github.wnebyte.jarguments.factory.AbstractArgumentFactoryBuilder;
 import com.github.wnebyte.jcli.*;
 import com.github.wnebyte.jcli.annotation.Scope;
+import com.github.wnebyte.jcli.exception.ConfigException;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
 import com.github.wnebyte.jcli.util.Reflections;
-import com.github.wnebyte.jcli.exception.ConfigException;
 import static com.github.wnebyte.jcli.util.Reflections.*;
 
 public class MethodTransformation implements IMethodTransformation {
@@ -23,12 +23,12 @@ public class MethodTransformation implements IMethodTransformation {
 
     private final IInstanceTracker tracker;
 
-    private final AbstractArgumentCollectionFactoryBuilder builder;
+    private final AbstractArgumentFactoryBuilder builder;
 
     /**
      * Stores unique hashes of transient controllers that have been successfully instantiated.
      */
-    private final List<Integer> hashes = new LinkedList<>();
+    private final Set<Integer> hashes = new HashSet<Integer>();
 
     /*
     ###########################
@@ -36,7 +36,7 @@ public class MethodTransformation implements IMethodTransformation {
     ###########################
     */
 
-    public MethodTransformation(IInstanceTracker tracker, AbstractArgumentCollectionFactoryBuilder builder) {
+    public MethodTransformation(IInstanceTracker tracker, AbstractArgumentFactoryBuilder builder) {
         this.tracker = tracker;
         this.builder = builder;
     }

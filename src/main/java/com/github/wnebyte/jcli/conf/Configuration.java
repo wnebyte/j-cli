@@ -1,55 +1,53 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.conf;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
-import com.github.wnebyte.jarguments.converter.TypeConverter;
-import com.github.wnebyte.jarguments.converter.AbstractTypeConverterMap;
-import com.github.wnebyte.jarguments.converter.TypeConverterMap;
+import java.util.HashSet;
+import java.util.Arrays;
+import java.lang.reflect.Method;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
+import com.github.wnebyte.jarguments.convert.AbstractTypeConverterMap;
+import com.github.wnebyte.jarguments.convert.TypeConverterMap;
 import com.github.wnebyte.jarguments.exception.ParseException;
-import com.github.wnebyte.jarguments.exception.TypeConversionException;
+import com.github.wnebyte.jcli.BaseCommand;
+import com.github.wnebyte.jcli.Formatter;
+import com.github.wnebyte.jcli.HelpCommandFormatter;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.di.DependencyContainer;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
+import com.github.wnebyte.jcli.io.Console;
+import com.github.wnebyte.jcli.io.IConsole;
+import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.util.Identifier;
 
 public class Configuration {
 
     /*
     ###########################
-    #     STATIC FIELDS       #
+    #      STATIC FIELDS      #
     ###########################
     */
 
     /**
-     * Default implementation.
+     * Default impl.
      */
-    private static final Formatter<BaseCommand> DEFAULT_HELP_FORMATTER =
+    public static final Formatter<BaseCommand> DEFAULT_HELP_FORMATTER =
             new HelpCommandFormatter();
 
     /**
-     * Default implementation.
+     * Default impl.
      */
-    private static final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
+    public static final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
             new Formatter<ParseException>() {
         @Override
         public String apply(ParseException e) {
-            if (e instanceof TypeConversionException) {
-                return String.format(
-                        "Failed to convert: '%s' into object of type: %s.",
-                        ((TypeConversionException) e).getValue(),
-                        ((TypeConversionException) e).getArgument().getType().getSimpleName()
-                );
-            }
             return e.getMessage();
         }
     };
 
     /**
-     * Default implementation.
+     * Default impl.
      */
-    private static final Formatter<UnknownCommandException> DEFAULT_UNKNOWN_COMMAND_FORMATTER =
+    public static final Formatter<UnknownCommandException> DEFAULT_UNKNOWN_COMMAND_FORMATTER =
             new Formatter<UnknownCommandException>() {
         @Override
         public String apply(UnknownCommandException e) {
@@ -64,66 +62,63 @@ public class Configuration {
     */
 
     /**
-     * Is used by the CLI to print and read.
+     * Is used by the <code>CLI</code> to print and read.
      */
     private IConsole console = new Console();
 
-    /**
-     * Mappings are used at 'runtime' to initialize Arguments.
-     */
     private AbstractTypeConverterMap converters = TypeConverterMap.getInstance();
 
     private IDependencyContainer dependencyContainer = new DependencyContainer();
 
     /**
-     * Is used by the CLI to scan for annotated Java Methods.
+     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
      */
     private Set<Object> objects = null;
 
     /**
-     * Is used by the CLI to scan for annotated Java Methods.
+     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
      */
     private Set<Method> methods = null;
 
     /**
-     * Is used by the CLI to scan for annotated Java Methods.
+     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
      */
     private Set<Class<?>> classes = null;
 
     /**
-     * Is used by the CLI to scan for annotated Java Methods.
+     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
      */
     private Set<Identifier> identifiers = null;
 
     /**
-     * Is used by the CLI to exclude classes from being scanned for annotated Java Methods.
+     * Is used by the <code>CLI</code> to exclude classes from being scanned for annotated Java Methods.
      */
     private Set<Class<?>> excludeClasses = null;
 
     /**
-     * Is used by the CLI to scan for annotated Java Methods.
+     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
      */
     private Set<String> packages = new HashSet<String>() {{
         add("");
     }};
 
     /**
-     * Is used to indicate that the CLI should not build its built-in Help Command.
+     * Is used to indicate that the <code>CLI</code> should not build its built-in Help Command.
      */
     private boolean nullifyHelpCommand = false;
 
     /**
-     * Is used by the CLI to format output.
+     * Is used by the <code>CLI</code> to format output.
      */
     private Formatter<BaseCommand> helpFormatter = DEFAULT_HELP_FORMATTER;
 
     /**
-     * Is used by the CLI to format output.
+     * Is used by the <code>CLI</code> to format output.
      */
     private Formatter<ParseException> parseExceptionFormatter = DEFAULT_PARSE_EXCEPTION_FORMATTER;
 
     /**
-     * Is used by the CLI to format output.
+     * Is used by the <code>CLI</code> to format output.
      */
     private Formatter<UnknownCommandException> unknownCommandExceptionFormatter = DEFAULT_UNKNOWN_COMMAND_FORMATTER;
 
@@ -412,7 +407,7 @@ public class Configuration {
     }
 
     /**
-     * @return the <code>IConsole</code> associated with this instance.
+     * @return the <code>IConsole</code> associated with this <code>Configuration</code> instance.
      */
     public IConsole getConsole() {
         return console;

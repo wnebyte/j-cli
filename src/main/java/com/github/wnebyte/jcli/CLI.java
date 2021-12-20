@@ -1,44 +1,72 @@
 package com.github.wnebyte.jcli;
 
+import java.util.*;
 import java.lang.reflect.Method;
-import java.util.Set;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.exception.ParseException;
-import com.github.wnebyte.jarguments.factory.ArgumentCollectionFactoryBuilder;
+import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
+import com.github.wnebyte.jcli.conf.Configuration;
+import com.github.wnebyte.jcli.io.IConsole;
+import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.processor.*;
 import com.github.wnebyte.jcli.filter.PostTransformationFilter;
+import com.github.wnebyte.jcli.exception.UnknownCommandException;
+import com.github.wnebyte.jcli.val.CommandValidator;
 import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.util.Objects;
-import com.github.wnebyte.jcli.exception.UnknownCommandException;
 
 public class CLI {
 
-    private final Configuration config;
-
-    private final Set<BaseCommand> commands;
-
-    private final IConsole console;
-
-    public CLI() {
-        this(null);
+    static int hash(Object o) {
+        return (o != null) ? o.hashCode() : 0;
     }
 
-    public CLI(Configuration config) {
-        this.config = Objects.requireNonNullElseGet(config, Configuration::new);
-        this.console = config.getConsole();
+    private final Configuration conf;
+
+    /**
+     * Is used to read and write.
+     */
+    private final IConsole console;
+
+    private final IWriter writer;
+
+    private final List<BaseCommand> commands;
+
+    private final Set<Integer> prefixes;
+
+    private final HashMap<Integer, BaseCommand> index;
+
+    /**
+     * Constructs a new instance using a default <code>Configuration</code>.
+     */
+    public CLI() {
+        this(new Configuration());
+    }
+
+    /**
+     * Constructs a new instance using the specified <code>Configuration</code>.
+     * @param conf to be used.
+     */
+    public CLI(Configuration conf) {
+        this.conf = Objects.requireNonNullElseGet(conf, Configuration::new);
+        this.console = conf.getConsole();
+        this.writer = console.writer();
+        this.prefixes = new HashSet<>();
+        this.index = new HashMap<>();
         this.commands = build();
     }
 
-    private Set<BaseCommand> build() {
+    private List<BaseCommand> build() {
         IMethodScanner scanner = new MethodScanner();
-        IInstanceTracker tracker = new InstanceTracker(config.getDependencyContainer());
-        Set<Object> objects = config.getScanObjects();
-        Set<Class<?>> classes = config.getScanClasses();
-        Set<String> packages = config.getScanPackages();
-        Set<Identifier> identifiers = config.getScanIdentifiers();
-        Set<Method> methods = config.getScanMethods();
+        IInstanceTracker tracker = new InstanceTracker(conf.getDependencyContainer());
+        Set<Object> objects = conf.getScanObjects();
+        Set<Class<?>> classes = conf.getScanClasses();
+        Set<String> packages = conf.getScanPackages();
+        Set<Identifier> identifiers = conf.getScanIdentifiers();
+        Set<Method> methods = conf.getScanMethods();
 
+        // scan for commands
         if (objects != null) {
             scanner.scanObjects(objects);
             tracker.addAll(objects);
@@ -55,27 +83,45 @@ public class CLI {
         if (methods !=  null) {
             scanner.scanMethods(methods);
         }
-        if (config.isNullifyHelpCommand()) {
+        if (conf.isNullifyHelpCommand()) {
             scanner.removedScannedElementIf(m -> m.getDeclaringClass() == this.getClass());
         }
         else {
             scanner.scanClass(this.getClass());
             tracker.add(this);
         }
-        if (config.getExcludeClasses() != null) {
-            scanner.removedScannedElementIf(m -> config.getExcludeClasses().contains(m.getDeclaringClass()));
+        if (conf.getExcludeClasses() != null) {
+            scanner.removedScannedElementIf(m -> conf.getExcludeClasses().contains(m.getDeclaringClass()));
         }
 
-        Set<BaseCommand> commands = scanner.getScannedElements().stream()
+        // build commands
+        List<BaseCommand> commands = scanner.getScannedElements().stream()
                 .map(new MethodTransformationBuilder()
                         .setInstanceTracker(tracker)
-                        .setArgumentCollectionFactoryBuilder(new ArgumentCollectionFactoryBuilder()
-                                .useTypeConverterMap(config.getTypeConverterMap()))
+                        .setArgumentFactoryBuilder(new ArgumentFactoryBuilder()
+                                .useTypeConverterMap(conf.getTypeConverterMap()))
                         .build()
                 )
                 .filter(Objects::nonNull)
                 .filter(new PostTransformationFilter())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // populate index
+        for (BaseCommand cmd : commands) {
+            for (String name : cmd.getNames()) {
+                int key;
+
+                if (cmd.hasPrefix()) {
+                    key = hash(cmd.getPrefix().concat(name));
+                    prefixes.add(hash(cmd.getPrefix()));
+                } else {
+                    key = hash(name);
+                }
+
+                index.put(key, cmd);
+            }
+        }
+
         return commands;
     }
 
@@ -85,15 +131,10 @@ public class CLI {
             cmd.run(input);
         }
         catch (UnknownCommandException e) {
-            BaseCommand cmd = commandHelp(input);
-            if (cmd != null) {
-                console.println(config.getHelpFormatter().apply(cmd));
-            } else {
-                console.printerr(config.getUnknownCommandExceptionFormatter().apply(e));
-            }
+            writer.printerr(conf.getUnknownCommandExceptionFormatter().apply(e));
         }
         catch (ParseException e) {
-            console.printerr(config.getParseExceptionFormatter().apply(e));
+            writer.printerr(conf.getParseExceptionFormatter().apply(e));
         }
     }
 
@@ -110,44 +151,36 @@ public class CLI {
     }
 
     protected BaseCommand getCommand(String input) throws UnknownCommandException {
-        for (BaseCommand cmd : commands) {
-            if (cmd.getPattern().matcher(input).matches()) {
-                return cmd;
-            }
-         }
-        throw new UnknownCommandException(
-                "'" + input + "' is not recognized as an internal command."
-        );
-    }
+        BaseCommand cmd = getIndexed(input);
 
-    protected BaseCommand commandHelp(String input) {
-        String[] arr = input.split("\\s");
-
-        if (arr[arr.length - 1].equals("--help")) {
-            BaseCommand cmd = null;
-
-            if (arr.length == 2) {
-                String name = arr[0];
-                cmd = commands.stream().filter(c -> c.getNames().contains(name))
-                        .findFirst().orElse(null);
-            }
-            else if (arr.length == 3) {
-                String prefix = arr[0];
-                String name = arr[1];
-                cmd = commands.stream().filter(c -> c.getPrefix().equals(prefix) && c.getNames().contains(name))
-                        .findFirst().orElse(null);
-            }
-
+        if (cmd != null && new CommandValidator(cmd).validate(input)) {
             return cmd;
         }
+        else {
+            throw new UnknownCommandException(
+                    String.format("'%s' is not recognized as an internal command.", input), input
+            );
+        }
+    }
 
-        return null;
+    protected BaseCommand getIndexed(String input) {
+        if (input == null) {
+            return null;
+        }
+        String[] split = input.split("\\s", 2);
+        int key = hash(split[0]);
+
+        if (2 <= split.length && prefixes.contains(key)) {
+            key = hash(split[0].concat(split[1]));
+        }
+
+        return index.get(key);
     }
 
     @Command(name = "--help, -h")
     protected void help() {
         for (BaseCommand cmd : commands) {
-            console.println(config.getHelpFormatter().apply(cmd));
+            writer.println(conf.getHelpFormatter().apply(cmd));
         }
     }
 }

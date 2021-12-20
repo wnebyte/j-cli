@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
+/*
 @State(Scope.Benchmark)
 public class ReflectionPerformanceTest {
 
@@ -53,3 +54,4 @@ public class ReflectionPerformanceTest {
         return 0;
     }
 }
+*/

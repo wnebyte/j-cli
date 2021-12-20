@@ -1,17 +1,17 @@
 package com.github.wnebyte.jcli.util;
 
+import java.util.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
 
 import com.github.wnebyte.jarguments.Flag;
 import com.github.wnebyte.jarguments.Optional;
 import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jarguments.Required;
-import com.github.wnebyte.jarguments.converter.TypeConverter;
-import com.github.wnebyte.jarguments.util.Strings;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
+
 import com.github.wnebyte.jcli.StubTypeConverter;
 import com.github.wnebyte.jcli.annotation.*;
 

@@ -1,6 +1,6 @@
 package com.github.wnebyte.jcli;
 
-import com.github.wnebyte.jarguments.converter.TypeConverter;
+import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jarguments.exception.ParseException;
 
 public class StubTypeConverter implements TypeConverter<Object> {

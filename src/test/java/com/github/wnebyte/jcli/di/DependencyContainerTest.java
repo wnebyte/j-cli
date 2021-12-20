@@ -1,4 +1,4 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.di;
 
 import com.github.wnebyte.jcli.annotation.Inject;
 import com.github.wnebyte.jcli.di.DependencyContainer;

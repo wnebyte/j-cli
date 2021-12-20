@@ -72,6 +72,7 @@ public final class AnnotationProcessor {
             // set command signature and compile pattern
             command.setSignatures(signature);
             commands.put(Pattern.compile(keyBuilder.toString()), command);
+            System.out.println(keyBuilder.toString());
         }
 
         return commands;

@@ -1,19 +1,6 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.io;
 
-import java.util.Scanner;
-import static java.lang.System.in;
-
-public class Console implements IConsole {
-
-    private final Scanner scanner = new Scanner(in);
-
-    @Override
-    public String read() {
-        if (scanner.hasNextLine()) {
-            return scanner.nextLine();
-        }
-        return null;
-    }
+public class Writer implements IWriter {
 
     /**
      * {@inheritDoc}
@@ -184,13 +171,5 @@ public class Console implements IConsole {
     @Override
     public void printerr(String out) {
         System.err.println(out);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void clear() {
-        System.out.println("\n\n\n\n\n\n\n\n\n\n");
     }
 }

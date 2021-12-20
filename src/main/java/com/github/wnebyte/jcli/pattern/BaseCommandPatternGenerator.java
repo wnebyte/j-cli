@@ -1,11 +1,10 @@
 package com.github.wnebyte.jcli.pattern;
 
 import java.util.regex.Pattern;
-
-import com.github.wnebyte.jarguments.ArgumentCollectionPatternGenerator;
+import com.github.wnebyte.jarguments.pattern.ArgumentPatternGenerator;
 import com.github.wnebyte.jcli.BaseCommand;
 
-public class BaseCommandPatternGenerator extends ArgumentCollectionPatternGenerator {
+public class BaseCommandPatternGenerator extends ArgumentPatternGenerator {
 
     private final BaseCommand cmd;
 
@@ -39,21 +38,21 @@ public class BaseCommandPatternGenerator extends ArgumentCollectionPatternGenera
     }
 
     @Override
-    public String generateRegex() {
+    public String getRegex() {
         StringBuilder builder = new StringBuilder();
         builder.append("^")
                 .append(cmd.hasPrefix() ? cmd.getPrefix().concat("\\s") : "")
                 .append("(")
                 .append(String.join("|", cmd.getNames()))
                 .append(")")
-                .append(super.generateRegex())
+                .append(super.getRegex())
                 .append("$");
         return builder.toString();
     }
 
     @Override
-    public Pattern generatePattern() {
-        String regex = generateRegex();
+    public Pattern getPattern() {
+        String regex = getRegex();
         return Pattern.compile(regex);
     }
 }

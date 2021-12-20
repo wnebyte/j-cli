@@ -1,14 +1,14 @@
 package com.github.wnebyte.jcli.parser;
 
 import java.util.LinkedList;
-import com.github.wnebyte.jarguments.ArgumentCollectionParser;
+import com.github.wnebyte.jarguments.parser.ArgumentParser;
 import com.github.wnebyte.jcli.BaseCommand;
 
-public class BaseCommandParser extends ArgumentCollectionParser {
+public class CommandParser extends ArgumentParser {
 
     private final BaseCommand cmd;
 
-    public BaseCommandParser(BaseCommand cmd) {
+    public CommandParser(BaseCommand cmd) {
         super(cmd.getArguments());
         this.cmd = cmd;
     }
