@@ -3,6 +3,8 @@ package com.github.wnebyte.jcli;
 import java.util.*;
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
+
+import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
@@ -10,7 +12,7 @@ import com.github.wnebyte.jcli.conf.Configuration;
 import com.github.wnebyte.jcli.io.IConsole;
 import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.processor.*;
-import com.github.wnebyte.jcli.filter.PostTransformationFilter;
+import com.github.wnebyte.jcli.processor.FilterImpl;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.val.CommandValidator;
 import com.github.wnebyte.jcli.util.Identifier;
@@ -29,19 +31,19 @@ public class CLI {
      */
     private final IConsole console;
 
-    private final IWriter writer;
+    private final IWriter out;
 
     private final List<BaseCommand> commands;
 
     private final Set<Integer> prefixes;
 
-    private final HashMap<Integer, BaseCommand> index;
+    private final HashMap<Integer, List<BaseCommand>> index;
 
     /**
      * Constructs a new instance using a default <code>Configuration</code>.
      */
     public CLI() {
-        this(new Configuration());
+        this(null);
     }
 
     /**
@@ -51,7 +53,7 @@ public class CLI {
     public CLI(Configuration conf) {
         this.conf = Objects.requireNonNullElseGet(conf, Configuration::new);
         this.console = conf.getConsole();
-        this.writer = console.writer();
+        this.out = console.writer();
         this.prefixes = new HashSet<>();
         this.index = new HashMap<>();
         this.commands = build();
@@ -103,7 +105,7 @@ public class CLI {
                         .build()
                 )
                 .filter(Objects::nonNull)
-                .filter(new PostTransformationFilter())
+                .filter(new FilterImpl())
                 .collect(Collectors.toCollection(ArrayList::new));
 
         // populate index
@@ -118,7 +120,12 @@ public class CLI {
                     key = hash(name);
                 }
 
-                index.put(key, cmd);
+                if (index.containsKey(key)) {
+                    index.get(key).add(cmd);
+                } else {
+                    index.put(key, new ArrayList<BaseCommand>(){{add(cmd);}});
+                }
+
             }
         }
 
@@ -131,10 +138,10 @@ public class CLI {
             cmd.run(input);
         }
         catch (UnknownCommandException e) {
-            writer.printerr(conf.getUnknownCommandExceptionFormatter().apply(e));
+            out.printerr(conf.getUnknownCommandExceptionFormatter().apply(e));
         }
         catch (ParseException e) {
-            writer.printerr(conf.getParseExceptionFormatter().apply(e));
+            out.printerr(conf.getParseExceptionFormatter().apply(e));
         }
     }
 
@@ -150,6 +157,7 @@ public class CLI {
         }
     }
 
+    /*
     protected BaseCommand getCommand(String input) throws UnknownCommandException {
         BaseCommand cmd = getIndexed(input);
 
@@ -162,11 +170,32 @@ public class CLI {
             );
         }
     }
+     */
 
-    protected BaseCommand getIndexed(String input) {
-        if (input == null) {
-            return null;
+    protected BaseCommand getCommand(String input) throws UnknownCommandException {
+        List<BaseCommand> c = getBucket(input);
+
+        for (BaseCommand cmd : c) {
+            if (new CommandValidator(cmd).validate(input)) {
+                return cmd;
+            }
         }
+
+        throw new UnknownCommandException(
+                String.format("'%s' is not recognized as an internal command.", input), input
+        );
+    }
+
+    protected List<BaseCommand> getBucket(String input) {
+        if (input == null) {
+            return Collections.emptyList();
+        }
+        int key = keyOf(input);
+        List<BaseCommand> c = index.get(key);
+        return (c != null) ? c : Collections.emptyList();
+    }
+
+    protected int keyOf(String input) {
         String[] split = input.split("\\s", 2);
         int key = hash(split[0]);
 
@@ -174,13 +203,13 @@ public class CLI {
             key = hash(split[0].concat(split[1]));
         }
 
-        return index.get(key);
+        return key;
     }
 
     @Command(name = "--help, -h")
     protected void help() {
         for (BaseCommand cmd : commands) {
-            writer.println(conf.getHelpFormatter().apply(cmd));
+            out.println(conf.getHelpFormatter().apply(cmd));
         }
     }
 }

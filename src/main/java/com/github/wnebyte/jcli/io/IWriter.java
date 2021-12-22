@@ -1,15 +1,18 @@
 package com.github.wnebyte.jcli.io;
 
+/**
+ * This interface represents a writer and declares methods for printing.
+ */
 public interface IWriter {
 
     /**
-     * Prints the specified String.
+     * Prints the specified <code>String</code>.
      * @param out the output to be appended to the console.
      */
     void print(String out);
 
     /**
-     * Prints the specified int.
+     * Prints the specified <code>int</code>.
      * @param out the output to be appended to the console.
      */
     void print(int out);

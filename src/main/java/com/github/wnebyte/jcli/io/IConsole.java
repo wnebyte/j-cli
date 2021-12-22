@@ -1,17 +1,11 @@
 package com.github.wnebyte.jcli.io;
 
-import java.util.List;
-
 /**
- * This interface represents a writeable and readable console.
+ * This interface represents a console and declares operations for printing and reading.
  */
 public interface IConsole {
 
     String read();
 
     IWriter writer();
-
-    List<String> getHistory();
-
-    void clear();
 }

@@ -1,5 +1,8 @@
 package com.github.wnebyte.jcli.io;
 
+/**
+ * This class represents a concrete writer that prints to the standard output stream.
+ */
 public class Writer implements IWriter {
 
     /**

@@ -1,4 +1,4 @@
-package com.github.wnebyte.jcli.filter;
+package com.github.wnebyte.jcli.processor;
 
 import java.util.function.Predicate;
 

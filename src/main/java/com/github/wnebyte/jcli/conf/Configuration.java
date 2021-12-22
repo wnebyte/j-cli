@@ -10,7 +10,7 @@ import com.github.wnebyte.jarguments.convert.TypeConverterMap;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.Formatter;
-import com.github.wnebyte.jcli.HelpCommandFormatter;
+import com.github.wnebyte.jcli.HelpFormatter;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.di.DependencyContainer;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
@@ -19,6 +19,9 @@ import com.github.wnebyte.jcli.io.IConsole;
 import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.util.Identifier;
 
+/**
+ * This class is used to specify configuration options for instances of {@link com.github.wnebyte.jcli.CLI}.
+ */
 public class Configuration {
 
     /*
@@ -31,7 +34,7 @@ public class Configuration {
      * Default impl.
      */
     public static final Formatter<BaseCommand> DEFAULT_HELP_FORMATTER =
-            new HelpCommandFormatter();
+            new HelpFormatter();
 
     /**
      * Default impl.
@@ -141,10 +144,12 @@ public class Configuration {
 
     /**
      * Specify that the <code>CLI</code> should use the specified <code>IConsole</code>, and that the specified
-     * <code>Class</code> and <code>IConsole</code> pair should be registered with the
-     * {@linkplain IDependencyContainer} associated with this <code>Configuration</code> instance.
+     * pairing should be registered with the
+     * {@link IDependencyContainer} associated with this instance.
      * @param abs the base class.
      * @param console the implementation.
+     * @param <T> the type of the base class.
+     * @param <R> the type of the implementation.
      * @return this (for chaining).
      */
     public <T extends IConsole, R extends T> Configuration setConsole(Class<T> abs, R console) {
@@ -156,7 +161,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code>'s built-in Help Command should use the specified <code>Formatter</code>.
+     * Specify that the <code>CLI</code>'s Help Command should use the specified <code>Formatter</code>.
      * @param formatter to be used.
      * @return this (for chaining).
      */
@@ -168,8 +173,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when encountering a
-     * <code>ParseException</code>.
+     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when handling a
+     * thrown <code>ParseException</code>.
      * @param formatter to be used.
      * @return this (for chaining).
      */
@@ -181,8 +186,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when encountering an
-     * <code>UnknownCommandException</code>.
+     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when handling a
+     * thrown <code>UnknownCommandException</code>.
      * @param formatter to be used.
      * @return this (for chaining).
      */
@@ -194,10 +199,12 @@ public class Configuration {
     }
 
     /**
-     * Specify that the specified Class and Implementation pair should be registered with the
-     * {@linkplain IDependencyContainer} associated with this <code>Configuration</code> instance.
+     * Specify that the specified pair should be registered with the
+     * {@link IDependencyContainer} associated with this instance.
      * @param abs the base class.
      * @param dependency the implementation.
+     * @param <T> the type of the base class.
+     * @param <R> the type of the implementation.
      * @return this (for chaining).
      */
     public <T, R extends T> Configuration registerDependency(Class<T> abs, R dependency) {
@@ -208,10 +215,11 @@ public class Configuration {
     }
 
     /**
-     * Specify the the specified <code>Class</code> and <code>TypeConverter</code> pair should be registered with
-     * the {@linkplain AbstractTypeConverterMap} associated with this <code>Configuration</code> instance.
+     * Specify the the specified pair should be registered with
+     * the {@link AbstractTypeConverterMap} associated with this instance.
      * @param cls the key.
      * @param converter the value.
+     * @param <T> the type of the converter.
      * @return this (for chaining).
      */
     public <T> Configuration registerTypeConverter(Class<T> cls, TypeConverter<T> converter) {
@@ -222,11 +230,12 @@ public class Configuration {
     }
 
     /**
-     * Specify the the specified <code>Class</code> and <code>TypeConverter</code> pair should be registered with
-     * the {@linkplain AbstractTypeConverterMap} associated with this <code>Configuration</code> instance,
-     * only if a mapping using the specified key does not already exist.
+     * Specify the the specified pair should be registered with
+     * the {@link AbstractTypeConverterMap} associated with this instance,
+     * only if a mapping for the specified key is not already present.
      * @param cls the key.
      * @param converter the value.
+     * @param <T> the type of the converter.
      * @return this (for chaining).
      */
     public <T> Configuration registerTypeConverterIfAbsent(Class<T> cls, TypeConverter<T> converter) {
@@ -249,8 +258,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>objects</code> for
-     * {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should scan the specified <code>Object[]</code> for
+     * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param objects to be scanned.
      * @return this (for chaining).
      */
@@ -262,8 +271,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>methods</code> for
-     * {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should scan the specified <code>Method[]</code> for
+     * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param methods to be scanned.
      * @return this (for chaining).
      */
@@ -275,8 +284,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>classes</code> for
-     * {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should scan the specified <code>Class[]</code> for
+     * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param classes to be scanned.
      * @return this (for chaining).
      */
@@ -288,10 +297,11 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>packages</code> for
-     * {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should scan the specified <code>String[]</code> for
+     * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param packages to be scanned.
      * @return this (for chaining).
+     * @see org.reflections.util.ClasspathHelper#forPackage(String, ClassLoader...)
      */
     public Configuration setScanPackages(String... packages) {
         if (packages != null) {
@@ -301,8 +311,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>identifiers</code> for
-     * {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should scan the specified <code>Identifier[]</code> for
+     * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param identifiers to be scanned.
      * @return this (for chaining).
      */
@@ -314,8 +324,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should exclude the specified <code>classes</code> from being scanned
-     * for {@linkplain com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specify that the <code>CLI</code> should exclude the classes in the specified <code>Class[]</code>
+     * from being scanned for {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param classes to be excluded from scanning.
      * @return this (for chaining).
      */

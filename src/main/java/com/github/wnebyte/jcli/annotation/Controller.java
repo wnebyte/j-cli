@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Annotate your Class with this annotation if it declares any {@link Command}
- * annotated Java Methods, to give each declared Command a prefix, and to control
+ * annotated Java Methods, to give each declared Command an optional prefix, and to control
  * the life-cycle of the Objects on which your (non-static) Commands are executed.
  * <br>
  * Here are some examples of usages:
@@ -33,9 +33,9 @@ import java.lang.annotation.Target;
  *     // code
  * }
  * </pre>
- * <p>You can also specify how instances of your class are constructed and (re)used.
+ * <p>You can also specify how instances of your class are to be constructed and (re)used.
  * By specifying a value of type {@link Scope#SINGLETON} on the Controller level,
- * you've specified that one object should be used for all subsequent Command invocations.<br>
+ * you're specifying that one object should be used for all subsequent Command invocations.<br>
  * If instead a value of type {@link Scope#TRANSIENT} is specified, a new instance will be constructed
  * prior to each invocation.<br>
  * <b>Note</b> that your class will only be instantiated if it declares at least one non-static Command annotated

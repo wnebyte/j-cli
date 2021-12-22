@@ -129,7 +129,6 @@ public class Configuration {
 
     /**
      * Configure the Shell to use the specified Console.
-     * <p></p>
      * If left unspecified the Shell will not be able to directly output any text, or read any text.
      * <br>
      * it is recommended to set all the Handlers if a Console is not set.

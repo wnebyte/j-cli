@@ -1,7 +1,7 @@
 package com.github.wnebyte.jcli.annotation;
 
 /**
- * This enum represents the Group of a Command Argument.
+ * This enum represents the Group of an Argument.
  * <ul>
  *    <li>{@linkplain Group#REQUIRED}</li>
  *    <li>{@linkplain Group#OPTIONAL}</li>
@@ -13,7 +13,7 @@ package com.github.wnebyte.jcli.annotation;
  */
 public enum Group {
     /**
-     * A Required Argument has the following properties: <br>
+     * Has the following properties: <br>
      * <ol>
      *     <li>Has to be included when a Command is specified for the Command to match and execute.</li>
      *     <li>Has no fixed position.</li>
@@ -23,7 +23,7 @@ public enum Group {
      */
     REQUIRED,
     /**
-     * An Optional Argument has the following properties: <br>
+     * Has the following properties: <br>
      * <ol>
      *     <li>Does not have to be included when a Command is specified for the Command to match and execute.</li>
      *     <li>Has no fixed position.</li>
@@ -34,7 +34,7 @@ public enum Group {
      */
     OPTIONAL,
     /**
-     * A Flag Argument has the following properties: <br>
+     * Has the following properties: <br>
      * <ol>
      *     <li>Does not have to be included when a Command is specified for the Command to match and execute.</li>
      *     <li>Has no fixed position.</li>
@@ -45,15 +45,12 @@ public enum Group {
      */
     FLAG,
     /**
-     * A Positional Argument has the following properties: <br>
+     * Has the following properties: <br>
      * <ol>
      *     <li>Has to be included when a Command is specified for the Command to match and execute.</li>
-     *     <li>Has a fixed position at the start of the Command.<br>
-     *     If your Command has multiple Positional Arguments, they have to appear one after another in
-     *     the relative order in which they are declared,
-     *     starting at the first Argument position.</li>
+     *     <li>Has a fixed relative position.<br>
      *     <li>Has no name.</li>
-     *     <li>Is initialized by including a value at the Argument's fixed position.</li>
+     *     <li>Is initialized by including a value at the Argument's fixed relative position.</li>
      * </ol>
      */
     POSITIONAL

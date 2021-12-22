@@ -1,21 +1,16 @@
-package com.github.wnebyte.jcli.filter;
+package com.github.wnebyte.jcli.processor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 import com.github.wnebyte.jarguments.Argument;
-import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 
-public class PostTransformationFilter implements Filter<BaseCommand> {
+public class FilterImpl implements Filter<BaseCommand> {
 
-    private final List<BaseCommand> mapped;
+    private final List<BaseCommand> processed;
 
-    public PostTransformationFilter() {
-        this.mapped = new ArrayList<>();
+    public FilterImpl() {
+        this.processed = new ArrayList<>();
     }
 
     @Override
@@ -25,12 +20,14 @@ public class PostTransformationFilter implements Filter<BaseCommand> {
 
         if (names.isEmpty()) {
             throw new IllegalAnnotationException(
-                    "A Command must consist of at least one name."
+                    String.format(
+                            "Command: '%s' must have at least one name.", cmd
+                    )
             );
         }
 
-        // check if command names have previously been mapped.
-        boolean nameCollision = mapped.stream()
+        // check if names have previously been mapped.
+        boolean nameCollision = processed.stream()
                 .anyMatch(c -> c.getPrefix().equals(prefix) && intersection(c.getNames(), names));
 
         if (nameCollision) {
@@ -42,7 +39,29 @@ public class PostTransformationFilter implements Filter<BaseCommand> {
             );
         }
 
-        mapped.add(cmd);
+        if (cmd.hasPrefix()) {
+            // check if prefix collides with any of the names.
+            nameCollision = names.contains(prefix);
+            if (nameCollision) {
+                throw new IllegalAnnotationException(
+                        String.format(
+                                "Command: '%s' has a duplicate prefix/name.", cmd
+                        )
+                );
+            }
+            // check if prefix collides with any of the previously mapped names.
+            nameCollision = processed.stream()
+                    .anyMatch(c -> c.getNames().contains(prefix));
+            if (nameCollision) {
+                throw new IllegalAnnotationException(
+                        String.format(
+                                "Command: '%s' has a prefix that has already been mapped as a name.", cmd
+                        )
+                );
+            }
+        }
+
+        processed.add(cmd);
         return true;
     }
 
@@ -51,23 +70,6 @@ public class PostTransformationFilter implements Filter<BaseCommand> {
             boolean contains = set2.contains(o);
             if (contains) {
                 return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean intersection(List<Argument> args) {
-        args = args.stream().filter(arg -> !(arg instanceof Positional)).collect(Collectors.toList());
-
-        for (int i = 0; i < args.size(); i++) {
-            Argument first = args.get(i);
-
-            for (int j = i + 1; j < args.size(); j++) {
-                Argument second = args.get(j);
-                boolean intersection = intersection(first.getNames(), second.getNames());
-                if (intersection) {
-                    return true;
-                }
             }
         }
         return false;

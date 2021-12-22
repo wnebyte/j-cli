@@ -99,7 +99,7 @@ public @interface Argument {
     /**
      * <p>Specify a Group for this Argument.</p>
      * Defaults to {@link Group#REQUIRED}, unless the parameter is of type <code>boolean</code>,
-     * then {@link Group#FLAG} will be set.
+     * then {@link Group#FLAG} will be enforced.
      * @return the Group of this Argument.
      */
     Group group() default Group.REQUIRED;

@@ -4,12 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
-import com.github.wnebyte.jcli.pattern.BaseCommandPatternGenerator;
 
+/**
+ * This class represents an abstract executable Command.
+ */
 public abstract class BaseCommand {
 
     /*

@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.function.Function;
 import com.github.wnebyte.jarguments.Argument;
 
-public class HelpCommandFormatter implements Formatter<BaseCommand> {
+public class HelpFormatter implements Formatter<BaseCommand> {
 
-    private static final Formatter<BaseCommand> CMD_TO_STRING_FUNCTION = BaseCommand::toPaddedDescriptiveString;
+    private static final Formatter<BaseCommand> CMD_TO_STRING_FUNCT = BaseCommand::toPaddedDescriptiveString;
 
-    private static final Formatter<Argument> ARG_TO_STRING_FUNCTION = Argument::toGenericString;
+    private static final Formatter<Argument> ARG_TO_STRING_FUNCT = Argument::toString;
 
     @Override
     public String apply(BaseCommand cmd) {
         StringBuilder out = new StringBuilder();
         out.append(cmd.hasDesc() ? cmd.getDesc().concat("\n") : "")
-                .append("Usage: ").append(CMD_TO_STRING_FUNCTION.apply(cmd));
+                .append("Usage: ").append(CMD_TO_STRING_FUNCT.apply(cmd));
 
         if (!cmd.getArguments().isEmpty()) {
             int maxLength  = maxToStringLength(cmd.getArguments());
@@ -24,10 +24,10 @@ public class HelpCommandFormatter implements Formatter<BaseCommand> {
             out.append("\n\n").append("OPTIONS: ").append("\n");
 
             for (Argument arg : cmd.getArguments()) {
-                String s = ARG_TO_STRING_FUNCTION.apply(arg);
+                String s = ARG_TO_STRING_FUNCT.apply(arg);
                 String indent = indent((maxLength + 1) - s.length());
                 String ln = new StringBuilder().append("\t").append(s).append(indent)
-                        .append(arg.getDesc()).toString();
+                        .append(arg.hasDesc() ? arg.getDesc() : "").toString();
                 out.append(ln);
                 indent = indent((maxTotalLength + 1) - ln.length());
                 out.append(indent).append("\n");
@@ -41,7 +41,7 @@ public class HelpCommandFormatter implements Formatter<BaseCommand> {
     }
 
     private int maxToStringLength(final List<Argument> args) {
-        return args.stream().map(ARG_TO_STRING_FUNCTION).max(Comparator.comparingInt(String::length))
+        return args.stream().map(ARG_TO_STRING_FUNCT).max(Comparator.comparingInt(String::length))
                 .orElse("")
                 .length();
     }
@@ -52,10 +52,10 @@ public class HelpCommandFormatter implements Formatter<BaseCommand> {
         return args.stream().map(new Function<Argument, String>() {
             @Override
             public String apply(Argument arg) {
-                String s = ARG_TO_STRING_FUNCTION.apply(arg);
+                String s = ARG_TO_STRING_FUNCT.apply(arg);
                 String indent = indent((max + 1) - s.length());
                 StringBuilder out = new StringBuilder();
-                out.append(" ").append(s).append(indent).append(arg.getDesc());
+                out.append(" ").append(s).append(indent).append(arg.hasDesc() ? arg.getDesc() : "");
                 return out.toString();
             }
         }).max(Comparator.comparingInt(String::length)).orElse("").length();

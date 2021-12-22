@@ -16,6 +16,9 @@ import com.github.wnebyte.jcli.parser.CommandParser;
 import com.github.wnebyte.jcli.util.Annotations;
 import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
+/**
+ * This class represents a Command mapped directly from a Java Method.
+ */
 public class Command extends BaseCommand {
 
     /*

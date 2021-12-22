@@ -1,11 +1,12 @@
 package com.github.wnebyte.jcli;
 
+import java.lang.reflect.Method;
 import java.util.regex.Pattern;
-
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.val.CommandValidator;
 
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class BaseTestClass {
 
     protected boolean allMatch(Pattern pattern, String... input) {
@@ -63,9 +64,11 @@ public class BaseTestClass {
     }
 
     protected BaseCommand newInstance(Object object, String cmdName) {
+        Method method = new Identifier(object.getClass(), cmdName).getMethod();
+        assert method != null;
         return new com.github.wnebyte.jcli.Command(
                 () -> object,
-                new Identifier(object.getClass(), cmdName).getMethod(),
+                method,
                 new ArgumentFactoryBuilder().build()
         );
     }

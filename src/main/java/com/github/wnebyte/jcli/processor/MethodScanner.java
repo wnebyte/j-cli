@@ -1,22 +1,35 @@
 package com.github.wnebyte.jcli.processor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import com.github.wnebyte.jcli.annotation.Command;
 
+/**
+ * This class implements methods used for the purpose of scanning for annotated Java Methods.
+ */
 public class MethodScanner implements IMethodScanner {
 
-    /* ----------- Fields ----------- */
+    /*
+    ###########################
+    #       STATIC FIELDS     #
+    ###########################
+    */
 
-    private static final Class<? extends Annotation> DEFAULT_ANNOTATION = Command.class;
+    public static final Class<? extends Annotation> DEFAULT_ANNOTATION = Command.class;
+
+    /*
+    ###########################
+    #          FIELDS         #
+    ###########################
+    */
 
     /**
      * The annotation to scan for.
@@ -24,22 +37,37 @@ public class MethodScanner implements IMethodScanner {
     private final Class<? extends Annotation> annotation;
 
     /**
-     * The set used to store discovered methods.
+     * Is used to store the scanned methods.
      */
     private final Set<Method> methods;
 
-    /* ----------- Constructors ----------- */
+    /*
+    ###########################
+    #       CONSTRUCTORS      #
+    ###########################
+    */
 
+    /**
+     * Constructs a new instance using {@link MethodScanner#DEFAULT_ANNOTATION}.
+     */
     public MethodScanner() {
         this(DEFAULT_ANNOTATION);
     }
 
+    /**
+     * Constructs a new instance using the specified <code>annotation</code>.
+     * @param annotation to scan for.
+     */
     public MethodScanner(Class<? extends Annotation> annotation) {
         this.methods = new HashSet<>();
         this.annotation = annotation != null ? annotation : DEFAULT_ANNOTATION;
     }
 
-    /* ----------- Static Methods ----------- */
+    /*
+    ###########################
+    #      STATIC METHODS     #
+    ###########################
+    */
 
     public static Collection<URL> toUrlCollection(Collection<String> c, ClassLoader... classLoaders) {
         List<URL> urls = new ArrayList<>();
@@ -49,27 +77,17 @@ public class MethodScanner implements IMethodScanner {
         return urls;
     }
 
-    public static Collection<URL> toUrlCollection(Collection<String> c) {
-        return toUrlCollection(
-                c,
-                Thread.currentThread().getContextClassLoader(),
-                Reflections.class.getClassLoader()
-        );
-    }
-
     public static Set<Method> getDeclaredAnnotatedMethodsOfClass(Class<?> cls, Class<? extends Annotation> annotation) {
         return Arrays.stream(cls.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(annotation))
-                .collect(Collectors.toSet());
+                .filter(method -> method.isAnnotationPresent(annotation)).collect(Collectors.toSet());
     }
 
-    public static Set<Method> getAnnotatedMethodsOfClass(Class<?> cls, Class<? extends Annotation> annotation) {
-        return Arrays.stream(cls.getMethods())
-                .filter(method -> method.isAnnotationPresent(annotation))
-                .collect(Collectors.toSet());
-    }
 
-    /* ----------- Implementations ----------- */
+    /*
+    ###########################
+    #         METHODS         #
+    ###########################
+    */
 
     @Override
     public void scanObject(Object object) {
