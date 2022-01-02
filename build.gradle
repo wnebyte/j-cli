@@ -36,14 +36,13 @@ sourceSets {
     }
 }
 
-shadowJar {
-    archiveBaseName.set(projectName.concat('-fat'))
-    archiveClassifier.set('')
-    archiveVersion.set(project.version)
+javadoc {
+    sourceSets.main.allJava
 }
 
-javadoc {
-    source = sourceSets.main.allJava
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
@@ -72,4 +71,24 @@ jar{
         )
     }
     archiveBaseName.set(projectName)
+}
+
+javadocJar {
+    archiveBaseName.set(projectName)
+    archiveClassifier.set('javadoc')
+    archiveVersion.set(project.version)
+    from(javadoc)
+}
+
+sourcesJar {
+    archiveBaseName.set(projectName)
+    archiveClassifier.set('sources')
+    archiveVersion.set(project.version)
+    from(sourceSets.main.allJava)
+}
+
+shadowJar {
+    archiveBaseName.set(projectName)
+    archiveClassifier.set('fat')
+    archiveVersion.set(project.version)
 }

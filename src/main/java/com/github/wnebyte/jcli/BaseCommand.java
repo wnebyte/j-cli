@@ -1,9 +1,6 @@
 package com.github.wnebyte.jcli;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
@@ -11,7 +8,17 @@ import com.github.wnebyte.jarguments.exception.ParseException;
 /**
  * This class represents an abstract executable Command.
  */
-public abstract class BaseCommand {
+public abstract class BaseCommand implements Comparable<BaseCommand> {
+
+    /*
+    ###########################
+    #      STATIC FIELDS      #
+    ###########################
+    */
+
+    protected static final Comparator<BaseCommand> COMPARATOR =
+            Comparator.comparing(BaseCommand::getPrefix)
+                    .thenComparing(cmd -> cmd.getNames().toArray(new String[0])[0]);
 
     /*
     ###########################
@@ -75,6 +82,11 @@ public abstract class BaseCommand {
 
     public final Set<String> getNames() {
         return Collections.unmodifiableSet(names);
+    }
+
+    @Override
+    public int compareTo(BaseCommand o) {
+        return COMPARATOR.compare(this, o);
     }
 
     @Override
