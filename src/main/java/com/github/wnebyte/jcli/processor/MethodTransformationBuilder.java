@@ -2,7 +2,6 @@ package com.github.wnebyte.jcli.processor;
 
 import com.github.wnebyte.jarguments.factory.AbstractArgumentFactoryBuilder;
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
-import com.github.wnebyte.jarguments.util.Objects;
 
 public class MethodTransformationBuilder {
 
@@ -15,9 +14,7 @@ public class MethodTransformationBuilder {
         return this;
     }
 
-    public MethodTransformationBuilder setArgumentFactoryBuilder(
-            AbstractArgumentFactoryBuilder builder
-    ) {
+    public MethodTransformationBuilder setArgumentFactoryBuilder(AbstractArgumentFactoryBuilder builder) {
         if (builder != null) {
             this.builder = builder;
         }
@@ -25,9 +22,9 @@ public class MethodTransformationBuilder {
     }
 
     public MethodTransformation build() {
-        if (Objects.isNull(tracker, builder)) {
+        if (tracker == null) {
             throw new NullPointerException(
-                    "InstanceTracker has to be specified."
+                    "InstanceTracker may not be null."
             );
         }
         return new MethodTransformation(tracker, builder);

@@ -131,10 +131,9 @@ public class Command extends BaseCommand {
     */
 
     @Override
-    void run(String input) throws ParseException {
+    void execute(Object[] args) throws ParseException {
         Object object = supplier.get();
-        Object[] args = new CommandParser(this)
-                .parse(input);
+
         try {
             method.setAccessible(true);
             method.invoke(object, args);

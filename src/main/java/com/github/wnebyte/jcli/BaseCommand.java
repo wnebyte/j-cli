@@ -1,6 +1,7 @@
 package com.github.wnebyte.jcli;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
@@ -9,6 +10,21 @@ import com.github.wnebyte.jarguments.exception.ParseException;
  * This class represents an abstract executable Command.
  */
 public abstract class BaseCommand implements Comparable<BaseCommand> {
+
+    /*
+    ###########################
+    #      STATIC METHODS     #
+    ###########################
+    */
+
+    static BaseCommand stub(Consumer<Object[]> exe) {
+        return new BaseCommand(null, null, null, null) {
+            @Override
+            void execute(Object[] args) {
+                exe.accept(args);
+            }
+        };
+    }
 
     /*
     ###########################
@@ -58,7 +74,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
     ###########################
     */
 
-    abstract void run(String input) throws ParseException;
+    abstract void execute(Object[] args) throws ParseException;
 
     public final List<Argument> getArguments() {
         return Collections.unmodifiableList(arguments);

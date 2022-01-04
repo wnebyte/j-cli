@@ -60,7 +60,7 @@ public class Configuration {
 
     /*
     ###########################
-    #     INSTANCE FIELDS     #
+    #          FIELDS         #
     ###########################
     */
 

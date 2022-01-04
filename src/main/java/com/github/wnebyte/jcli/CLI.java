@@ -3,9 +3,12 @@ package com.github.wnebyte.jcli;
 import java.util.*;
 import java.lang.reflect.Method;
 import java.util.stream.Collectors;
+import com.github.wnebyte.jarguments.Argument;
+import com.github.wnebyte.jarguments.Tokens;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
-import com.github.wnebyte.jarguments.util.Strings;
+import com.github.wnebyte.jarguments.parser.AbstractParser;
+import com.github.wnebyte.jarguments.parser.Parser;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.conf.Configuration;
 import com.github.wnebyte.jcli.io.IConsole;
@@ -13,7 +16,6 @@ import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.processor.*;
 import com.github.wnebyte.jcli.processor.FilterImpl;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
-import com.github.wnebyte.jcli.val.CommandValidator;
 import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.util.Objects;
 
@@ -21,7 +23,7 @@ public class CLI {
 
     /*
     ###########################
-    #      STATIC METHODS     #
+    #     UTILITY METHODS     #
     ###########################
     */
 
@@ -29,8 +31,12 @@ public class CLI {
         return (o != null) ? o.hashCode() : 0;
     }
 
-    static List<String> tokenize(String input) {
-        return Strings.splitByWhitespace(input);
+    static Tokens slice(Tokens tokens, BaseCommand cmd) {
+        return tokens.subTokens(cmd.hasPrefix() ? 2 : 1, tokens.size());
+    }
+
+    static boolean isHelp(Tokens tokens) {
+        return (tokens != null) && (tokens.size() == 1) && (tokens.get(0).equals("--help") || tokens.get(0).equals("-h"));
     }
 
     /*
@@ -50,6 +56,8 @@ public class CLI {
     private final Set<Integer> prefixes;
 
     private final HashMap<Integer, List<BaseCommand>> index;
+
+    private final AbstractParser<Tokens, Collection<Argument>> parser = new Parser();
 
     /*
     ###########################
@@ -153,16 +161,18 @@ public class CLI {
             }
         }
 
-        // sort
         commands.sort(BaseCommand::compareTo);
 
         return commands;
     }
 
     public void accept(String input) {
+        Tokens tokens = Tokens.tokenize(input);
+
         try {
-            BaseCommand cmd = getCommand(input);
-            cmd.run(input);
+            BaseCommand cmd = lookup(tokens);
+            Object[] args = parser.initialize();
+            cmd.execute(args);
         }
         catch (UnknownCommandException e) {
             out.printerr(conf.getUnknownCommandExceptionFormatter().apply(e));
@@ -184,38 +194,40 @@ public class CLI {
         }
     }
 
-    protected BaseCommand getCommand(String input) throws UnknownCommandException {
-        List<BaseCommand> c = getBucket(input); // will only contain 1 item for now
+    protected BaseCommand lookup(Tokens tokens) throws UnknownCommandException {
+        List<BaseCommand> c = getBucket(tokens); // will only contain one element.
+        String input = tokens.join();
 
         for (BaseCommand cmd : c) {
-            if (new CommandValidator(cmd).validate(input)) {
+            tokens = slice(tokens, cmd);
+            try {
+                parser.parse(tokens, cmd.getArguments());
                 return cmd;
-            } else if (isHelp(input, cmd)) {
-                return new BaseCommand(null, null, null, null) {
-                    @Override
-                    void run(String input) {
-                        out.println(conf.getHelpFormatter().apply(cmd));
-                    }
-                };
+            }
+            catch (ParseException e) {
+                if (isHelp(tokens)) {
+                    parser.reset();
+                    return BaseCommand.stub((args) -> out.println(conf.getHelpFormatter().apply(cmd)));
+                }
             }
         }
 
         throw new UnknownCommandException(
                 String.format("'%s' is not recognized as an internal command.", input), input
         );
+
     }
 
-    protected List<BaseCommand> getBucket(String input) {
-        if (input == null) {
+    protected List<BaseCommand> getBucket(Tokens tokens) {
+        if (tokens == null) {
             return Collections.emptyList();
         }
-        int key = keyOf(input);
+        int key = toKey(tokens);
         List<BaseCommand> c = index.get(key);
         return (c != null) ? c : Collections.emptyList();
     }
 
-    protected int keyOf(String input) {
-        List<String> tokens = tokenize(input);
+    protected int toKey(Tokens tokens) {
         int key = hash(tokens.get(0));
 
         if (2 <= tokens.size() && prefixes.contains(key)) {
@@ -223,17 +235,6 @@ public class CLI {
         }
 
         return key;
-    }
-
-    protected boolean isHelp(String input, BaseCommand cmd) {
-        List<String> tokens = tokenize(input);
-        if (cmd.hasPrefix()) {
-            return tokens.size() == 3 && tokens.get(0).equals(cmd.getPrefix()) && cmd.getNames().contains(tokens.get(1)) &&
-                    (tokens.get(2).equals("--help") || tokens.get(2).equals("-h"));
-        } else {
-            return tokens.size() == 2 && cmd.getNames().contains(tokens.get(0)) &&
-                    (tokens.get(1).equals("--help") || tokens.get(1).equals("-h"));
-        }
     }
 
     @Command(name = "--help, -h")
