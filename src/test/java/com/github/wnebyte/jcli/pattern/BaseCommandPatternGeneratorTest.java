@@ -5,13 +5,13 @@ import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 import com.github.wnebyte.jcli.BaseCommand;
-import com.github.wnebyte.jcli.BaseTestClass;
+import com.github.wnebyte.jcli.AbstractTestClass;
 import com.github.wnebyte.jcli.annotation.Group;
 import com.github.wnebyte.jcli.util.Identifier;
 import org.junit.Assert;
 import java.util.regex.Pattern;
 
-public class BaseCommandPatternGeneratorTest extends BaseTestClass {
+public class BaseCommandPatternGeneratorTest extends AbstractTestClass {
 
     @Test
     public void testPattern00() {

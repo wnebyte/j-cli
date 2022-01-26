@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import com.github.wnebyte.jarguments.parser.ArgumentParser;
 import com.github.wnebyte.jcli.BaseCommand;
 
+@Deprecated
 public class CommandParser extends ArgumentParser {
 
     private final BaseCommand cmd;

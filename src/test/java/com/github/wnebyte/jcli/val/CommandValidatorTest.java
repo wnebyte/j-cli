@@ -1,8 +1,8 @@
 package com.github.wnebyte.jcli.val;
 
-import com.github.wnebyte.jcli.BaseTestClass;
+import com.github.wnebyte.jcli.AbstractTestClass;
 
-public class CommandValidatorTest extends BaseTestClass {
+public class CommandValidatorTest extends AbstractTestClass {
 
 
 }

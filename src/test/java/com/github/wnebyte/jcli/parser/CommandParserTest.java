@@ -1,7 +1,7 @@
 package com.github.wnebyte.jcli.parser;
 
 import com.github.wnebyte.jcli.BaseCommand;
-import com.github.wnebyte.jcli.BaseTestClass;
+import com.github.wnebyte.jcli.AbstractTestClass;
 import com.github.wnebyte.jcli.annotation.Group;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jarguments.exception.ParseException;
 
-public class CommandParserTest extends BaseTestClass {
+public class CommandParserTest extends AbstractTestClass {
 
     @Test
     public void testOnlyBooleanArgs() throws ParseException {

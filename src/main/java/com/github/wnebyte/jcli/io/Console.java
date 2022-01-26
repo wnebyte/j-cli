@@ -1,34 +1,25 @@
 package com.github.wnebyte.jcli.io;
 
-import java.util.Scanner;
-import static java.lang.System.in;
+import java.io.InputStream;
+import java.io.PrintStream;
 
 /**
  * This class represents a concrete console that implements methods for printing to the standard output stream.
  */
 public class Console implements IConsole {
 
-    private final Scanner scanner;
-
-    private final IWriter writer;
-
-    public Console() {
-        this.scanner = new Scanner(in);
-        this.writer = new Writer();
+    @Override
+    public PrintStream out() {
+        return System.out;
     }
 
     @Override
-    public String read() {
-        if (scanner.hasNextLine()) {
-            String in = scanner.nextLine();
-            return in;
-        } else {
-            return null;
-        }
+    public PrintStream err() {
+        return System.err;
     }
 
     @Override
-    public IWriter writer() {
-        return writer;
+    public InputStream in() {
+        return System.in;
     }
 }

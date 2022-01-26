@@ -3,30 +3,30 @@ package com.github.wnebyte.jcli.processor;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentFactoryBuilder;
 import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 
-public class MethodTransformationBuilder {
+public class MethodMapperBuilder {
 
     private IInstanceTracker tracker;
 
     private AbstractArgumentFactoryBuilder builder = new ArgumentFactoryBuilder();
 
-    public MethodTransformationBuilder setInstanceTracker(IInstanceTracker tracker) {
+    public MethodMapperBuilder setInstanceTracker(IInstanceTracker tracker) {
         this.tracker = tracker;
         return this;
     }
 
-    public MethodTransformationBuilder setArgumentFactoryBuilder(AbstractArgumentFactoryBuilder builder) {
+    public MethodMapperBuilder setArgumentFactoryBuilder(AbstractArgumentFactoryBuilder builder) {
         if (builder != null) {
             this.builder = builder;
         }
         return this;
     }
 
-    public MethodTransformation build() {
+    public MethodMapper build() {
         if (tracker == null) {
             throw new NullPointerException(
                     "InstanceTracker may not be null."
             );
         }
-        return new MethodTransformation(tracker, builder);
+        return new MethodMapper(tracker, builder);
     }
 }

@@ -7,7 +7,7 @@ import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.val.CommandValidator;
 
 @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-public class BaseTestClass {
+public class AbstractTestClass {
 
     protected boolean allMatch(Pattern pattern, String... input) {
         for (String s : input) {

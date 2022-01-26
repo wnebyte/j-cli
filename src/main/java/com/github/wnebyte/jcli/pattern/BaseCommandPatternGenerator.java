@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 import com.github.wnebyte.jarguments.pattern.ArgumentPatternGenerator;
 import com.github.wnebyte.jcli.BaseCommand;
 
+@Deprecated
 public class BaseCommandPatternGenerator extends ArgumentPatternGenerator {
 
     private final BaseCommand cmd;

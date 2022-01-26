@@ -1,14 +1,10 @@
 package com.github.wnebyte.jcli.annotation;
 
+import org.junit.Test;
 import com.github.wnebyte.jcli.CLI;
-import com.github.wnebyte.jcli.annotation.Command;
-import com.github.wnebyte.jcli.annotation.Controller;
-import com.github.wnebyte.jcli.annotation.Inject;
-import com.github.wnebyte.jcli.annotation.Scope;
 import com.github.wnebyte.jcli.conf.Configuration;
 import com.github.wnebyte.jcli.exception.ConfigException;
 import com.github.wnebyte.jcli.io.IConsole;
-import org.junit.Test;
 
 public class ControllerLifeCycleTest {
 
@@ -36,7 +32,7 @@ public class ControllerLifeCycleTest {
 
         @Command
         public void foo() {
-            console.writer().println(this);
+            console.out().println(this);
         }
     }
 
@@ -68,7 +64,7 @@ public class ControllerLifeCycleTest {
 
         @Command
         public void foo() {
-            console.writer().println(this);
+            console.out().println(this);
         }
     }
 
@@ -96,7 +92,7 @@ public class ControllerLifeCycleTest {
 
         @Command
         public void foo() {
-            console.writer().println(this);
+            console.out().println(this);
         }
     }
 
@@ -128,7 +124,7 @@ public class ControllerLifeCycleTest {
 
         @Command
         public void foo() {
-            console.writer().println(this);
+            console.out().println(this);
         }
     }
 

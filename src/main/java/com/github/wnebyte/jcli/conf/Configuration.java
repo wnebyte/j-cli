@@ -1,12 +1,14 @@
 package com.github.wnebyte.jcli.conf;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.*;
 import java.lang.reflect.Method;
 import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jarguments.convert.AbstractTypeConverterMap;
 import com.github.wnebyte.jarguments.convert.TypeConverterMap;
+import com.github.wnebyte.jarguments.exception.MissingArgumentException;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.Formatter;
@@ -39,7 +41,7 @@ public class Configuration {
     /**
      * Default impl.
      */
-    public static final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
+    public final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
             new Formatter<ParseException>() {
         @Override
         public String apply(ParseException e) {
@@ -133,7 +135,6 @@ public class Configuration {
 
     public Configuration() {
         registerDependency(IConsole.class, console);
-        registerDependency(IWriter.class, console.writer());
     }
 
     /*
@@ -159,7 +160,7 @@ public class Configuration {
         }
         return this;
     }
-
+    
     /**
      * Specify that the <code>CLI</code>'s Help Command should use the specified <code>Formatter</code>.
      * @param formatter to be used.

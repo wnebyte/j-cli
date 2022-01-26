@@ -9,6 +9,11 @@ public class UnknownCommandException extends RuntimeException {
         this.input = input;
     }
 
+    public UnknownCommandException(Throwable cause, String input) {
+        super(cause);
+        this.input = input;
+    }
+
     public String getInput() {
         return input;
     }

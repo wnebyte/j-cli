@@ -13,7 +13,7 @@ import com.github.wnebyte.jcli.util.Annotations;
 import com.github.wnebyte.jcli.util.Reflections;
 import static com.github.wnebyte.jcli.util.Reflections.*;
 
-public class MethodTransformation implements IMethodTransformation {
+public class MethodMapper implements IMethodMapper {
 
     /*
     ###########################
@@ -36,7 +36,7 @@ public class MethodTransformation implements IMethodTransformation {
     ###########################
     */
 
-    public MethodTransformation(IInstanceTracker tracker, AbstractArgumentFactoryBuilder builder) {
+    public MethodMapper(IInstanceTracker tracker, AbstractArgumentFactoryBuilder builder) {
         this.tracker = tracker;
         this.builder = builder;
     }

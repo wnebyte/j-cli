@@ -5,6 +5,7 @@ import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.val.ArgumentValidator;
 
+@Deprecated
 public class CommandValidator extends ArgumentValidator {
 
     private final BaseCommand cmd;

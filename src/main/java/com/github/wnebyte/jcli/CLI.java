@@ -1,8 +1,9 @@
 package com.github.wnebyte.jcli;
 
 import java.util.*;
-import java.lang.reflect.Method;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.lang.reflect.Method;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.Tokens;
 import com.github.wnebyte.jarguments.exception.ParseException;
@@ -11,11 +12,9 @@ import com.github.wnebyte.jarguments.parser.AbstractParser;
 import com.github.wnebyte.jarguments.parser.Parser;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.conf.Configuration;
-import com.github.wnebyte.jcli.io.IConsole;
-import com.github.wnebyte.jcli.io.IWriter;
-import com.github.wnebyte.jcli.processor.*;
-import com.github.wnebyte.jcli.processor.FilterImpl;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
+import com.github.wnebyte.jcli.io.IConsole;
+import com.github.wnebyte.jcli.processor.*;
 import com.github.wnebyte.jcli.util.Identifier;
 import com.github.wnebyte.jcli.util.Objects;
 
@@ -36,7 +35,8 @@ public class CLI {
     }
 
     static boolean isHelp(Tokens tokens) {
-        return (tokens != null) && (tokens.size() == 1) && (tokens.get(0).equals("--help") || tokens.get(0).equals("-h"));
+        return (tokens != null) && (tokens.size() == 1) &&
+                (tokens.get(0).equals("--help") || tokens.get(0).equals("-h"));
     }
 
     /*
@@ -45,19 +45,17 @@ public class CLI {
     ###########################
     */
 
-    private final Configuration conf;
+    protected final Configuration conf;
 
-    private final IConsole console;
+    protected final IConsole console;
 
-    private final IWriter out;
+    protected final List<BaseCommand> commands;
 
-    private final List<BaseCommand> commands;
+    protected final Set<Integer> prefixes;
 
-    private final Set<Integer> prefixes;
+    protected final HashMap<Integer, List<BaseCommand>> index;
 
-    private final HashMap<Integer, List<BaseCommand>> index;
-
-    private final AbstractParser<Tokens, Collection<Argument>> parser = new Parser();
+    protected final AbstractParser<Tokens, Collection<Argument>> parser;
 
     /*
     ###########################
@@ -74,15 +72,15 @@ public class CLI {
 
     /**
      * Constructs a new instance with the specified <code>Configuration</code>.
-     * @param conf configuration to be used.
+     * @param conf the configuration to be used.
      */
     public CLI(Configuration conf) {
         this.conf = Objects.requireNonNullElseGet(conf, Configuration::new);
         this.console = conf.getConsole();
-        this.out = console.writer();
         this.prefixes = new HashSet<>();
         this.index = new HashMap<>();
-        this.commands = build();
+        this.parser = new Parser();
+        this.commands = build(new MethodScanner(), new InstanceTracker(conf.getDependencyContainer()));
     }
 
     /*
@@ -91,16 +89,21 @@ public class CLI {
     ###########################
     */
 
-    private List<BaseCommand> build() {
-        IMethodScanner scanner = new MethodScanner();
-        IInstanceTracker tracker = new InstanceTracker(conf.getDependencyContainer());
+    protected List<BaseCommand> build(IMethodScanner scanner, IInstanceTracker tracker) {
+        scan(scanner, tracker);
+        List<BaseCommand> commands = map(scanner, tracker);
+        index(commands);
+        sort(commands);
+        return commands;
+    }
+
+    protected void scan(IMethodScanner scanner, IInstanceTracker tracker) {
         Set<Object> objects = conf.getScanObjects();
         Set<Class<?>> classes = conf.getScanClasses();
         Set<String> packages = conf.getScanPackages();
         Set<Identifier> identifiers = conf.getScanIdentifiers();
         Set<Method> methods = conf.getScanMethods();
 
-        // scan for commands
         if (objects != null) {
             scanner.scanObjects(objects);
             tracker.addAll(objects);
@@ -118,19 +121,21 @@ public class CLI {
             scanner.scanMethods(methods);
         }
         if (conf.isNullifyHelpCommand()) {
-            scanner.removedScannedElementIf(m -> m.getDeclaringClass() == this.getClass());
+            // remove help-command from set of scanned methods
+            scanner.removedScannedElementIf(m -> m.getDeclaringClass() == CLI.class);
         }
         else {
-            scanner.scanClass(this.getClass());
+            scanner.scanClass(CLI.class);
             tracker.add(this);
         }
         if (conf.getExcludeClasses() != null) {
             scanner.removedScannedElementIf(m -> conf.getExcludeClasses().contains(m.getDeclaringClass()));
         }
+    }
 
-        // build commands
-        List<BaseCommand> commands = scanner.getScannedElements().stream()
-                .map(new MethodTransformationBuilder()
+    protected List<BaseCommand> map(IMethodScanner scanner, IInstanceTracker tracker) {
+        return scanner.getScannedElements().stream()
+                .map(new MethodMapperBuilder()
                         .setInstanceTracker(tracker)
                         .setArgumentFactoryBuilder(new ArgumentFactoryBuilder()
                                 .useTypeConverterMap(conf.getTypeConverterMap()))
@@ -139,8 +144,9 @@ public class CLI {
                 .filter(Objects::nonNull)
                 .filter(new FilterImpl())
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
 
-        // populate index
+    protected void index(List<BaseCommand> commands) {
         for (BaseCommand cmd : commands) {
             for (String name : cmd.getNames()) {
                 int key;
@@ -155,15 +161,14 @@ public class CLI {
                 if (index.containsKey(key)) {
                     index.get(key).add(cmd);
                 } else {
-                    index.put(key, new ArrayList<BaseCommand>(){{add(cmd);}});
+                    index.put(key, Collections.singletonList(cmd));
                 }
-
             }
         }
+    }
 
+    protected void sort(List<BaseCommand> commands) {
         commands.sort(BaseCommand::compareTo);
-
-        return commands;
     }
 
     public void accept(String input) {
@@ -175,26 +180,35 @@ public class CLI {
             cmd.execute(args);
         }
         catch (UnknownCommandException e) {
-            out.printerr(conf.getUnknownCommandExceptionFormatter().apply(e));
+            console.err().println(conf.getUnknownCommandExceptionFormatter().apply(e));
         }
         catch (ParseException e) {
-            out.printerr(conf.getParseExceptionFormatter().apply(e));
+            console.err().println(conf.getParseExceptionFormatter().apply(e));
         }
+    }
+
+    public void accept(String[] input) {
+        accept(String.join(" ", input));
+    }
+
+    public Consumer<String> toConsumer() {
+        return CLI.this::accept;
     }
 
     public void read() {
-        while (true) {
-            String input = console.read();
+        Scanner scanner = new Scanner(console.in());
 
-            if (input != null) {
-                accept(input);
-            } else {
-                break;
-            }
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+            accept(input);
         }
     }
 
-    protected BaseCommand lookup(Tokens tokens) throws UnknownCommandException {
+    public final Configuration getConfiguration() {
+        return conf;
+    }
+
+    protected BaseCommand lookup(Tokens tokens) throws UnknownCommandException, ParseException {
         List<BaseCommand> c = getBucket(tokens); // will only contain one element.
         String input = tokens.join();
 
@@ -207,7 +221,9 @@ public class CLI {
             catch (ParseException e) {
                 if (isHelp(tokens)) {
                     parser.reset();
-                    return BaseCommand.stub((args) -> out.println(conf.getHelpFormatter().apply(cmd)));
+                    return BaseCommand.stub((args) -> console.out().println(conf.getHelpFormatter().apply(cmd)));
+                } else {
+                    throw e;
                 }
             }
         }
@@ -240,7 +256,7 @@ public class CLI {
     @Command(name = "--help, -h")
     protected void help() {
         for (BaseCommand cmd : commands) {
-            out.println(conf.getHelpFormatter().apply(cmd));
+            console.out().println(conf.getHelpFormatter().apply(cmd));
         }
     }
 }

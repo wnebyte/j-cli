@@ -1,18 +1,16 @@
 package com.github.wnebyte.jcli;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Supplier;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.Flag;
 import com.github.wnebyte.jarguments.convert.TypeConverter;
-import com.github.wnebyte.jarguments.exception.ParseException;
 import com.github.wnebyte.jarguments.factory.AbstractArgumentFactory;
 import com.github.wnebyte.jarguments.util.Reflections;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
-import com.github.wnebyte.jcli.parser.CommandParser;
 import com.github.wnebyte.jcli.util.Annotations;
 import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
@@ -42,10 +40,11 @@ public class Command extends BaseCommand {
             Method method,
             AbstractArgumentFactory factory
     ) {
-        super(resolvePrefix(method, factory), resolveNames(method, factory), resolveDescription(method),
-                resolveArgs(method, factory));
+        super(resolvePrefix(method, factory), resolveNames(method, factory),
+                resolveDesc(method), resolveArgs(method, factory));
         this.supplier = supplier;
         this.method = method;
+        this.method.setAccessible(true);
     }
 
     /*
@@ -65,25 +64,28 @@ public class Command extends BaseCommand {
         return normalize(names, factory.getExcludeCharacters());
     }
 
-    private static String resolveDescription(Method method) {
+    private static String resolveDesc(Method method) {
         String desc = Annotations.getDescription(method);
         return requireNonNullElseGet(desc, () -> "");
     }
 
     private static Set<String> normalize(Set<String> names, Collection<Character> exclude) {
-        Set<String> normalized = new LinkedHashSet<>(names.size());
+        Set<String> normNames = new LinkedHashSet<>(names.size());
 
         for (String s : names) {
             s = Strings.removeAll(s, exclude);
             if (s.equals("")) {
                 throw new IllegalAnnotationException(
-                        "The name of a Command may not be left empty after normalization. The following characters " +
-                                "are removed during normalization: " + Arrays.toString(exclude.toArray()) + "."
+                        String.format(
+                                "The name of a Command may not be left empty after normalization. " +
+                                        "The following characters are configured to be removed during " +
+                                        "normalization: '%s'.", Arrays.toString(exclude.toArray())
+                        )
                 );
             }
-            normalized.add(s);
+            normNames.add(s);
         }
-        return normalized;
+        return normNames;
     }
 
     private static List<Argument> resolveArgs(Method method, AbstractArgumentFactory factory) {
@@ -130,12 +132,16 @@ public class Command extends BaseCommand {
     ###########################
     */
 
+    /**
+     * Executes this Command by invoking its underlying Java Method with the specified
+     * <code>args</code>.
+     * @param args to be used during the invocation.
+     */
     @Override
-    void execute(Object[] args) throws ParseException {
+    final void execute(Object[] args) {
         Object object = supplier.get();
 
         try {
-            method.setAccessible(true);
             method.invoke(object, args);
         }
         catch (Exception e) {
