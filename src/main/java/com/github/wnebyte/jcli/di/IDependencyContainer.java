@@ -2,13 +2,13 @@ package com.github.wnebyte.jcli.di;
 
 public interface IDependencyContainer {
 
-    <T, R extends T> void registerDependency(Class<T> abs, R impl);
+    <T, R extends T> void registerDependency(Class<T> base, R impl);
 
-    <T, R extends T> void unregisterDependency(Class<T> abs);
+    void unregisterDependency(Class<?> base);
 
-    Object newInstance(Class<?> abs) throws ReflectiveOperationException;
+    Object newInstance(Class<?> cls) throws ReflectiveOperationException;
 
-    Object newConstructorInjection(Class<?> abs) throws ReflectiveOperationException;
+    Object newConstructorInjection(Class<?> cls) throws ReflectiveOperationException;
 
-    void injectFields(Object object) throws ReflectiveOperationException;
+    void injectFields(Object obj) throws ReflectiveOperationException;
 }

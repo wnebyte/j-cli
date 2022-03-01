@@ -1,8 +1,6 @@
 package com.github.wnebyte.jcli.di;
 
-import com.github.wnebyte.jcli.annotation.Inject;
-import com.github.wnebyte.jcli.di.DependencyContainer;
-import com.github.wnebyte.jcli.di.IDependencyContainer;
+import com.github.wnebyte.jcli.annotation.Resource;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,7 +27,7 @@ public class DependencyContainerTest {
 
     private static class ClassA {
 
-        @Inject
+        @Resource
         private String a;
     }
 
@@ -37,7 +35,7 @@ public class DependencyContainerTest {
 
         private String a;
 
-        @Inject
+        @Resource
         public ClassB() {
             this.a = "hello";
         }
@@ -51,7 +49,7 @@ public class DependencyContainerTest {
 
         private String a;
 
-        @Inject
+        @Resource
         public ClassC(String a) {
             this.a = a;
         }

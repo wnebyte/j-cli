@@ -5,11 +5,11 @@ import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
 
 public class MethodMapperBuilder {
 
-    private IInstanceTracker tracker;
+    private InstanceTracker tracker;
 
     private AbstractArgumentFactoryBuilder builder = new ArgumentFactoryBuilder();
 
-    public MethodMapperBuilder setInstanceTracker(IInstanceTracker tracker) {
+    public MethodMapperBuilder setInstanceTracker(InstanceTracker tracker) {
         this.tracker = tracker;
         return this;
     }
@@ -21,12 +21,12 @@ public class MethodMapperBuilder {
         return this;
     }
 
-    public MethodMapper build() {
+    public MethodMapperImpl build() {
         if (tracker == null) {
             throw new NullPointerException(
-                    "InstanceTracker may not be null."
+                    "InstanceTrackerImpl may not be null."
             );
         }
-        return new MethodMapper(tracker, builder);
+        return new MethodMapperImpl(tracker, builder);
     }
 }

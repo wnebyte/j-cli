@@ -1,15 +1,13 @@
 package com.github.wnebyte.jcli.conf;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.lang.reflect.Method;
 import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jarguments.convert.AbstractTypeConverterMap;
 import com.github.wnebyte.jarguments.convert.TypeConverterMap;
-import com.github.wnebyte.jarguments.exception.MissingArgumentException;
-import com.github.wnebyte.jarguments.exception.ParseException;
+import com.github.wnebyte.jarguments.exception.*;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.Formatter;
 import com.github.wnebyte.jcli.HelpFormatter;
@@ -18,11 +16,11 @@ import com.github.wnebyte.jcli.di.DependencyContainer;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
 import com.github.wnebyte.jcli.io.Console;
 import com.github.wnebyte.jcli.io.IConsole;
-import com.github.wnebyte.jcli.io.IWriter;
 import com.github.wnebyte.jcli.util.Identifier;
 
 /**
- * This class is used to specify configuration options for instances of {@link com.github.wnebyte.jcli.CLI}.
+ * This class is used to specify configuration options for instances of
+ * {@link com.github.wnebyte.jcli.CLI}.
  */
 public class Configuration {
 
@@ -41,24 +39,68 @@ public class Configuration {
     /**
      * Default impl.
      */
-    public final Formatter<ParseException> DEFAULT_PARSE_EXCEPTION_FORMATTER =
-            new Formatter<ParseException>() {
-        @Override
-        public String apply(ParseException e) {
-            return e.getMessage();
-        }
-    };
+    public static final Formatter<UnknownCommandException> DEFAULT_UNKNOWN_COMMAND_EXCEPTION_FORMATTER =
+            new Formatter<UnknownCommandException>() {
+                @Override
+                public String apply(UnknownCommandException e) {
+                    return e.getMessage();
+                }
+            };
 
     /**
      * Default impl.
      */
-    public static final Formatter<UnknownCommandException> DEFAULT_UNKNOWN_COMMAND_FORMATTER =
-            new Formatter<UnknownCommandException>() {
-        @Override
-        public String apply(UnknownCommandException e) {
-            return e.getMessage();
-        }
-    };
+    public static final Formatter<TypeConversionException> DEFAULT_TYPE_CONVERSION_EXCEPTION_FORMATTER =
+            new Formatter<TypeConversionException>() {
+                @Override
+                public String apply(TypeConversionException e) {
+                    return e.getMessage();
+                }
+            };
+
+    /**
+     * Default impl.
+     */
+    public static final Formatter<NoSuchArgumentException> DEFAULT_NO_SUCH_ARGUMENT_EXCEPTION_FORMATTER =
+            new Formatter<NoSuchArgumentException>() {
+                @Override
+                public String apply(NoSuchArgumentException e) {
+                    return e.getMessage();
+                }
+            };
+
+    /**
+     * Default impl.
+     */
+    public static final Formatter<MissingArgumentValueException> DEFAULT_MISSING_ARGUMENT_VALUE_EXCEPTION_FORMATTER =
+            new Formatter<MissingArgumentValueException>() {
+                @Override
+                public String apply(MissingArgumentValueException e) {
+                    return e.getMessage();
+                }
+            };
+
+    /**
+     * Default impl.
+     */
+    public static final Formatter<MalformedArgumentException> DEFAULT_MALFORMED_ARGUMENT_EXCEPTION_FORMATTER =
+            new Formatter<MalformedArgumentException>() {
+                @Override
+                public String apply(MalformedArgumentException e) {
+                    return e.getMessage();
+                }
+            };
+
+    /**
+     * Default impl.
+     */
+    public static final Formatter<MissingArgumentException> DEFAULT_MISSING_ARGUMENT_EXCEPTION_FORMATTER =
+            new Formatter<MissingArgumentException>() {
+                @Override
+                public String apply(MissingArgumentException e) {
+                    return e.getMessage();
+                }
+            };
 
     /*
     ###########################
@@ -70,6 +112,12 @@ public class Configuration {
      * Is used by the <code>CLI</code> to print and read.
      */
     private IConsole console = new Console();
+
+    private PrintStream out = System.out;
+
+    private PrintStream err = System.err;
+
+    private InputStream in = System.in;
 
     private AbstractTypeConverterMap converters = TypeConverterMap.getInstance();
 
@@ -115,17 +163,44 @@ public class Configuration {
     /**
      * Is used by the <code>CLI</code> to format output.
      */
-    private Formatter<BaseCommand> helpFormatter = DEFAULT_HELP_FORMATTER;
+    private Formatter<BaseCommand> helpFormatter =
+            DEFAULT_HELP_FORMATTER;
 
     /**
      * Is used by the <code>CLI</code> to format output.
      */
-    private Formatter<ParseException> parseExceptionFormatter = DEFAULT_PARSE_EXCEPTION_FORMATTER;
+    private Formatter<UnknownCommandException> unknownCommandExceptionFormatter =
+            DEFAULT_UNKNOWN_COMMAND_EXCEPTION_FORMATTER;
 
     /**
      * Is used by the <code>CLI</code> to format output.
      */
-    private Formatter<UnknownCommandException> unknownCommandExceptionFormatter = DEFAULT_UNKNOWN_COMMAND_FORMATTER;
+    private Formatter<TypeConversionException> typeConversionExceptionFormatter =
+            DEFAULT_TYPE_CONVERSION_EXCEPTION_FORMATTER;
+
+    /**
+     * Is used by the <code>CLI</code> to format output.
+     */
+    private Formatter<NoSuchArgumentException> noSuchArgumentExceptionFormatter =
+            DEFAULT_NO_SUCH_ARGUMENT_EXCEPTION_FORMATTER;
+
+    /**
+     * Is used by the <code>CLI</code> to format output.
+     */
+    private Formatter<MissingArgumentValueException> missingArgumentValueExceptionFormatter =
+            DEFAULT_MISSING_ARGUMENT_VALUE_EXCEPTION_FORMATTER;
+
+    /**
+     * Is used by the <code>CLI</code> to format output.
+     */
+    private Formatter<MalformedArgumentException> malformedArgumentExceptionFormatter =
+            DEFAULT_MALFORMED_ARGUMENT_EXCEPTION_FORMATTER;
+
+    /**
+     * Is used by the <code>CLI</code> to format output.
+     */
+    private Formatter<MissingArgumentException> missingArgumentExceptionFormatter =
+            DEFAULT_MISSING_ARGUMENT_EXCEPTION_FORMATTER;
 
     /*
     ###########################
@@ -144,19 +219,40 @@ public class Configuration {
     */
 
     /**
-     * Specify that the <code>CLI</code> should use the specified <code>IConsole</code>, and that the specified
+     * Specifies that the <code>CLI</code> should use the specified <code>IConsole</code> and that the specified
      * pairing should be registered with the
      * {@link IDependencyContainer} associated with this instance.
-     * @param abs the base class.
+     * @param base the base class.
      * @param console the implementation.
      * @param <T> the type of the base class.
      * @param <R> the type of the implementation.
      * @return this (for chaining).
      */
-    public <T extends IConsole, R extends T> Configuration setConsole(Class<T> abs, R console) {
-        if (abs != null && console != null) {
+    public <T extends IConsole, R extends T> Configuration setConsole(Class<T> base, R console) {
+        if ((base != null) && (console != null)) {
             this.console = console;
-            registerDependency(abs, console);
+            registerDependency(base, console);
+        }
+        return this;
+    }
+
+    public Configuration setOut(PrintStream out) {
+        if (out != null) {
+            this.out = out;
+        }
+        return this;
+    }
+
+    public Configuration setErr(PrintStream err) {
+        if (err != null) {
+            this.err = err;
+        }
+        return this;
+    }
+
+    public Configuration setIn(InputStream in) {
+        if (in != null) {
+            this.in = in;
         }
         return this;
     }
@@ -175,19 +271,6 @@ public class Configuration {
 
     /**
      * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when handling a
-     * thrown <code>ParseException</code>.
-     * @param formatter to be used.
-     * @return this (for chaining).
-     */
-    public Configuration setParseExceptionFormatter(Formatter<ParseException> formatter) {
-        if (formatter != null) {
-            this.parseExceptionFormatter = formatter;
-        }
-        return this;
-    }
-
-    /**
-     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when handling a
      * thrown <code>UnknownCommandException</code>.
      * @param formatter to be used.
      * @return this (for chaining).
@@ -199,18 +282,53 @@ public class Configuration {
         return this;
     }
 
+    public Configuration setTypeConversionExceptionFormatter(Formatter<TypeConversionException> formatter) {
+        if (formatter != null) {
+            this.typeConversionExceptionFormatter = formatter;
+        }
+        return this;
+    }
+
+    public Configuration setNoSuchArgumentExceptionFormatter(Formatter<NoSuchArgumentException> formatter) {
+        if (formatter != null) {
+            this.noSuchArgumentExceptionFormatter = formatter;
+        }
+        return this;
+    }
+
+    public Configuration setMissingArgumentValueExceptionFormatter(Formatter<MissingArgumentValueException> formatter) {
+        if (formatter != null) {
+            this.missingArgumentValueExceptionFormatter = formatter;
+        }
+        return this;
+    }
+
+    public Configuration setMalformedArgumentExceptionFormatter(Formatter<MalformedArgumentException> formatter) {
+        if (formatter != null) {
+            this.malformedArgumentExceptionFormatter = formatter;
+        }
+        return this;
+    }
+
+    public Configuration setMissingArgumentExceptionFormatter(Formatter<MissingArgumentException> formatter) {
+        if (formatter != null) {
+            this.missingArgumentExceptionFormatter = formatter;
+        }
+        return this;
+    }
+
     /**
      * Specify that the specified pair should be registered with the
      * {@link IDependencyContainer} associated with this instance.
-     * @param abs the base class.
-     * @param dependency the implementation.
+     * @param base the base class.
+     * @param impl the implementation.
      * @param <T> the type of the base class.
      * @param <R> the type of the implementation.
      * @return this (for chaining).
      */
-    public <T, R extends T> Configuration registerDependency(Class<T> abs, R dependency) {
-        if ((abs != null) && (dependency != null)) {
-            dependencyContainer.registerDependency(abs, dependency);
+    public <T, R extends T> Configuration registerDependency(Class<T> base, R impl) {
+        if ((base != null) && (impl != null)) {
+            dependencyContainer.registerDependency(base, impl);
         }
         return this;
     }
@@ -362,6 +480,25 @@ public class Configuration {
     */
 
     /**
+     * @return the <code>IConsole</code> associated with this <code>Configuration</code> instance.
+     */
+    public IConsole getConsole() {
+        return console;
+    }
+
+    public PrintStream out() {
+        return out;
+    }
+
+    public PrintStream err() {
+        return err;
+    }
+
+    public InputStream in() {
+        return in;
+    }
+
+    /**
      * @return the <code>IDependencyContainer</code> associated with this instance.
      */
     public IDependencyContainer getDependencyContainer() {
@@ -418,13 +555,6 @@ public class Configuration {
     }
 
     /**
-     * @return the <code>IConsole</code> associated with this <code>Configuration</code> instance.
-     */
-    public IConsole getConsole() {
-        return console;
-    }
-
-    /**
      * @return whether the <code>CLI</code>'s built-in Help Command should not be built.
      */
     public boolean isNullifyHelpCommand() {
@@ -439,16 +569,30 @@ public class Configuration {
     }
 
     /**
-     * @return the ParseException Formatter associated with this instance.
-     */
-    public Formatter<ParseException> getParseExceptionFormatter() {
-        return parseExceptionFormatter;
-    }
-
-    /**
      * @return the UnknownCommandException Formatter associated with this instance.
      */
     public Formatter<UnknownCommandException> getUnknownCommandExceptionFormatter() {
         return unknownCommandExceptionFormatter;
     }
+
+    public Formatter<TypeConversionException> getTypeConversionExceptionFormatter() {
+        return typeConversionExceptionFormatter;
+    }
+
+    public Formatter<NoSuchArgumentException> getNoSuchArgumentExceptionFormatter() {
+        return this.noSuchArgumentExceptionFormatter;
+    }
+
+    public Formatter<MissingArgumentValueException> getMissingArgumentValueExceptionFormatter() {
+        return this.missingArgumentValueExceptionFormatter;
+    }
+
+    public Formatter<MalformedArgumentException> getMalformedArgumentExceptionFormatter() {
+        return this.malformedArgumentExceptionFormatter;
+    }
+
+    public Formatter<MissingArgumentException> getMissingArgumentExceptionFormatter() {
+        return this.missingArgumentExceptionFormatter;
+    }
+
 }

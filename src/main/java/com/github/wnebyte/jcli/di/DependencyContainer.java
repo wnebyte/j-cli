@@ -1,14 +1,23 @@
 package com.github.wnebyte.jcli.di;
 
-import com.github.wnebyte.jcli.annotation.Inject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
+import java.lang.annotation.Annotation;
+import com.github.wnebyte.jcli.annotation.Resource;
+import static com.github.wnebyte.jcli.util.Reflections.getNoArgsConstructor;
+import static com.github.wnebyte.jcli.util.Reflections.getAnnotatedConstructor;
 
 public class DependencyContainer implements IDependencyContainer {
+
+    /*
+    ###########################
+    #       STATIC FIELDS     #
+    ###########################
+    */
+
+    private static Class<? extends Annotation> DEFAULT_ANNOTATION = Resource.class;
 
     /*
     ###########################
@@ -18,6 +27,8 @@ public class DependencyContainer implements IDependencyContainer {
 
     private final Map<Class<?>, Object> dependencies;
 
+    private final Class<? extends Annotation> annotation;
+
     /*
     ###########################
     #       CONSTRUCTORS      #
@@ -25,31 +36,12 @@ public class DependencyContainer implements IDependencyContainer {
     */
 
     public DependencyContainer() {
+        this(DEFAULT_ANNOTATION);
+    }
+
+    public DependencyContainer(Class<? extends Annotation> annotation) {
         this.dependencies = new HashMap<>();
-    }
-
-    /*
-    ###########################
-    #     STATIC UTILITIES    #
-    ###########################
-    */
-
-    private static Constructor<?> getInjectableConstructor(Class<?> cls) {
-        if (cls == null)
-            return null;
-        return Arrays.stream(cls.getDeclaredConstructors())
-                .filter(c -> c.isAnnotationPresent(Inject.class))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private static Constructor<?> getNoArgsConstructor(Class<?> cls) {
-        if (cls == null)
-            return null;
-        return Arrays.stream(cls.getDeclaredConstructors())
-                .filter(c -> c.getParameterCount() == 0)
-                .findFirst()
-                .orElse(null);
+        this.annotation = annotation;
     }
 
     /*
@@ -58,18 +50,18 @@ public class DependencyContainer implements IDependencyContainer {
     ###########################
     */
     @Override
-    public <T, R extends T> void registerDependency(Class<T> abs, R impl) {
-        dependencies.put(abs, impl);
+    public <T, R extends T> void registerDependency(Class<T> base, R impl) {
+        dependencies.put(base, impl);
     }
 
     @Override
-    public <T, R extends T> void unregisterDependency(Class<T> abs) {
-        dependencies.remove(abs);
+    public void unregisterDependency(Class<?> base) {
+        dependencies.remove(base);
     }
 
     @Override
-    public Object newInstance(Class<?> abs) throws ReflectiveOperationException {
-        Object object = newConstructorInjection(abs);
+    public Object newInstance(Class<?> cls) throws ReflectiveOperationException {
+        Object object = newConstructorInjection(cls);
         if (object != null) {
             injectFields(object);
         }
@@ -77,13 +69,13 @@ public class DependencyContainer implements IDependencyContainer {
     }
 
     @Override
-    public Object newConstructorInjection(Class<?> abs) throws InstantiationException {
-        Constructor<?> cons = getInjectableConstructor(abs);
-        cons = (cons == null) ? getNoArgsConstructor(abs) : cons;
+    public Object newConstructorInjection(Class<?> cls) throws InstantiationException {
+        Constructor<?> cons = getAnnotatedConstructor(cls, annotation);
+        cons = (cons == null) ? getNoArgsConstructor(cls) : cons;
 
         if (cons == null) {
             throw new InstantiationException(
-                    "Class: " + abs + " declares no appropriate constructor, " +
+                    "Class: '" + cls + "' does not declare an appropriate constructor, " +
                             "and can therefore not be instantiated."
             );
         }
@@ -115,19 +107,19 @@ public class DependencyContainer implements IDependencyContainer {
     }
 
     @Override
-    public void injectFields(Object object) throws ReflectiveOperationException {
-        Class<?> cls = object.getClass();
+    public void injectFields(Object obj) throws ReflectiveOperationException {
+        Class<?> cls = obj.getClass();
 
         for (Field field : cls.getDeclaredFields()) {
             field.setAccessible(true);
             Class<?> type = field.getType();
 
-            if (field.isAnnotationPresent(Inject.class)) {
+            if (field.isAnnotationPresent(Resource.class)) {
                 Object dependency = dependencies.get(type);
 
                 if (dependency != null) {
                     try {
-                        field.set(object, dependency);
+                        field.set(obj, dependency);
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }

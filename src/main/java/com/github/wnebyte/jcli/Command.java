@@ -55,13 +55,13 @@ public class Command extends BaseCommand {
 
     private static String resolvePrefix(Method method, AbstractArgumentFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
-        return Strings.removeAll(requireNonNullElseGet(prefix, () -> ""), factory.getExcludeCharacters());
+        return Strings.removeAll(requireNonNullElseGet(prefix, () -> ""), factory.getExcludedCharacters());
     }
 
     private static Set<String> resolveNames(Method method, AbstractArgumentFactory factory) {
         Set<String> names = Annotations.getNames(method);
         assert names != null;
-        return normalize(names, factory.getExcludeCharacters());
+        return normalize(names, factory.getExcludedCharacters());
     }
 
     private static String resolveDesc(Method method) {
@@ -95,7 +95,7 @@ public class Command extends BaseCommand {
             for (Parameter param : params) {
                 Class<? extends Argument> sClass = Reflections.isBoolean(param.getType()) ?
                         Flag.class : Annotations.getSubClass(param);
-                factory.setSubClass(sClass);
+                factory.setCls(sClass);
                 String[] names = Annotations.getNames(param);
                 if (names != null) {
                     factory.setName(names);

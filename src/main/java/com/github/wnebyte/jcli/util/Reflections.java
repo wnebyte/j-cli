@@ -2,45 +2,48 @@ package com.github.wnebyte.jcli.util;
 
 import com.github.wnebyte.jshell.exception.config.NoDefaultConstructorException;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * This class declares utility methods for working with Reflection.
  */
 public final class Reflections {
 
+    private static final List<Class<?>> WRAPPER_CLASSES = Arrays.asList(
+            Boolean.class,
+            Byte.class,
+            Double.class,
+            Float.class,
+            Integer.class,
+            Long.class,
+            Short.class,
+            String.class
+    );
+
     /**
-     * Returns whether the specified Class is of a primitive/wrapper class Group.
-     * @param cls the Class.
-     * @return <code>true</code> if the Class is a primitive type or a wrapper class,
+     * Returns whether the specified <code>Class</code> is a primitive/wrapper <code>Class</code>.
+     * @param cls the class.
+     * @return <code>true</code> if the specified <code>Class</code> is a primitive/wrapper <code>Class</code>,
      * otherwise <code>false</code>.
      */
     public static boolean isPrimitive(Class<?> cls) {
-        return (cls != null) && (cls.isPrimitive() || new HashSet<Object>() {{
-                addAll(Arrays.asList
-                        (
-                                Boolean.class,
-                                Byte.class,
-                                Double.class,
-                                Float.class,
-                                Integer.class,
-                                Long.class,
-                                Short.class,
-                                String.class
-                        )
-                );
-            }}.contains(cls));
+        return (cls != null) && (cls.isPrimitive() || WRAPPER_CLASSES.contains(cls));
     }
 
     /**
-     * Returns <code>Collection.class.isAssignableFrom(cls)</code>.
-     * @param cls the Class.
-     * @return <code>Collection.class.isAssignableFrom(cls)</code>.
+     * Returns whether <code>Collection.class</code> is the same as, or is a super interface of the
+     * specified <code>Class</code>.
+     * @param cls the class.
+     * @return <code>true</code> if <code>Collection.class</code> is the same as, or is a super interface of the
+     * specified <code>Class</code>,
+     * otherwise <code>false</code>.
      */
     public static boolean isCollection(Class<?> cls) {
         return (cls != null) && (Collection.class.isAssignableFrom(cls));
@@ -134,5 +137,39 @@ public final class Reflections {
         } catch (Exception e) {
             throw new NoDefaultConstructorException(e.getMessage());
         }
+    }
+
+    /**
+     * Returns the <code>Constructor</code> annotated with the specified <code>Annotation</code> declared
+     * in the specified <code>Class</code> if one exists.
+     * @param cls the class.
+     * @param annotation the annotation.
+     * @return the annotated <code>Constructor</code> if one exists,
+     * otherwise <code>null</code>.
+     */
+    public static Constructor<?> getAnnotatedConstructor(Class<?> cls, Class<? extends Annotation> annotation) {
+        if (cls == null) {
+            return null;
+        }
+        return Arrays.stream(cls.getDeclaredConstructors())
+                .filter(c -> c.isAnnotationPresent(annotation))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Returns the no-args <code>Constructor</code> declared in the specified <code>Class</code> if one exists.
+     * @param cls the class.
+     * @return the no-args <code>Constructor</code> if one exists,
+     * otherwise <code>null</code>.
+     */
+    public static Constructor<?> getNoArgsConstructor(Class<?> cls) {
+        if (cls == null) {
+            return null;
+        }
+        return Arrays.stream(cls.getDeclaredConstructors())
+                .filter(c -> c.getParameterCount() == 0)
+                .findFirst()
+                .orElse(null);
     }
 }

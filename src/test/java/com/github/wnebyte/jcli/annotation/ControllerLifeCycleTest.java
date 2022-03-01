@@ -27,7 +27,7 @@ public class ControllerLifeCycleTest {
     @Controller(Scope.TRANSIENT)
     private static class TransientClassNested00 {
 
-        @Inject
+        @Resource
         IConsole console;
 
         @Command
@@ -57,7 +57,7 @@ public class ControllerLifeCycleTest {
 
         private IConsole console;
 
-        @Inject
+        @Resource
         public TransientClassNested01(IConsole console) {
             this.console = console;
         }
@@ -87,7 +87,7 @@ public class ControllerLifeCycleTest {
     @Controller(Scope.SINGLETON)
     private static class SingletonClassNested00 {
 
-        @Inject
+        @Resource
         private IConsole console;
 
         @Command
@@ -117,7 +117,7 @@ public class ControllerLifeCycleTest {
 
         private IConsole console;
 
-        @Inject
+        @Resource
         public SingletonClassNested01(IConsole console) {
             this.console = console;
         }
@@ -146,7 +146,7 @@ public class ControllerLifeCycleTest {
     @Controller(Scope.SINGLETON)
     private static class Cls0 {
 
-        @Inject
+        @Resource
         private String junk; // has not been registered with the dependency container.
 
         @Command
@@ -173,7 +173,7 @@ public class ControllerLifeCycleTest {
     @Controller(Scope.TRANSIENT)
     private static class Cls1 {
 
-        @Inject
+        @Resource
         private String junk; // has not been registered with the dependency container.
 
         @Command
@@ -202,7 +202,7 @@ public class ControllerLifeCycleTest {
 
         private String junk; // has not been registered with the dependency container.
 
-        @Inject
+        @Resource
         public Cls2(String junk) {
             this.junk = junk;
         }
@@ -233,7 +233,7 @@ public class ControllerLifeCycleTest {
 
         private String junk; // has not been registered with the dependency container.
 
-        @Inject
+        @Resource
         public Cls3(String junk) {
             this.junk = junk;
         }

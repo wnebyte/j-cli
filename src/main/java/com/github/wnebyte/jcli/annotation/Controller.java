@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * <br>
  * @see Command
  * @see Argument
- * @see Inject
+ * @see Resource
  * @see Scope
  */
 @Retention(RetentionPolicy.RUNTIME)

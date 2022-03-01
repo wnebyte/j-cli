@@ -12,7 +12,7 @@ public class InstanceTrackerTest {
 
     @Test
     public void test00() throws ReflectiveOperationException {
-        InstanceTracker tracker = new InstanceTracker(new DependencyContainer());
+        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
         tracker.add(this);
         Object object = tracker.get(this.getClass());
         Assert.assertSame(this, object);
@@ -20,14 +20,14 @@ public class InstanceTrackerTest {
 
     @Test
     public void test01() throws ReflectiveOperationException {
-        InstanceTracker tracker = new InstanceTracker(new DependencyContainer());
+        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
         Object object = tracker.get(this.getClass());
         Assert.assertNotSame(this, object);
     }
 
     @Test
     public void test02() {
-        InstanceTracker tracker = new InstanceTracker(new DependencyContainer());
+        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
         tracker.addAll(Arrays.asList(
                 new InstanceTrackerTest(),
                 new InstanceTrackerTest(),
