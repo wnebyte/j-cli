@@ -1,5 +1,6 @@
 package com.github.wnebyte.jcli.annotation;
 
+import com.github.wnebyte.jcli.io.Console;
 import org.junit.Test;
 import com.github.wnebyte.jcli.CLI;
 import com.github.wnebyte.jcli.conf.Configuration;
@@ -19,6 +20,7 @@ public class ControllerLifeCycleTest {
         CLI cli = new CLI(new Configuration()
                 .nullifyScanPackages()
                 .setScanClasses(TransientClassNested00.class)
+                .registerDependency(IConsole.class, new Console())
         );
         cli.accept("foo");
         cli.accept("foo");
@@ -47,6 +49,7 @@ public class ControllerLifeCycleTest {
         CLI cli = new CLI(new Configuration()
                 .nullifyScanPackages()
                 .setScanClasses(TransientClassNested01.class)
+                .registerDependency(IConsole.class, new Console())
         );
         cli.accept("foo");
         cli.accept("foo");
@@ -79,6 +82,7 @@ public class ControllerLifeCycleTest {
         CLI cli = new CLI(new Configuration()
                 .nullifyScanPackages()
                 .setScanClasses(SingletonClassNested00.class)
+                .registerDependency(IConsole.class, new Console())
         );
         cli.accept("foo");
         cli.accept("foo");
@@ -107,6 +111,7 @@ public class ControllerLifeCycleTest {
         CLI cli = new CLI(new Configuration()
                 .nullifyScanPackages()
                 .setScanClasses(SingletonClassNested01.class)
+                .registerDependency(IConsole.class, new Console())
         );
         cli.accept("foo");
         cli.accept("foo");
@@ -140,7 +145,6 @@ public class ControllerLifeCycleTest {
                 .nullifyScanPackages()
                 .setScanClasses(Cls0.class)
         );
-
     }
 
     @Controller(Scope.SINGLETON)
@@ -167,7 +171,6 @@ public class ControllerLifeCycleTest {
                 .nullifyScanPackages()
                 .setScanClasses(Cls1.class)
         );
-
     }
 
     @Controller(Scope.TRANSIENT)
@@ -194,7 +197,6 @@ public class ControllerLifeCycleTest {
                 .nullifyScanPackages()
                 .setScanClasses(Cls2.class)
         );
-
     }
 
     @Controller(Scope.SINGLETON)
@@ -225,7 +227,6 @@ public class ControllerLifeCycleTest {
                 .nullifyScanPackages()
                 .setScanClasses(Cls3.class)
         );
-
     }
 
     @Controller(Scope.TRANSIENT)
@@ -251,7 +252,7 @@ public class ControllerLifeCycleTest {
     */
 
     /*
-    expecting an exception because #foo is not static and is declared in a non-static class.
+    expecting an exception because #foo is not static, and is declared within a non-static class.
      */
     @Test(expected = ConfigException.class)
     public void testNonStaticMethodNonStaticClass() {

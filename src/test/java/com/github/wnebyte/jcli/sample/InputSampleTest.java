@@ -10,7 +10,7 @@ public class InputSampleTest {
                 .nullifyScanPackages()
                 .setScanClasses(InputController.class)
         );
-        cli.getConfiguration().getConsole().out().println("rdy");
+        cli.getConfiguration().out().println("rdy");
         cli.read();
     }
 }

@@ -1,26 +1,25 @@
 package com.github.wnebyte.jcli.conf;
 
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.*;
 import java.lang.reflect.Method;
+import java.io.InputStream;
+import java.io.PrintStream;
 import com.github.wnebyte.jarguments.convert.TypeConverter;
 import com.github.wnebyte.jarguments.convert.AbstractTypeConverterMap;
 import com.github.wnebyte.jarguments.convert.TypeConverterMap;
 import com.github.wnebyte.jarguments.exception.*;
+import com.github.wnebyte.jcli.annotation.*;
+import com.github.wnebyte.jcli.CLI;
 import com.github.wnebyte.jcli.BaseCommand;
 import com.github.wnebyte.jcli.Formatter;
 import com.github.wnebyte.jcli.HelpFormatter;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.di.DependencyContainer;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
-import com.github.wnebyte.jcli.io.Console;
-import com.github.wnebyte.jcli.io.IConsole;
 import com.github.wnebyte.jcli.util.Identifier;
 
 /**
- * This class is used to specify configuration options for instances of
- * {@link com.github.wnebyte.jcli.CLI}.
+ * This class is used to specify configuration options for instances of {@link CLI}.
  */
 public class Configuration {
 
@@ -108,11 +107,6 @@ public class Configuration {
     ###########################
     */
 
-    /**
-     * Is used by the <code>CLI</code> to print and read.
-     */
-    private IConsole console = new Console();
-
     private PrintStream out = System.out;
 
     private PrintStream err = System.err;
@@ -124,39 +118,39 @@ public class Configuration {
     private IDependencyContainer dependencyContainer = new DependencyContainer();
 
     /**
-     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which objects to scan for annotated Java Methods.
      */
     private Set<Object> objects = null;
 
     /**
-     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which Methods to scan for annotated Java Methods.
      */
     private Set<Method> methods = null;
 
     /**
-     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which classes to scan for annotated Java Methods.
      */
     private Set<Class<?>> classes = null;
 
     /**
-     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which Methods to scan for annotated Java Methods.
      */
     private Set<Identifier> identifiers = null;
 
     /**
-     * Is used by the <code>CLI</code> to exclude classes from being scanned for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which classes it should exclude from being scanned for annotated Java Methods.
      */
     private Set<Class<?>> excludeClasses = null;
 
     /**
-     * Is used by the <code>CLI</code> to scan for annotated Java Methods.
+     * Is used to indicate to the <code>CLI</code> which packages to scan for annotated Java Methods.
      */
     private Set<String> packages = new HashSet<String>() {{
         add("");
     }};
 
     /**
-     * Is used to indicate that the <code>CLI</code> should not build its built-in Help Command.
+     * Is used to indicate to the <code>CLI</code> that it should not build its built-in Help Command.
      */
     private boolean nullifyHelpCommand = false;
 
@@ -208,9 +202,10 @@ public class Configuration {
     ###########################
     */
 
-    public Configuration() {
-        registerDependency(IConsole.class, console);
-    }
+    /**
+     * Constructs a new instance.
+     */
+    public Configuration() { }
 
     /*
     ###########################
@@ -219,23 +214,11 @@ public class Configuration {
     */
 
     /**
-     * Specifies that the <code>CLI</code> should use the specified <code>IConsole</code> and that the specified
-     * pairing should be registered with the
-     * {@link IDependencyContainer} associated with this instance.
-     * @param base the base class.
-     * @param console the implementation.
-     * @param <T> the type of the base class.
-     * @param <R> the type of the implementation.
+     * Specifies that the <code>CLI</code> should use the specified <code>PrintStream</code> when
+     * appending standard output.
+     * @param out to be used.
      * @return this (for chaining).
      */
-    public <T extends IConsole, R extends T> Configuration setConsole(Class<T> base, R console) {
-        if ((base != null) && (console != null)) {
-            this.console = console;
-            registerDependency(base, console);
-        }
-        return this;
-    }
-
     public Configuration setOut(PrintStream out) {
         if (out != null) {
             this.out = out;
@@ -243,6 +226,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>PrintStream</code> when
+     * appending error related output.
+     * @param err to be used.
+     * @return this (for chaining).
+     */
     public Configuration setErr(PrintStream err) {
         if (err != null) {
             this.err = err;
@@ -250,6 +239,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specified that the <code>CLI</code> should use the specified <code>InputStream</code> when
+     * reading input from the user.
+     * @param in to be used.
+     * @return this (for chaining).
+     */
     public Configuration setIn(InputStream in) {
         if (in != null) {
             this.in = in;
@@ -258,7 +253,8 @@ public class Configuration {
     }
     
     /**
-     * Specify that the <code>CLI</code>'s Help Command should use the specified <code>Formatter</code>.
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when its built-in Help
+     * Command is invoked.
      * @param formatter to be used.
      * @return this (for chaining).
      */
@@ -270,7 +266,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should use the specified <code>Formatter</code> when handling a
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
      * thrown <code>UnknownCommandException</code>.
      * @param formatter to be used.
      * @return this (for chaining).
@@ -282,6 +278,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
+     * thrown <code>TypeConversionException</code>.
+     * @param formatter to be used.
+     * @return this (for chaining).
+     */
     public Configuration setTypeConversionExceptionFormatter(Formatter<TypeConversionException> formatter) {
         if (formatter != null) {
             this.typeConversionExceptionFormatter = formatter;
@@ -289,6 +291,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
+     * thrown <code>NoSuchArgumentException</code>.
+     * @param formatter to be used.
+     * @return this (for chaining).
+     */
     public Configuration setNoSuchArgumentExceptionFormatter(Formatter<NoSuchArgumentException> formatter) {
         if (formatter != null) {
             this.noSuchArgumentExceptionFormatter = formatter;
@@ -296,6 +304,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
+     * thrown <code>MissingArgumentValueException</code>.
+     * @param formatter to be used.
+     * @return this (for chaining).
+     */
     public Configuration setMissingArgumentValueExceptionFormatter(Formatter<MissingArgumentValueException> formatter) {
         if (formatter != null) {
             this.missingArgumentValueExceptionFormatter = formatter;
@@ -303,6 +317,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
+     * thrown <code>MalformedArgumentException</code>.
+     * @param formatter to be used.
+     * @return this (for chaining).
+     */
     public Configuration setMalformedArgumentExceptionFormatter(Formatter<MalformedArgumentException> formatter) {
         if (formatter != null) {
             this.malformedArgumentExceptionFormatter = formatter;
@@ -310,6 +330,12 @@ public class Configuration {
         return this;
     }
 
+    /**
+     * Specifies that the <code>CLI</code> should use the specified <code>Formatter</code> when catching a
+     * thrown <code>MissingArgumentException</code>.
+     * @param formatter to be used.
+     * @return this (for chaining).
+     */
     public Configuration setMissingArgumentExceptionFormatter(Formatter<MissingArgumentException> formatter) {
         if (formatter != null) {
             this.missingArgumentExceptionFormatter = formatter;
@@ -318,12 +344,12 @@ public class Configuration {
     }
 
     /**
-     * Specify that the specified pair should be registered with the
+     * Specifies that the specified pair should be registered with the
      * {@link IDependencyContainer} associated with this instance.
      * @param base the base class.
-     * @param impl the implementation.
+     * @param impl the implementing Object.
      * @param <T> the type of the base class.
-     * @param <R> the type of the implementation.
+     * @param <R> the type of the implementing Object.
      * @return this (for chaining).
      */
     public <T, R extends T> Configuration registerDependency(Class<T> base, R impl) {
@@ -334,11 +360,11 @@ public class Configuration {
     }
 
     /**
-     * Specify the the specified pair should be registered with
+     * Specifies the the specified pair should be registered with
      * the {@link AbstractTypeConverterMap} associated with this instance.
      * @param cls the key.
      * @param converter the value.
-     * @param <T> the type of the converter.
+     * @param <T> the type of the key and the converter.
      * @return this (for chaining).
      */
     public <T> Configuration registerTypeConverter(Class<T> cls, TypeConverter<T> converter) {
@@ -349,12 +375,12 @@ public class Configuration {
     }
 
     /**
-     * Specify the the specified pair should be registered with
+     * Specifies the the specified pair should be registered with
      * the {@link AbstractTypeConverterMap} associated with this instance,
      * only if a mapping for the specified key is not already present.
      * @param cls the key.
      * @param converter the value.
-     * @param <T> the type of the converter.
+     * @param <T> the type of the key and the converter.
      * @return this (for chaining).
      */
     public <T> Configuration registerTypeConverterIfAbsent(Class<T> cls, TypeConverter<T> converter) {
@@ -365,7 +391,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should use the specified <code>AbstractTypeConverterMap</code>.
+     * Specifies that the <code>CLI</code> should use the specified <code>AbstractTypeConverterMap</code>.
      * @param converters to be used.
      * @return this (for chaining).
      */
@@ -377,7 +403,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>Object[]</code> for
+     * Specifies that the <code>CLI</code> should scan the specified <code>Object[]</code> for
      * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param objects to be scanned.
      * @return this (for chaining).
@@ -390,7 +416,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>Method[]</code> for
+     * Specifies that the <code>CLI</code> should scan the specified <code>Method[]</code> for
      * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param methods to be scanned.
      * @return this (for chaining).
@@ -403,7 +429,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>Class[]</code> for
+     * Specifies that the <code>CLI</code> should scan the specified <code>Class[]</code> for
      * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param classes to be scanned.
      * @return this (for chaining).
@@ -416,7 +442,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>String[]</code> for
+     * Specifies that the <code>CLI</code> should scan the specified <code>String[]</code> for
      * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param packages to be scanned.
      * @return this (for chaining).
@@ -430,7 +456,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should scan the specified <code>Identifier[]</code> for
+     * Specifies that the <code>CLI</code> should scan the specified <code>Identifier[]</code> for
      * {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
      * @param identifiers to be scanned.
      * @return this (for chaining).
@@ -443,8 +469,8 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should exclude the classes in the specified <code>Class[]</code>
-     * from being scanned for {@link com.github.wnebyte.jcli.annotation.Command} annotated Java Methods.
+     * Specifies that the <code>CLI</code> should exclude the classes contained in the specified <code>Class[]</code>
+     * from being scanned for {@link Command} annotated Java Methods.
      * @param classes to be excluded from scanning.
      * @return this (for chaining).
      */
@@ -456,7 +482,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should not build its built-in Help Command.
+     * Specifies that the <code>CLI</code> should not build its built-in Help Command.
      * @return this (for chaining).
      */
     public Configuration nullifyHelpCommand() {
@@ -465,7 +491,7 @@ public class Configuration {
     }
 
     /**
-     * Specify that the <code>CLI</code> should not scan any packages.
+     * Specifies that the <code>CLI</code> should not scan any packages for any {@link Command} annotated Java Methods.
      * @return this (for chaining).
      */
     public Configuration nullifyScanPackages() {
@@ -478,13 +504,6 @@ public class Configuration {
     #      GETTER METHODS     #
     ###########################
     */
-
-    /**
-     * @return the <code>IConsole</code> associated with this <code>Configuration</code> instance.
-     */
-    public IConsole getConsole() {
-        return console;
-    }
 
     public PrintStream out() {
         return out;
@@ -513,49 +532,49 @@ public class Configuration {
     }
 
     /**
-     * @return the enumeration of classes to be scanned associated with this instance.
+     * @return the <code>Set</code> of classes to be scanned for annotated Java Methods associated with this instance.
      */
     public Set<Class<?>> getScanClasses() {
         return classes;
     }
 
     /**
-     * @return the enumeration of objects to be scanned associated with this instance.
+     * @return the <code>Set</code> of objects to be scanned for annotated Java Methods associated with this instance.
      */
     public Set<Object> getScanObjects() {
         return objects;
     }
 
     /**
-     * @return the enumeration of methods to be scanned associated with this instance.
+     * @return the <code>Set</code> of methods to be scanned for annotated Java Methods associated with this instance.
      */
     public Set<Method> getScanMethods() {
         return methods;
     }
 
     /**
-     * @return the enumeration of packages to be scanned associated with this instance.
+     * @return the <code>Set</code> of packages to be scanned for annotated Java Methods associated with this instance.
      */
     public Set<String> getScanPackages() {
         return packages;
     }
 
     /**
-     * @return the enumeration of identifiers to be scanned associated with this instance.
+     * @return the <code>Set</code> of identifiers to be scanned for annotated Java Methods associated with this instance.
      */
     public Set<Identifier> getScanIdentifiers() {
         return identifiers;
     }
 
     /**
-     * @return the enumeration of classes to be excluded from being scanned associated with this instance.
+     * @return the <code>Set</code> of classes to be excluded from being scanned for annotated Java Methods associated with this instance.
      */
     public Set<Class<?>> getExcludeClasses() {
         return excludeClasses;
     }
 
     /**
-     * @return whether the <code>CLI</code>'s built-in Help Command should not be built.
+     * @return whether the <code>CLI</code> should not build its built-in Help Command.
      */
     public boolean isNullifyHelpCommand() {
         return nullifyHelpCommand;
@@ -575,22 +594,37 @@ public class Configuration {
         return unknownCommandExceptionFormatter;
     }
 
+    /**
+     * @return the TypeConversionException Formatter associated with this instance.
+     */
     public Formatter<TypeConversionException> getTypeConversionExceptionFormatter() {
         return typeConversionExceptionFormatter;
     }
 
+    /**
+     * @return the NoSuchArgumentException Formatter associated with this instance.
+     */
     public Formatter<NoSuchArgumentException> getNoSuchArgumentExceptionFormatter() {
         return this.noSuchArgumentExceptionFormatter;
     }
 
+    /**
+     * @return the MissingArgumentValueException Formatter associated with this instance.
+     */
     public Formatter<MissingArgumentValueException> getMissingArgumentValueExceptionFormatter() {
         return this.missingArgumentValueExceptionFormatter;
     }
 
+    /**
+     * @return the MalformedArgumentException Formatter associated with this instance.
+     */
     public Formatter<MalformedArgumentException> getMalformedArgumentExceptionFormatter() {
         return this.malformedArgumentExceptionFormatter;
     }
 
+    /**
+     * @return the MissingArgumentException Formatter associated with this instance.
+     */
     public Formatter<MissingArgumentException> getMissingArgumentExceptionFormatter() {
         return this.missingArgumentExceptionFormatter;
     }
