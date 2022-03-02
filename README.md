@@ -1,138 +1,123 @@
-# j-shell
-java library
+# j-cli
+java-library
 
 ## Table of Contents
 - [About](#about)
 - [Sample](#sample)
-  - [The absolute minimum](#the-absolute-minimum)
-  - [Annotations+](#annotations)
-  - [Shell.class](#shell)  
+  - [Command](#command)
+  - [Argument](#argument)
+  - [Controller](#controller)
+  - [Group](#group)
+  - [CLI](#cli)
+  - [Configuration]()
 - [Build](#build)
 - [Documentation](#documentation)
 - [Licence](#licence)
 
 ## About
-This java-library allows for the easy setup of a 
-Shell around an arbitrary Java Application, 
-it works by mapping annotated Java Methods 
-to runtime accessible Command Objects.<br>
+
+This library enables the user to quickly configure a command-line interface around an 
+arbitrary Java application.<br> 
 
 ## Sample
-### The absolute minimum
-Just annotate the Java Methods you'd like mapped to Commands 
-with the @Command annotation, <br/>
-which is the only required annotation.<br/>
 
-    @Command 
+### Command
+
+Annotate any Java Method with the @Command annotation, and it can each be initialized and invoked via an
+instance of <code>CLI</code> at runtime.<br>
+Each <code>Command</code> has an optional prefix, one or more distinct names, an optional description, 
+and an optional enumeration of Arguments.<br>
+Here are some examples of usage:<br>
+
+#### Example 1:
+  
+    @Command
+    public void foo() {
+        // code
+    }
+  
+<p>Here the name field is implicitly set to the name of the method, [ "foo" ].
+The description is omitted, as is the enumeration of Arguments.</p>
+
+#### Example 2:
+    
+    @Command(name = "foo, -foo", description = "bar")
+    public void foo() {
+        // code
+    }
+  
+<p>Here the name field is explicitly set to [ "foo", "-foo" ].
+The description field is set to "bar", and the enumeration of Arguments is omitted.</p>
+
+### Argument
+
+Annotate the Parameter of any @Command annotated Java Method with the @Argument annotation to explicitly set its
+name, description, Group, and TypeConverter.<br>
+Here are some examples of usage:<br>
+
+#### Example 1:
+
+    @Command
     public void foo(
-            int a, 
-            int b
+            @Argument
+            String bar
     ) {
         // code
     }
-The resulting Command Object will have the same name as the annotated Java Method, <br/>
-and its Argument Objects will have the same name as their respective Java Parameters<br/>
-(that is if the proper [compiler options](#build) have been set, otherwise 
-their names will default to arg0 and arg1).
-    
-Then construct and configure an instance of the Shell class.<br>
 
-    Shell shell = new Shell(new Configuration()
-            .setConsole(new Console())); // optional, but recommended
+<p>Here the name field is implicitly set to [ "bar" ], or [ "arg0" ] depending on compiler options.
+<br>
+The description field is omitted, and the group field is implicitly set to Group.REQUIRED.
+<br>
+In this instance the annotation could have been omitted, and the same configuration
+would have been achieved.</p>
 
-Then call run -- which is a blocking method which continuously reads from the console
-(if set), <br/>
-or call accept -- which accepts a single String to be matched against a known Command.
+#### Example 2:
 
-    shell.run(); 
-    // or 
-    shell.accept("foo a 75 b 25");
-
-That's it!
-
-### Annotations+
-    @Controller(name = "prefix") 
-    public class Contoller {
-
-    private final IConsole console;
-
-    public Controller(IConsole console) {
-        this.console = console;
-    }
-    
     @Command
     public void foo(
-            int a,
-            int b
+            @Argument(name = "-b, --b")
+            boolean bar
     ) {
-        console.println("out");
+        // code
     }
-    
-You can give each Command declared in a particular class a prefix by supplying the @Controller annotation 
-on the class level.<br/>
-If you have configured the Shell with an instance of the IConsole interface 
-(or an interface which extends the IConsole interface), the same instance can be injected into 
-any object whose class declare(s) one or more non-static @Command annotated Java Methods, when reflectively instantiated by the Shell, 
-by declaring the proper constructor<br/>
-(Does not work on instances that have been directly passed to the Shell via setScanObjects(Objects...) 
-seeing as they've already been instantiated). 
 
-    @Command(name = "foo", description = "?")
+<p>Here the name field is explicitly set to [ "-b", "--b" ], and
+the description field is omitted. The Group field is forcefully set to Group.FLAG due to the
+fact that the Parameter is of type <code>boolean</code>.<br>
+<b>Note</b> that Group.REQUIRED is the default group for every other type.</p>
+
+#### Example 3:
+
+    @Command
     public void foo(
-            @Argument(name = "*", type = Type.POSITIONAL)
-            String p,
-            @Argument(name = "a", type = Type.REQUIRED)
-            String a, 
-            @Argument(name = "b", type = TYPE.OPTIONAL)
-            String b,
-            @Argument(typeConverter = PersonTypeConverter.class) 
-            Person person
-    ) {}
-    
-You can explicitly set the name for every Controller, Command, and Argument.
-For the latter two you can also specify a description.<br><br/>
-You can also specify a user-defined TypeConverter to be used with a ParameterType 
-for which there is no built in support (there is built in support for primitives, wrapper classes, 
-and arrays where the component type is either a primitive or a wrapper class).
+            @Argument(typeConverter = BarTypeConverter.class)
+            Bar bar
+    ) {
+        // code
+    }  
 
-### Shell
+<p>A user-defined TypeConverter can be specified by assigning to the typeConverter field a class
+which implements the interface and has a no-args constructor.
+<br>
+Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
+primitive type, or a wrapper class.
+<br>
+This field only needs to be specified if the type of the Java Parameter is not one of the
+aforementioned. Limitations exists for types that have one or more parameterized types.
+</p>
 
-    Shell shell = new Shell(new Configuration()
-            .setConsole(new Console())
-            .setUnknownCommandOutputFormatter(input -> 
-                    "out")
-            .setParseExceptionOutputFormatter(e -> 
-                    "out")
-            .setHelpOutputFormatter(command -> 
-                    "out"));
-                    
-If you've configured the Shell with an IConsole implementation, you can set 
-various formatter functions -- they allow you to 
-specify how certain output should be formatted.
+### Controller
+coming soon
 
-    Shell shell = new Shell(new Configuration()
-            .setUnknownCommandHandler(input -> 
-                    System.out.println(input))
-            .setParseExceptionHandler(e -> 
-                    System.out.println(e))
-            .setHelpHandler(command ->
-                    System.out.println(command)));
+### Group
+coming soon
 
-If you do not wish to configure the Shell with an IConsole implementation, you can 
-set handlers to handle these events for you instead.
+### CLI
+coming soon
 
-    Shell shell = new Shell(new Configuration()
-            .nullifyScanPackages()
-            .setScanObjects(new Class1(arg1, arg2), new Class2(arg2))
-            .setScanClasses(Class1.class, Class2.class));
-    
-By default, the Shell scans all the packages on the class-path for @Command annotated Java Methods.<br/>
-You can tell the Shell to not scan any packages by calling nullifyScanPackages. <br/><br/>
-You can also directly pass 
-instantiated objects to the Shell,
-to be scanned for and to be used when invoking any underlying Java Methods, 
-or you can specify that the Shell should scan a certain 
-set of Classes for annotated Java Methods.
+### Configuration
+coming soon
 
 ## Build
 
