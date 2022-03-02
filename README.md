@@ -99,7 +99,7 @@ fact that the Parameter is of type <code>boolean</code>.<br>
     }  
 
 <p>A user-defined <code>TypeConverter</code> can be specified by assigning to the typeConverter field a class
-which implements the <code>TypeConverter</code> interface and has a no-args constructor.
+which implements the <code>TypeConverter</code> interface and which has a no-args constructor.
 <br>
 Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
 primitive type, or a wrapper class.
@@ -149,7 +149,33 @@ coming soon
 
 ### CLI
 
-coming soon
+#### Example 1:
+
+    public class Sample {
+        public static void main(String[] args) {
+            CLI cli = new CLI(new Configuration());
+            cli.accept("--help");
+        }
+    }
+    
+<p>Input is passed to the <code>CLI</code> by calling read(input: String).<br>
+Unless explicitly told not to, the <code>CLI</code> will build its built-in Help Command, 
+which when invoked prints information regarding the CLI's other Commands to the standard 
+<code>OutputStream</code> that is associated with its <code>Configuration</code> instance.
+</p>
+
+#### Example 2:
+
+    public class Sample {
+        public static void main(String[] args) {
+            CLI cli = new CLI(new Configuration());
+            cli.read();
+        }
+    }
+    
+<p>You can also specify that the <code>CLI</code> should continuously block and poll for input from the 
+<code>InputStream</code> that is associated with its <code>Configuration</code> instance.
+</p>
 
 ### Configuration
 
