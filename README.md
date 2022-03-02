@@ -1,7 +1,9 @@
 # j-cli
+
 java-library
 
 ## Table of Contents
+
 - [About](#about)
 - [Sample](#sample)
   - [Command](#command)
@@ -108,26 +110,29 @@ aforementioned. Limitations exists for types that have one or more parameterized
 </p>
 
 ### Controller
+
 coming soon
 
 ### Group
+
 coming soon
 
 ### CLI
+
 coming soon
 
 ### Configuration
+
 coming soon
 
 ## Build
 
 ### Gradle 
+
     compileJava {
         options.compilerArgs.add("-parameters")
     }
-By setting the -parameters compiler arg, 
-the names of any local parameters found in any java files will be saved, 
-and therefore will be accessible at runtime.
+    
 ## Documentation
 coming soon
 
