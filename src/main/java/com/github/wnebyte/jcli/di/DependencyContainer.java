@@ -7,7 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.annotation.Annotation;
 import com.github.wnebyte.jcli.annotation.Resource;
 import static com.github.wnebyte.jcli.util.Reflections.getNoArgsConstructor;
-import static com.github.wnebyte.jcli.util.Reflections.getAnnotatedConstructor;
+import static com.github.wnebyte.jcli.util.Reflections.getFirstAnnotatedConstructor;
 
 public class DependencyContainer implements IDependencyContainer {
 
@@ -51,12 +51,16 @@ public class DependencyContainer implements IDependencyContainer {
     */
     @Override
     public <T, R extends T> void registerDependency(Class<T> base, R impl) {
-        dependencies.put(base, impl);
+        if ((base != null) && (impl != null)) {
+            dependencies.put(base, impl);
+        }
     }
 
     @Override
     public void unregisterDependency(Class<?> base) {
-        dependencies.remove(base);
+        if (base != null) {
+            dependencies.remove(base);
+        }
     }
 
     @Override
@@ -69,8 +73,8 @@ public class DependencyContainer implements IDependencyContainer {
     }
 
     @Override
-    public Object newConstructorInjection(Class<?> cls) throws InstantiationException {
-        Constructor<?> cons = getAnnotatedConstructor(cls, annotation);
+    public Object newConstructorInjection(Class<?> cls) throws ReflectiveOperationException {
+        Constructor<?> cons = getFirstAnnotatedConstructor(cls, annotation);
         cons = (cons == null) ? getNoArgsConstructor(cls) : cons;
 
         if (cons == null) {
@@ -80,7 +84,7 @@ public class DependencyContainer implements IDependencyContainer {
             );
         }
         else {
-            cons.setAccessible(true);
+            cons.setAccessible(true); // Todo: reset accessibility flag for reflective member
             Object[] args = new Object[cons.getParameterCount()];
             int i = 0;
             for (Class<?> type : cons.getParameterTypes()) {
@@ -96,13 +100,8 @@ public class DependencyContainer implements IDependencyContainer {
                     );
                 }
             }
-            try {
-                return cons.newInstance(args);
-            } catch (Exception e) {
-                throw new InstantiationException(
-                        e.getMessage()
-                );
-            }
+
+            return cons.newInstance(args);
         }
     }
 
@@ -111,18 +110,14 @@ public class DependencyContainer implements IDependencyContainer {
         Class<?> cls = obj.getClass();
 
         for (Field field : cls.getDeclaredFields()) {
-            field.setAccessible(true);
+            field.setAccessible(true); // Todo: reset accessibility flag for reflective member
             Class<?> type = field.getType();
 
-            if (field.isAnnotationPresent(Resource.class)) {
+            if (field.isAnnotationPresent(annotation)) {
                 Object dependency = dependencies.get(type);
 
                 if (dependency != null) {
-                    try {
-                        field.set(obj, dependency);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
+                    field.set(obj, dependency);
                 } else {
                     throw new ReflectiveOperationException(
                             String.format(
