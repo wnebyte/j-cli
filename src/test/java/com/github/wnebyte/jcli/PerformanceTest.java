@@ -4,7 +4,6 @@ import com.github.wnebyte.jcli.annotation.Argument;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Group;
 import com.github.wnebyte.jcli.conf.Configuration;
-import org.junit.Test;
 
 @SuppressWarnings("unused")
 public class PerformanceTest {

@@ -2,32 +2,30 @@ package com.github.wnebyte.jcli.util;
 
 import java.util.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-
 import com.github.wnebyte.jarguments.Flag;
 import com.github.wnebyte.jarguments.Optional;
 import com.github.wnebyte.jarguments.Positional;
 import com.github.wnebyte.jarguments.Required;
 import com.github.wnebyte.jarguments.convert.TypeConverter;
-
 import com.github.wnebyte.jcli.StubTypeConverter;
 import com.github.wnebyte.jcli.annotation.*;
 
 /**
- * This is a utility class for the {@link com.github.wnebyte.jcli.annotation} package.
+ * This class is a utility class for the classes declared in the
+ * {@link com.github.wnebyte.jcli.annotation} package.
  */
 public class Annotations {
 
     /*
-    ####################################
-    #    @CONTROLLER UTILITY METHODS   #
-    ####################################
+    ###########################
+    #   CONTROLLER METHODS   #
+    ###########################
     */
 
     public static boolean isAnnotated(Class<?> cls) {
-        return cls != null && cls.isAnnotationPresent(Controller.class);
+        return (cls != null) && (cls.isAnnotationPresent(Controller.class));
     }
 
     public static Scope getScope(Class<?> cls) {
@@ -43,14 +41,14 @@ public class Annotations {
 
     public static boolean isTransient(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return cls.getAnnotation(Controller.class).value() == Scope.TRANSIENT;
+            return (cls.getAnnotation(Controller.class).value() == Scope.TRANSIENT);
         }
         return false;
     }
 
     public static boolean isSingleton(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return cls.getAnnotation(Controller.class).value() == Scope.SINGLETON;
+            return (cls.getAnnotation(Controller.class).value() == Scope.SINGLETON);
         }
         return false;
     }
@@ -63,13 +61,13 @@ public class Annotations {
     }
 
     /*
-    ####################################
-    #      @COMMAND UTILITY METHODS    #
-    ####################################
+    ###########################
+    #     COMMAND METHODS     #
+    ###########################
     */
 
     public static boolean isAnnotated(Method method) {
-        return method != null && method.isAnnotationPresent(Command.class);
+        return (method != null) && (method.isAnnotationPresent(Command.class));
     }
 
     public static boolean isNotAnnotated(Method method) {
@@ -83,8 +81,8 @@ public class Annotations {
             if (name.equals("")) {
                 names.add(method.getName().toLowerCase());
             } else {
-                String[] arr = name.replace(" ", "").split(",");
-                Collections.addAll(names, arr);
+                String[] array = name.replace(" ", "").split(",");
+                Collections.addAll(names, array);
             }
             return names;
         }
@@ -96,15 +94,22 @@ public class Annotations {
         if (isAnnotated(method)) {
             return method.getAnnotation(Command.class).description();
         }
-
         return null;
     }
 
     /*
-    ####################################
-    #     @ARGUMENT UTILITY METHODS    #
-    ####################################
+    ###########################
+    #     ARGUMENT METHODS    #
+    ###########################
     */
+
+    public static boolean isAnnotated(Parameter param) {
+        return (param != null) && (param.isAnnotationPresent(Argument.class));
+    }
+
+    public static boolean isNotAnnotated(Parameter param) {
+        return !isAnnotated(param);
+    }
 
     public static String[] getNames(Parameter param) {
         if (isAnnotated(param)) {
@@ -113,13 +118,13 @@ public class Annotations {
             if (name.equals("")) {
                 names.add(param.getName().toLowerCase());
             } else {
-                String[] arr = name.replace(" ", "").split(",");
-                Collections.addAll(names, arr);
+                String[] array = name.replace(" ", "").split(",");
+                Collections.addAll(names, array);
             }
             return names.toArray(new String[0]);
         }
 
-        return new String[]{param.getName().toLowerCase()};
+        return new String[]{ param.getName().toLowerCase() };
     }
 
     public static String getDescription(Parameter param) {
@@ -145,10 +150,6 @@ public class Annotations {
         return null;
     }
 
-    public static boolean isAnnotated(Parameter param) {
-        return param != null && param.isAnnotationPresent(Argument.class);
-    }
-
     public static TypeConverter<?> getTypeConverter(Parameter param) {
         if (isAnnotated(param)) {
             Class<?> cls = param.getAnnotation(Argument.class).typeConverter();
@@ -157,9 +158,14 @@ public class Annotations {
             } else {
                 try {
                     @SuppressWarnings("unchecked")
-                    Constructor<TypeConverter<?>> cons = (Constructor<TypeConverter<?>>) cls.getConstructor();
-                    return cons.newInstance();
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                    Constructor<TypeConverter<?>> cons
+                            = (Constructor<TypeConverter<?>>) Reflections.getNoArgsConstructor(cls);
+                    if (cons != null) {
+                        return cons.newInstance();
+                    } else {
+                        return null;
+                    }
+                } catch (Exception e) {
                     e.printStackTrace();
                     return null;
                 }
@@ -193,26 +199,5 @@ public class Annotations {
         }
 
         return Required.class;
-    }
-
-    public static Class<? extends com.github.wnebyte.jarguments.Argument> getSubClassOrDefaultValue(
-            Parameter param, Class<? extends com.github.wnebyte.jarguments.Argument> defaultValue
-    ) {
-        if (isAnnotated(param)) {
-            Group group = param.getAnnotation(Argument.class).group();
-
-            switch (group) {
-                case OPTIONAL:
-                    return Optional.class;
-                case POSITIONAL:
-                    return Positional.class;
-                case FLAG:
-                    return Flag.class;
-                case REQUIRED:
-                    return Required.class;
-            }
-        }
-
-        return defaultValue;
     }
 }
