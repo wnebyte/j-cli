@@ -221,21 +221,6 @@ public class CLI {
         return conf;
     }
 
-    protected BaseCommand parse(TokenSequence tokens, BaseCommand cmd) throws ParseException {
-        try {
-            parser.parse(tokens, cmd.getArguments());
-            return cmd;
-        }
-        catch (ParseException e) {
-            if (isHelp(tokens)) {
-                parser.reset();
-                return BaseCommand.stub((args) -> conf.out().println(conf.getHelpFormatter().apply(cmd)));
-            } else {
-                throw e;
-            }
-        }
-    }
-
     protected BaseCommand lookup(TokenSequence tokens) throws UnknownCommandException, ParseException {
         List<BaseCommand> c = getBucket(tokens); // will only contain one or zero elements.
         assert (c.size() <= 1);
@@ -244,6 +229,7 @@ public class CLI {
         for (BaseCommand cmd : c) {
             tokens = slice(tokens, cmd);
             try {
+                // Todo: forego parsing when delta(tokens, arguments) is non-zero?
                 parser.parse(tokens, cmd.getArguments());
                 return cmd;
             }

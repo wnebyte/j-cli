@@ -21,7 +21,7 @@ public class ClassSet extends DerivedSet<Object> {
 
     @Override
     public boolean contains(Object o) {
-        return o != null && set.stream().anyMatch(o1 -> o1.getClass() == o.getClass());
+        return (o != null) && (set.stream().anyMatch(obj -> obj.getClass() == o.getClass()));
     }
 
     @Override
@@ -34,8 +34,10 @@ public class ClassSet extends DerivedSet<Object> {
         return true;
     }
 
-    public Object get(Class<?> aClass) {
-        return set.stream().filter(o -> o.getClass() == aClass).findFirst().orElse(null);
+    public Object get(Class<?> cls) {
+        return set.stream().filter(obj -> obj.getClass() == cls)
+                .findFirst()
+                .orElse(null);
     }
 
     public int size() {

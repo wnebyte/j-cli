@@ -18,14 +18,15 @@ java-library
 
 ## About
 
-This library enables a user to quickly configure a command-line interface around an 
+This library enables a prospective user to quickly configure a command-line interface around an 
 arbitrary Java application.<br> 
 
 ## Sample
 
 ### Command
 
-Annotate any Java Method with the @Command annotation, and it will be mapped to a <code>Command</code>.<br>
+Annotate any Java Method with the @Command annotation, and it can be mapped to a 
+<code>Command</code> object at runtime.<br>
 Each <code>Command</code> has an optional prefix, one or more distinct names, an optional description, 
 and an optional enumeration of Arguments.<br>
 Here are some examples of usage:<br>
@@ -52,8 +53,8 @@ The description field is set to "bar", and the enumeration of Arguments is omitt
 
 ### Argument
 
-Annotate the Parameters of any @Command annotated Java Methods with the @Argument annotation to explicitly set the
-name, description, group, and typeConverter properties of the <code>Argument</code>.<br>
+Annotate the Parameters of any @Command annotated Java Methods with the @Argument annotation to explicitly set their
+name, description, group, and typeConverter properties.<br>
 Here are some examples of usage:<br>
 
 #### Example 1:
@@ -145,7 +146,41 @@ Java Method.</p>
 
 ### Group
 
-coming soon
+<code>**Group.REQUIRED**</code> has the following properties: <br>
+<ol>
+<li>Has to be included when a <code>Command</code> is specified for the <code>Command</code> to match and execute.</li>
+<li>Has no fixed position.</li>
+<li>Has a name.</li>
+<li>Is initialized by including its name together with a value separated by a whitespace character.</li>
+</ol>
+
+<code>**Group.OPTIONAL**</code> has the following properties: <br>
+<ol>
+<li>Does not have to be included when a <code>Command</code> is specified for the <code>Command</code> to match and execute.</li>
+<li>Has no fixed position.</li>
+<li>Has a name.</li>
+<li>Has a default value.</li>
+<li>Is initialized by including its name together with a value separated by a whitespace character, or by omission.</li>
+</ol>
+
+<code>**Group.FLAG**</code> has the following properties: <br>
+<ol>
+<li>Does not have to be included when a <code>Command</code> is specified for the <code>Command</code> to match and execute.</li>
+<li>Has no fixed position.</li>
+<li>Has a name.</li>
+<li>Has a default value.</li>
+<li>Has a flag value.</li>
+<li>Is initialized by including its name, or by omission.</li>
+</ol>
+
+<code>**Group.POSITIONAL**</code> has the following properties: <br>
+<ol>
+<li>Has to be included when a <code>Command</code> is specified for the <code>Command</code> to match and execute.</li>
+<li>Has a fixed relative position.<br>
+<li>Has no name.</li>
+<li>Is initialized by including a value at the Argument's fixed relative position.</li>
+</ol>
+
 
 ### CLI
 
@@ -159,10 +194,9 @@ coming soon
     }
     
 <p>Input is passed to the <code>CLI</code> by calling read(input: String).<br>
-Unless explicitly told not to, the <code>CLI</code> will build its built-in Help Command, 
-which when invoked prints information regarding the CLI's other Commands to the standard 
-<code>OutputStream</code> that is associated with its <code>Configuration</code> instance.
-</p>
+Unless explicitly told not to, the <code>CLI</code> will build its built-in Help Command; 
+which when invoked will print the details of all of the Commands to the standard 
+<code>OutputStream</code> instance that is associated with the <code>Configuration</code>.</p>
 
 #### Example 2:
 
@@ -174,7 +208,7 @@ which when invoked prints information regarding the CLI's other Commands to the 
     }
     
 <p>You can also specify that the <code>CLI</code> should continuously block and poll for input from the 
-<code>InputStream</code> that is associated with its <code>Configuration</code> instance.
+<code>InputStream</code> instance that is associated with the <code>Configuration</code>.
 </p>
 
 ### Configuration

@@ -11,12 +11,12 @@ public class SampleTest {
                 .setScanClasses(FooController.class, BarController.class, SampleTest.class)
                 .nullifyScanPackages()
         );
-
+        cli.getConfiguration().out().println("--start--");
         cli.read();
     }
 
     @Command
-    public static void dab() {
+    public static void dab(int a) {
 
     }
 
