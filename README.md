@@ -8,8 +8,8 @@ java-library
 - [Sample](#sample)
   - [Command](#command)
   - [Argument](#argument)
-  - [Controller](#controller)
   - [Group](#group)
+  - [Controller](#controller)
   - [CLI](#cli)
   - [Configuration]()
 - [Build](#build)
@@ -108,42 +108,6 @@ primitive type, or a wrapper class.
 This field only needs to be specified if the type of the Java Parameter is not one of the
 aforementioned. Limitations exists for types that have one or more parameterized types.</p>
 
-### Controller
-
-Annotate your <code>Class</code> with the @Controller annotation if it declares any @Command
-annotated Java Methods, to give each declared <code>Command</code> an optional prefix, and to control
-the life-cycle of the Objects on which your (non-static) Commands are executed.
-<br>
-Here are some examples of usages:
-<br>
-
-#### Example 1:
-
-    @Controller(name = ""foo)
-    public class Foo {
-        // code
-    }
-
-<p>You can give each declared <code>Command</code> a prefix by specifying a
-name on the Controller level.<br>
-Here the name field is set to "foo".<br>
-<b>Note</b> that static Commands will also receive the assigned prefix.</p>
-  
-#### Example 2:
-  
-    @Controller(Scope.SINGLETON)
-    public class Foo {
-        // code
-    }  
-
-<p>You can also specify how instances of your <code>Class</code> are to be constructed and (re)used.<br>
-By specifying a value of type <code>Scope.SINGLETON</code> on the Controller level,
-you're specifying that one instance of your <code>Class</code> should be used for all subsequent <code>Command</code> invocations.<br>
-If instead a value of type <code>Scope.TRANSIENT</code> is specified, a new instance will be constructed
-prior to each invocation.<br>
-<b>Note</b> that your class will only be instantiated if it declares at least one non-static @Command annotated
-Java Method.</p>
-
 ### Group
 
 <code>**Group.REQUIRED**</code> has the following properties: <br>
@@ -181,6 +145,41 @@ Java Method.</p>
 <li>Is initialized by including a value at the Argument's fixed relative position.</li>
 </ol>
 
+### Controller
+
+Annotate your <code>Class</code> with the @Controller annotation if it declares any @Command
+annotated Java Methods, to give each declared <code>Command</code> an optional prefix, and to control
+the life-cycle of the Objects on which your (non-static) Commands are executed.
+<br>
+Here are some examples of usages:
+<br>
+
+#### Example 1:
+
+    @Controller(name = ""foo)
+    public class Foo {
+        // code
+    }
+
+<p>You can give each declared <code>Command</code> a prefix by specifying a
+name on the Controller level.<br>
+Here the name field is set to "foo".<br>
+<b>Note</b> that static Commands will also receive the assigned prefix.</p>
+  
+#### Example 2:
+  
+    @Controller(Scope.SINGLETON)
+    public class Foo {
+        // code
+    }  
+
+<p>You can also specify how instances of your <code>Class</code> are to be constructed and (re)used.<br>
+By specifying a value of type <code>Scope.SINGLETON</code> on the Controller level,
+you're specifying that one instance of your <code>Class</code> should be used for all subsequent <code>Command</code> invocations.<br>
+If instead a value of type <code>Scope.TRANSIENT</code> is specified, a new instance will be constructed
+prior to each invocation.<br>
+<b>Note</b> that your class will only be instantiated if it declares at least one non-static @Command annotated
+Java Method.</p>
 
 ### CLI
 
@@ -193,10 +192,10 @@ Java Method.</p>
         }
     }
     
-<p>Input is passed to the <code>CLI</code> by calling read(input: String).<br>
-Unless explicitly told not to, the <code>CLI</code> will build its built-in Help Command; 
-which when invoked will print the details of all of the Commands to the standard 
-<code>OutputStream</code> instance that is associated with the <code>Configuration</code>.</p>
+<p>Input is passed to the <code>CLI</code> by calling <code>accept(input: String)</code>.<br>
+Unless explicitly told not to, the <code>CLI</code> will build its declared Help <code>Command</code>. 
+Which when invoked will print a view of all of the mapped Commands to the standard 
+<code>OutputStream</code> specified by the <code>Configuration</code>.</p>
 
 #### Example 2:
 
@@ -208,7 +207,7 @@ which when invoked will print the details of all of the Commands to the standard
     }
     
 <p>You can also specify that the <code>CLI</code> should continuously block and poll for input from the 
-<code>InputStream</code> instance that is associated with the <code>Configuration</code>.
+<code>InputStream</code> specified by the <code>Configuration</code>.
 </p>
 
 ### Configuration
