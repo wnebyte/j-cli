@@ -53,7 +53,7 @@ The description field is set to "bar", and the enumeration of Arguments is omitt
 
 ### Argument
 
-Annotate the Parameters of any @Command annotated Java Methods with the @Argument annotation to explicitly set their
+Annotate the Parameters of any @Command annotated Java Method with the @Argument annotation to explicitly set their
 name, description, group, and typeConverter properties.<br>
 Here are some examples of usage:<br>
 
@@ -100,13 +100,18 @@ fact that the Parameter is of type <code>boolean</code>.<br>
     }  
 
 <p>A user-defined <code>TypeConverter</code> can be specified by assigning to the typeConverter field a class
-which implements the <code>TypeConverter</code> interface and which has a no-args constructor.
+which implements the <code>TypeConverter</code> interface and has a no-args constructor. 
+<br>
+<b>Note</b> that the type-safe and preferred way of specifying a user-defined <code>TypeConverter</code> is 
+to register it with the <code>CLI</code> via its <code>Configuration</code> object. 
 <br>
 Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
 primitive type, or a wrapper class.
 <br>
 This field only needs to be specified if the type of the Java Parameter is not one of the
-aforementioned. Limitations exists for types that have one or more parameterized types.</p>
+aforementioned. 
+<br>
+Limitations exists for types that have one or more parameterized types.</p>
 
 ### Group
 
@@ -195,7 +200,7 @@ Java Method.</p>
 <p>Input is passed to the <code>CLI</code> by calling <code>accept(input: String)</code>.<br>
 Unless explicitly told not to, the <code>CLI</code> will build its declared Help <code>Command</code>. 
 Which when invoked will print a view of all of the mapped Commands to the standard 
-<code>OutputStream</code> specified by the <code>Configuration</code>.</p>
+<code>PrintStream</code> specified by the <code>Configuration</code>.</p>
 
 #### Example 2:
 
