@@ -198,7 +198,7 @@ public class CLI {
         catch (MissingArgumentException e) {
             conf.err().println(conf.getMissingArgumentExceptionFormatter().apply(e));
         }
-        catch (ParseException e) {
+        catch (Exception e) {
             conf.err().println(e.getMessage());
         }
     }
