@@ -49,9 +49,9 @@ public class CLI {
 
     protected final List<BaseCommand> commands;
 
-    protected final Set<Integer> prefixes;
+    protected final Set<String> prefixes;
 
-    protected final HashMap<Integer, List<BaseCommand>> index;
+    protected final HashMap<String, List<BaseCommand>> index;
 
     protected final AbstractParser<TokenSequence, Collection<Argument>> parser;
 
@@ -118,15 +118,14 @@ public class CLI {
             scanner.scanMethods(methods);
         }
         if (conf.isNullifyHelpCommand()) {
-            // remove help-command from set of scanned methods
-            scanner.removedScannedElementIf(m -> m.getDeclaringClass() == CLI.class);
+            scanner.removeScannedElementIf(m -> m.getDeclaringClass() == CLI.class);
         }
         else {
             scanner.scanClass(CLI.class);
             tracker.add(this);
         }
         if (conf.getExcludeClasses() != null) {
-            scanner.removedScannedElementIf(m -> conf.getExcludeClasses().contains(m.getDeclaringClass()));
+            scanner.removeScannedElementIf(m -> conf.getExcludeClasses().contains(m.getDeclaringClass()));
         }
     }
 
@@ -146,13 +145,13 @@ public class CLI {
     protected void index(List<BaseCommand> commands) {
         for (BaseCommand cmd : commands) {
             for (String name : cmd.getNames()) {
-                int key;
+                String key;
 
                 if (cmd.hasPrefix()) {
-                    key = hash(cmd.getPrefix().concat(name));
-                    prefixes.add(hash(cmd.getPrefix()));
+                    key = cmd.getPrefix().concat(name);
+                    prefixes.add(cmd.getPrefix());
                 } else {
-                    key = hash(name);
+                    key = name;
                 }
 
                 if (index.containsKey(key)) {
@@ -166,6 +165,11 @@ public class CLI {
 
     protected void sort(List<BaseCommand> commands) {
         commands.sort(BaseCommand::compareTo);
+    }
+
+    public void accept(String[] input) {
+        String s = String.join(Strings.WHITESPACE, (input == null) ? new String[0] : input);
+        accept(s);
     }
 
     public void accept(String input) {
@@ -199,11 +203,6 @@ public class CLI {
         }
     }
 
-    public void accept(String[] input) {
-        String s = String.join(Strings.WHITESPACE, input);
-        accept(s);
-    }
-
     public Consumer<String> toConsumer() {
         return CLI.this::accept;
     }
@@ -217,19 +216,14 @@ public class CLI {
         }
     }
 
-    public final Configuration getConfiguration() {
-        return conf;
-    }
-
     protected BaseCommand lookup(TokenSequence tokens) throws UnknownCommandException, ParseException {
-        List<BaseCommand> c = getBucket(tokens); // will only contain one or zero elements.
+        List<BaseCommand> c = getBucket(tokens);
         assert (c.size() <= 1);
         String input = tokens.join();
 
         for (BaseCommand cmd : c) {
             tokens = slice(tokens, cmd);
             try {
-                // Todo: forego parsing when delta(tokens, arguments) is non-zero?
                 parser.parse(tokens, cmd.getArguments());
                 return cmd;
             }
@@ -243,29 +237,31 @@ public class CLI {
             }
         }
 
-        throw new UnknownCommandException(
-                String.format("'%s' is not recognized as an internal command.", input), input
-        );
-
+        throw new UnknownCommandException(String.format(
+                "'%s' is not recognized as an internal command.", input), input);
     }
 
     protected List<BaseCommand> getBucket(TokenSequence tokens) {
         if (tokens == null) {
             return Collections.emptyList();
         }
-        int key = toKey(tokens);
+        String key = getKey(tokens);
         List<BaseCommand> c = index.get(key);
-        return (c != null) ? c : Collections.emptyList();
+        return (c == null) ? Collections.emptyList() : c;
     }
 
-    protected int toKey(TokenSequence tokens) {
-        int key = hash(tokens.get(0));
+    protected String getKey(TokenSequence tokens) {
+        String key = tokens.get(0);
 
-        if (2 <= tokens.size() && prefixes.contains(key)) {
-            key = hash(tokens.get(0).concat(tokens.get(1)));
+        if (tokens.size() >= 2 && prefixes.contains(key)) {
+            key = tokens.get(0).concat(tokens.get(1));
         }
 
         return key;
+    }
+
+    public Configuration getConfiguration() {
+        return conf;
     }
 
     @Command(name = "--help, -h")

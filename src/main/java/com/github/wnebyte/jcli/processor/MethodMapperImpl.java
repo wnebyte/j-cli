@@ -25,10 +25,7 @@ public class MethodMapperImpl implements MethodMapper {
 
     private final AbstractArgumentFactoryBuilder builder;
 
-    /**
-     * Stores unique hashes of transient controllers that have been successfully instantiated.
-     */
-    private final Set<Integer> hashes = new HashSet<Integer>();
+    private final Set<Class<?>> classes;
 
     /*
     ###########################
@@ -39,6 +36,7 @@ public class MethodMapperImpl implements MethodMapper {
     public MethodMapperImpl(InstanceTracker tracker, AbstractArgumentFactoryBuilder builder) {
         this.tracker = tracker;
         this.builder = builder;
+        this.classes = new HashSet<>();
     }
 
     /*
@@ -49,11 +47,11 @@ public class MethodMapperImpl implements MethodMapper {
 
     /**
      * Constructs a new instance of <code>Command</code> from the specified <code>Method</code>.
-     * @param method the Method to be mapped.
-     * @return a new Command instance.
-     * @throws ConfigException if the specified <code>Method</code> is not annotated
-     * with {@link com.github.wnebyte.jcli.annotation.Command}, or if its declaring class is both nested and
-     * non-static, or if it is non-static and its declaring class could not be instantiated.
+     * @param method a Method.
+     * @return a new instance of Command.
+     * @throws ConfigException if the specified Method is not annotated
+     * with {@link com.github.wnebyte.jcli.annotation.Command}, or if the Method's declaring class is both nested and
+     * non-static, or if the Method is non-static and its declaring class could not be instantiated.
      */
     @Override
     public Command apply(Method method) {
@@ -92,11 +90,11 @@ public class MethodMapperImpl implements MethodMapper {
         }
         else {
             // scope is Scope.TRANSIENT
-            if (!hashes.contains(cls.hashCode())) {
+            if (!classes.contains(cls)) {
                 try {
-                    // dry run to make sure objects can be successfully instantiated at 'runtime'.
+                    // dry run to make sure class can be instantiated at 'runtime'.
                     Object junk = tracker.newInstance(cls);
-                    hashes.add(cls.hashCode());
+                    classes.add(cls);
                     junk = null;
                 } catch (ReflectiveOperationException e) {
                     throw new ConfigException(

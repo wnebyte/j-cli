@@ -15,7 +15,7 @@ import com.github.wnebyte.jcli.util.Annotations;
 import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
 /**
- * This class represents a Command mapped directly from a Java Method.
+ * This class represents a Command created directly from the properties of a Java Method.
  */
 public class Command extends BaseCommand {
 
@@ -55,26 +55,26 @@ public class Command extends BaseCommand {
 
     private static String resolvePrefix(Method method, AbstractArgumentFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
-        return Strings.removeAll(requireNonNullElseGet(prefix, () -> ""), factory.getExcludedCharacters());
+        return Strings.removeAll(requireNonNullElseGet(prefix, () -> Strings.EMPTY), factory.getExcludedCharacters());
     }
 
     private static Set<String> resolveNames(Method method, AbstractArgumentFactory factory) {
         Set<String> names = Annotations.getNames(method);
-        assert names != null;
+        assert (names != null);
         return normalize(names, factory.getExcludedCharacters());
     }
 
     private static String resolveDesc(Method method) {
-        String desc = Annotations.getDescription(method);
-        return requireNonNullElseGet(desc, () -> "");
+        String description = Annotations.getDescription(method);
+        return requireNonNullElseGet(description, () -> Strings.EMPTY);
     }
 
     private static Set<String> normalize(Set<String> names, Collection<Character> exclude) {
-        Set<String> normNames = new LinkedHashSet<>(names.size());
+        Set<String> set = new LinkedHashSet<>(names.size());
 
-        for (String s : names) {
-            s = Strings.removeAll(s, exclude);
-            if (s.equals("")) {
+        for (String name : names) {
+            name = Strings.removeAll(name, exclude);
+            if (name.equals(Strings.EMPTY)) {
                 throw new IllegalAnnotationException(
                         String.format(
                                 "The name of a Command may not be left empty after normalization. " +
@@ -83,9 +83,10 @@ public class Command extends BaseCommand {
                         )
                 );
             }
-            normNames.add(s);
+            set.add(name);
         }
-        return normNames;
+
+        return set;
     }
 
     private static List<Argument> resolveArgs(Method method, AbstractArgumentFactory factory) {
@@ -93,15 +94,15 @@ public class Command extends BaseCommand {
 
         try {
             for (Parameter param : params) {
-                Class<? extends Argument> sClass = Reflections.isBoolean(param.getType()) ?
+                Class<? extends Argument> cls = Reflections.isBoolean(param.getType()) ?
                         Flag.class : Annotations.getSubClass(param);
-                factory.setCls(sClass);
+                factory.setClass(cls);
                 String[] names = Annotations.getNames(param);
                 if (names != null) {
                     factory.setName(names);
                 }
-                String desc = Annotations.getDescription(param);
-                factory.setDescription(requireNonNullElseGet(desc, () -> ""));
+                String description = Annotations.getDescription(param);
+                factory.setDescription(requireNonNullElseGet(description, () -> Strings.EMPTY));
                 factory.setType(param.getType());
                 TypeConverter<?> converter = Annotations.getTypeConverter(param);
                 if (converter != null) {
@@ -133,9 +134,9 @@ public class Command extends BaseCommand {
     */
 
     /**
-     * Executes this Command by invoking its underlying Java Method with the specified
+     * Executes this <code>Command</code> by invoking its underlying Java Method with the specified
      * <code>args</code>.
-     * @param args to be used during the invocation.
+     * @param args to be passed to the underlying Java Method.
      */
     @Override
     final void execute(Object[] args) {
@@ -151,10 +152,10 @@ public class Command extends BaseCommand {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this)
-            return true;
         if (o == null)
             return false;
+        if (o == this)
+            return true;
         if (!(o instanceof Command))
             return false;
         Command cmd = (Command) o;

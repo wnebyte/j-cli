@@ -1,8 +1,8 @@
 package com.github.wnebyte.jcli.processor;
 
-import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.lang.reflect.Method;
 
 public interface ElementScanner<E> {
 
@@ -22,7 +22,7 @@ public interface ElementScanner<E> {
 
     void scanUrls(Set<String> urls);
 
-    void removedScannedElementIf(Predicate<E> p);
+    void removeScannedElementIf(Predicate<E> p);
 
     Set<E> getScannedElements();
 }

@@ -34,7 +34,7 @@ public class HelpFormatter implements Formatter<BaseCommand> {
                 String indent = indent((max + 1) - s.length());
                 StringBuilder out = new StringBuilder();
                 out.append(Strings.WHITESPACE).append(s).append(indent)
-                        .append(Objects.requireNonNullElseGet(argument.getDesc(), () -> Strings.EMPTY));
+                        .append(Objects.requireNonNullElseGet(argument.getDescription(), () -> Strings.EMPTY));
                 return out.toString();
             }
         }).max(Comparator.comparingInt(String::length))
@@ -67,8 +67,8 @@ public class HelpFormatter implements Formatter<BaseCommand> {
     @Override
     public String apply(BaseCommand cmd) {
         StringBuilder out = new StringBuilder();
-        out.append(cmd.hasDesc() ? cmd.getDesc().concat("\n") : Strings.EMPTY)
-                .append("Usage: ").append(COMMAND_FORMATTER.apply(cmd));
+        out.append("Usage: ").append(COMMAND_FORMATTER.apply(cmd))
+                .append(cmd.hasDescription() ? "\n".concat(cmd.getDescription()) : Strings.EMPTY);
 
         if (!cmd.getArguments().isEmpty()) {
             int maxLength  = maxLength(cmd.getArguments());
@@ -81,7 +81,7 @@ public class HelpFormatter implements Formatter<BaseCommand> {
                 String s = ARGUMENT_FORMATTER.apply(argument);
                 String indent = indent((maxLength + 1) - s.length());
                 String ln = new StringBuilder().append("\t").append(s).append(indent)
-                        .append(Objects.requireNonNullElseGet(argument.getDesc(), () -> Strings.EMPTY)).toString();
+                        .append(Objects.requireNonNullElseGet(argument.getDescription(), () -> Strings.EMPTY)).toString();
                 out.append(ln);
                 /*
                 indent = indent((maxTotalLength + 1) - ln.length());

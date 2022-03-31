@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import com.github.wnebyte.jarguments.Argument;
-import com.github.wnebyte.jarguments.exception.ParseException;
+import com.github.wnebyte.jarguments.util.Strings;
 
 /**
  * This class represents an abstract executable Command.
@@ -34,7 +34,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
     protected static final Comparator<BaseCommand> COMPARATOR =
             Comparator.comparing(BaseCommand::getPrefix)
-                    .thenComparing(cmd -> cmd.getNames().toArray(new String[0])[0]);
+                    .thenComparing(BaseCommand::getCanonicalName);
 
     /*
     ###########################
@@ -46,7 +46,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
     protected final Set<String> names;
 
-    protected final String desc;
+    protected final String description;
 
     protected final List<Argument> arguments;
 
@@ -59,13 +59,13 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
     protected BaseCommand(
             String prefix,
             Set<String> names,
-            String desc,
-            List<Argument> args
+            String description,
+            List<Argument> arguments
     ) {
         this.prefix = prefix;
         this.names = names;
-        this.desc = desc;
-        this.arguments = args;
+        this.description = description;
+        this.arguments = arguments;
     }
 
     /*
@@ -74,7 +74,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
     ###########################
     */
 
-    abstract void execute(Object[] args) throws ParseException;
+    abstract void execute(Object[] args);
 
     public final List<Argument> getArguments() {
         return Collections.unmodifiableList(arguments);
@@ -85,19 +85,23 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
     }
 
     public final boolean hasPrefix() {
-        return (prefix != null) && !(prefix.equals(""));
+        return (prefix != null) && !(prefix.equals(Strings.EMPTY));
     }
 
-    public final String getDesc() {
-        return desc;
+    public final String getDescription() {
+        return description;
     }
 
-    public final boolean hasDesc() {
-        return (desc != null) && !(desc.equals(""));
+    public final boolean hasDescription() {
+        return (description != null) && !(description.equals(Strings.EMPTY));
     }
 
     public final Set<String> getNames() {
         return Collections.unmodifiableSet(names);
+    }
+
+    public final String getCanonicalName() {
+        return (names.isEmpty()) ? null : names.toArray(new String[0])[0];
     }
 
     @Override
@@ -107,16 +111,16 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this)
-            return true;
         if (o == null)
             return false;
+        if (o == this)
+            return true;
         if (!(o instanceof BaseCommand))
             return false;
         BaseCommand cmd = (BaseCommand) o;
         return Objects.equals(cmd.prefix, this.prefix) &&
                 Objects.equals(cmd.names, this.names) &&
-                Objects.equals(cmd.desc, this.desc) &&
+                Objects.equals(cmd.description, this.description) &&
                 Objects.equals(cmd.arguments, this.arguments);
     }
 
@@ -126,7 +130,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
         return 2 * result +
                 Objects.hashCode(prefix) +
                 Objects.hashCode(names) +
-                Objects.hashCode(desc) +
+                Objects.hashCode(description) +
                 Objects.hashCode(arguments);
     }
 
@@ -134,24 +138,24 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
     public String toString() {
         String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
         return prefix + String.join(" | ", names) + " " +
-                arguments.stream().map(Argument::toString).collect(Collectors.joining(" "));
+                arguments.stream().map(Argument::toString).collect(Collectors.joining(Strings.WHITESPACE));
     }
 
     public String toPaddedString() {
         String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
         return prefix + String.join(" | ", names) + " " +
-                arguments.stream().map(Argument::toPaddedString).collect(Collectors.joining(" "));
+                arguments.stream().map(Argument::toPaddedString).collect(Collectors.joining(Strings.WHITESPACE));
     }
 
     public String toDescriptiveString() {
         String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
         return prefix + String.join(" | ", names) + " " +
-                arguments.stream().map(Argument::toDescriptiveString).collect(Collectors.joining(" "));
+                arguments.stream().map(Argument::toDescriptiveString).collect(Collectors.joining(Strings.WHITESPACE));
     }
 
     public String toPaddedDescriptiveString() {
         String prefix = hasPrefix() ? getPrefix().concat(" ") : "";
         return prefix + String.join(" | ", names) + " " +
-                arguments.stream().map(Argument::toPaddedDescriptiveString).collect(Collectors.joining(" "));
+                arguments.stream().map(Argument::toPaddedDescriptiveString).collect(Collectors.joining(Strings.WHITESPACE));
     }
 }

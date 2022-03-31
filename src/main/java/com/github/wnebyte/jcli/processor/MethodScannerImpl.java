@@ -153,7 +153,7 @@ public class MethodScannerImpl implements MethodScanner {
     }
 
     @Override
-    public void removedScannedElementIf(Predicate<Method> p) {
+    public void removeScannedElementIf(Predicate<Method> p) {
         methods.removeIf(p);
     }
 
