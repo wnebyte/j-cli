@@ -17,7 +17,7 @@ public class DependencyContainer implements IDependencyContainer {
     ###########################
     */
 
-    private static Class<? extends Annotation> DEFAULT_ANNOTATION = Resource.class;
+    public static final Class<? extends Annotation> DEFAULT_ANNOTATION = Resource.class;
 
     /*
     ###########################

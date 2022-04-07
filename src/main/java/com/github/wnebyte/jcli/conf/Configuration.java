@@ -113,7 +113,7 @@ public class Configuration {
 
     private InputStream in = System.in;
 
-    private AbstractTypeConverterMap converters = TypeConverterMap.getInstance();
+    private AbstractTypeConverterMap typeConverters = TypeConverterMap.getInstance();
 
     private IDependencyContainer dependencyContainer = new DependencyContainer();
 
@@ -360,44 +360,44 @@ public class Configuration {
     }
 
     /**
-     * Specifies the the specified pair should be registered with
-     * the {@link AbstractTypeConverterMap} associated with this instance.
-     * @param cls the key.
-     * @param converter the value.
-     * @param <T> the type of the key and the converter.
+     * Specifies the the specified <code>Class</code> and <code>TypeConverter</code> should be registered as an entry
+     * with the {@link AbstractTypeConverterMap} associated with this instance.
+     * @param cls a Class.
+     * @param typeConverter a TypeConverter.
+     * @param <T> the type of the Class and TypeConverter.
      * @return this (for chaining).
      */
-    public <T> Configuration registerTypeConverter(Class<T> cls, TypeConverter<T> converter) {
-        if ((cls != null) && (converter != null)) {
-            converters.put(cls, converter);
+    public <T> Configuration registerTypeConverter(Class<T> cls, TypeConverter<T> typeConverter) {
+        if ((cls != null) && (typeConverter != null)) {
+            typeConverters.put(cls, typeConverter);
         }
         return this;
     }
 
     /**
-     * Specifies the the specified pair should be registered with
-     * the {@link AbstractTypeConverterMap} associated with this instance,
-     * only if a mapping for the specified key is not already present.
-     * @param cls the key.
-     * @param converter the value.
-     * @param <T> the type of the key and the converter.
+     * Specifies the the specified <code>Class</code> and <code>TypeConverter</code> should be registered as an entry
+     * with the {@link AbstractTypeConverterMap} associated with this instance,
+     * only if a mapping for the specified Class is not already present.
+     * @param cls a Class.
+     * @param typeConverter a TypeConverter.
+     * @param <T> the type of the Class and TypeConverter.
      * @return this (for chaining).
      */
-    public <T> Configuration registerTypeConverterIfAbsent(Class<T> cls, TypeConverter<T> converter) {
-        if ((cls != null) && (converter != null)) {
-            converters.putIfAbsent(cls, converter);
+    public <T> Configuration registerTypeConverterIfAbsent(Class<T> cls, TypeConverter<T> typeConverter) {
+        if ((cls != null) && (typeConverter != null)) {
+            typeConverters.putIfAbsent(cls, typeConverter);
         }
         return this;
     }
 
     /**
      * Specifies that the <code>CLI</code> should use the specified <code>AbstractTypeConverterMap</code>.
-     * @param converters to be used.
+     * @param typeConverters to be used.
      * @return this (for chaining).
      */
-    public Configuration setTypeConverterMap(AbstractTypeConverterMap converters) {
-        if (converters != null) {
-            this.converters = converters;
+    public Configuration setTypeConverterMap(AbstractTypeConverterMap typeConverters) {
+        if (typeConverters != null) {
+            this.typeConverters = typeConverters;
         }
         return this;
     }
@@ -528,7 +528,7 @@ public class Configuration {
      * @return the <code>AbstractTypeConverterMap</code> associated with this instance.
      */
     public AbstractTypeConverterMap getTypeConverterMap() {
-        return converters;
+        return typeConverters;
     }
 
     /**

@@ -17,6 +17,7 @@ CLI.iml
 *.jar
 # Avoid ignoring lib jar files
 !lib/*.jar
+!libs/*.jar
 *.war
 *.ear
 

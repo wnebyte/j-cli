@@ -1,10 +1,9 @@
 package com.github.wnebyte.jcli.processor;
 
-import com.github.wnebyte.jcli.di.DependencyContainer;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
+import com.github.wnebyte.jcli.di.DependencyContainer;
 
 public class InstanceTrackerTest {
 
@@ -12,7 +11,7 @@ public class InstanceTrackerTest {
 
     @Test
     public void test00() throws ReflectiveOperationException {
-        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
+        InstanceTracker tracker = new InstanceTrackerImpl(new DependencyContainer());
         tracker.add(this);
         Object object = tracker.get(this.getClass());
         Assert.assertSame(this, object);
@@ -20,14 +19,14 @@ public class InstanceTrackerTest {
 
     @Test
     public void test01() throws ReflectiveOperationException {
-        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
+        InstanceTracker tracker = new InstanceTrackerImpl(new DependencyContainer());
         Object object = tracker.get(this.getClass());
         Assert.assertNotSame(this, object);
     }
 
     @Test
     public void test02() {
-        InstanceTrackerImpl tracker = new InstanceTrackerImpl(new DependencyContainer());
+        InstanceTracker tracker = new InstanceTrackerImpl(new DependencyContainer());
         tracker.addAll(Arrays.asList(
                 new InstanceTrackerTest(),
                 new InstanceTrackerTest(),
