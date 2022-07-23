@@ -107,10 +107,6 @@ public class Annotations {
         return (param != null) && (param.isAnnotationPresent(Argument.class));
     }
 
-    public static boolean isNotAnnotated(Parameter param) {
-        return !isAnnotated(param);
-    }
-
     public static String[] getNames(Parameter param) {
         if (isAnnotated(param)) {
             Set<String> names = new LinkedHashSet<>();

@@ -34,6 +34,14 @@ sourceSets {
             srcDirs = ["src/jmh/resources"]
         }
     }
+    sample {
+        java {
+            srcDirs = ["src/sample/java"]
+        }
+        resources {
+            srcDirs = ["src/sample/resources"]
+        }
+    }
 }
 
 javadoc {
