@@ -1,6 +1,6 @@
 package com.github.wnebyte.jcli.di;
 
-import com.github.wnebyte.jcli.annotation.Resource;
+import com.github.wnebyte.jcli.annotation.Inject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -9,7 +9,7 @@ public class DependencyContainerTest {
     @Test
     public void testInjectFields() throws ReflectiveOperationException {
         IDependencyContainer dependencyContainer = new DependencyContainer();
-        dependencyContainer.registerDependency(String.class, "hello");
+        dependencyContainer.register(String.class, "hello");
         ClassA cls = new ClassA();
         dependencyContainer.injectFields(cls);
         Assert.assertEquals("hello", cls.a);
@@ -18,7 +18,7 @@ public class DependencyContainerTest {
     @Test
     public void testInjectConstructor() throws ReflectiveOperationException {
         IDependencyContainer dependencyContainer = new DependencyContainer();
-        dependencyContainer.registerDependency(String.class, "hello");
+        dependencyContainer.register(String.class, "hello");
         Object cls = dependencyContainer.newConstructorInjection(ClassB.class);
         Assert.assertEquals("hello", ((ClassB) cls).a);
         ClassC clsC = (ClassC) dependencyContainer.newConstructorInjection(ClassC.class);
@@ -27,7 +27,7 @@ public class DependencyContainerTest {
 
     private static class ClassA {
 
-        @Resource
+        @Inject
         private String a;
     }
 
@@ -35,7 +35,7 @@ public class DependencyContainerTest {
 
         private String a;
 
-        @Resource
+        @Inject
         public ClassB() {
             this.a = "hello";
         }
@@ -49,7 +49,7 @@ public class DependencyContainerTest {
 
         private String a;
 
-        @Resource
+        @Inject
         public ClassC(String a) {
             this.a = a;
         }

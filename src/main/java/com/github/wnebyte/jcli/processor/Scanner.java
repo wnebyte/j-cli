@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.lang.reflect.Method;
 
-public interface ElementScanner<E> {
+public interface Scanner<E> {
 
     void scanObject(Object object);
 

@@ -1,27 +1,23 @@
 package com.github.wnebyte.jcli.util;
 
-import com.github.wnebyte.jcli.util.Identifier;
-import org.junit.Test;
-import org.junit.Assert;
+import java.util.Arrays;
+import java.util.Set;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Set;
+import org.junit.Test;
+import org.junit.Assert;
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.*;
-import com.github.wnebyte.jcli.util.Annotations;
-import com.github.wnebyte.jarguments.Optional;
-import com.github.wnebyte.jarguments.Positional;
-import com.github.wnebyte.jarguments.Required;
-import com.github.wnebyte.jarguments.convert.TypeConverter;
+import com.github.wnebyte.jarguments.adapter.TypeAdapter;
 
 public class AnnotationsTest {
 
     @Test
     public void testCommandIsAnnotated00() throws NoSuchMethodException {
-        Method method = new Identifier(this.getClass(), "foo").getMethod();
+        Method method = new CommandIdentifier(this.getClass(), "foo").getMethod();
         boolean isAnnotated = Annotations.isAnnotated(method);
         Assert.assertTrue(isAnnotated);
-        method = new Identifier(this.getClass(), "bar").getMethod();
+        method = new CommandIdentifier(this.getClass(), "bar").getMethod();
         isAnnotated = Annotations.isAnnotated(method);
         Assert.assertTrue(isAnnotated);
         method = this.getClass().getDeclaredMethod("empty");
@@ -31,7 +27,7 @@ public class AnnotationsTest {
 
     @Test
     public void testGetCommandNames00() throws NoSuchMethodException {
-        Method method = new Identifier(this.getClass(), "foo").getMethod();
+        Method method = new CommandIdentifier(this.getClass(), "foo").getMethod();
         Set<String> names = Annotations.getNames(method);
         Assert.assertNotNull(names);
         Assert.assertEquals(1, names.size());
@@ -43,11 +39,11 @@ public class AnnotationsTest {
 
     @Test
     public void testGetCommandDescription00() throws NoSuchMethodException {
-        Method method = new Identifier(this.getClass(), "bar").getMethod();
+        Method method = new CommandIdentifier(this.getClass(), "bar").getMethod();
         String desc = Annotations.getDescription(method);
         Assert.assertNotNull(desc);
         Assert.assertEquals("desc", desc);
-        method = new Identifier(this.getClass(), "foo").getMethod();
+        method = new CommandIdentifier(this.getClass(), "foo").getMethod();
         desc = Annotations.getDescription(method);
         Assert.assertNotNull(desc);
         Assert.assertEquals("", desc);
@@ -96,95 +92,77 @@ public class AnnotationsTest {
 
     @Test
     public void testGetArgumentNames00() {
-        Parameter param = new Identifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
-        String[] names = Annotations.getNames(param);
+        Parameter param = new CommandIdentifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
+        String names = Annotations.getNamesAsString(param);
         Assert.assertNotNull(names);
-        Assert.assertEquals(1, names.length);
-        Assert.assertTrue(names[0].equals("name") || names[0].equals("arg0"));
+        Assert.assertEquals("name", names);
     }
 
     @Test
     public void testGetArgumentNames01() {
-        Parameter param = new Identifier(this.getClass(), "argumenttest01").getMethod().getParameters()[0];
-        String[] names = Annotations.getNames(param);
-        Assert.assertNotNull(names);
-        Assert.assertEquals(1, names.length);
-        Assert.assertTrue(names[0].equals("name") || names[0].equals("arg0"));
+        Parameter param = new CommandIdentifier(this.getClass(), "argumenttest01").getMethod().getParameters()[0];
+        String names = Annotations.getNamesAsString(param);
+        Assert.assertNull(names);
     }
 
     @Test
-    public void testGetArgumentNames02() {
-        Parameter param = new Identifier(this.getClass(), "argumenttest02").getMethod().getParameters()[0];
-        String[] names = Annotations.getNames(param);
-        Assert.assertEquals(0, names.length);
-        param = new Identifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
-        names = Annotations.getNames(param);
+    public void testGetArgumentNames02and03() {
+        Parameter param = new CommandIdentifier(this.getClass(), "argumenttest02").getMethod().getParameters()[0];
+        String names = Annotations.getNamesAsString(param);
         Assert.assertNotNull(names);
-        Assert.assertEquals(1, names.length);
-        Assert.assertTrue(names[0].equals("name") || names[0].equals("arg0"));
+        param = new CommandIdentifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
+        names = Annotations.getNamesAsString(param);
+        Assert.assertNull(names);
     }
 
     @Test
     public void testGetArgumentDescription00() {
-        Parameter param = new Identifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
+        Parameter param = new CommandIdentifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
         String desc = Annotations.getDescription(param);
         Assert.assertEquals("desc", desc);
-        param = new Identifier(this.getClass(), "argumenttest01").getMethod().getParameters()[0];
+        param = new CommandIdentifier(this.getClass(), "argumenttest01").getMethod().getParameters()[0];
         desc = Annotations.getDescription(param);
         Assert.assertEquals("", desc);
-        param = new Identifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
+        param = new CommandIdentifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
         desc = Annotations.getDescription(param);
         Assert.assertEquals("", desc);
     }
 
     @Test
     public void testGetArgumentTypeConverter00() {
-        Parameter param = new Identifier(this.getClass(), "convertertest00").getMethod().getParameters()[0];
-        TypeConverter<?> converter = Annotations.getTypeConverter(param);
-        Assert.assertNull(converter);
-        param = new Identifier(this.getClass(), "convertertest01").getMethod().getParameters()[0];
-        converter = Annotations.getTypeConverter(param);
-        Assert.assertNotNull(converter);
-        param = new Identifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
-        converter = Annotations.getTypeConverter(param);
-        Assert.assertNull(converter);
-    }
-
-    @Test
-    public void testGetArgumentSubClass00() {
-        Parameter param = new Identifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
-        Class<? extends com.github.wnebyte.jarguments.Argument> sClass = Annotations.getSubClass(param);
-        Assert.assertNotNull(sClass);
-        Assert.assertEquals(Required.class, sClass);
-        param = new Identifier(this.getClass(), "argumenttest02").getMethod().getParameters()[0];
-        sClass = Annotations.getSubClass(param);
-        Assert.assertNotNull(sClass);
-        Assert.assertEquals(Optional.class, sClass);
-        param = new Identifier(this.getClass(), "convertertest01").getMethod().getParameters()[0];
-        sClass = Annotations.getSubClass(param);
-        Assert.assertNotNull(sClass);
-        Assert.assertEquals(Positional.class, sClass);
-        param = new Identifier(this.getClass(), "subclasstest01").getMethod().getParameters()[0];
-        sClass = Annotations.getSubClass(param);
-        Assert.assertNotNull(sClass);
-        Assert.assertEquals(Required.class, sClass);
+        Parameter param = new CommandIdentifier(this.getClass(), "convertertest00").getMethod().getParameters()[0];
+        TypeAdapter<?> adapter = Annotations.getTypeConverter(param);
+        Assert.assertNull(adapter);
+        param = new CommandIdentifier(this.getClass(), "convertertest01").getMethod().getParameters()[0];
+        adapter = Annotations.getTypeConverter(param);
+        Assert.assertNotNull(adapter);
+        param = new CommandIdentifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
+        adapter = Annotations.getTypeConverter(param);
+        Assert.assertNull(adapter);
     }
 
     @Test
     public void testGetArgumentDefaultValue00() {
         // annotated with @Argument and no explicit defaultValue
-        Parameter param = new Identifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
+        Parameter param = new CommandIdentifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
         String defaultValue = Annotations.getDefaultValue(param);
         Assert.assertNull(defaultValue);
         // not annotated with @Argument
-        param = new Identifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
+        param = new CommandIdentifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
         defaultValue = Annotations.getDefaultValue(param);
         Assert.assertNull(defaultValue);
         // annotated with @Argument and explicit defaultValue
-        param = new Identifier(this.getClass(), "argumenttest02").getMethod().getParameters()[0];
+        param = new CommandIdentifier(this.getClass(), "argumenttest02").getMethod().getParameters()[0];
         defaultValue = Annotations.getDefaultValue(param);
         Assert.assertNotNull(defaultValue);
         Assert.assertEquals("5", defaultValue);
+    }
+
+    @Test
+    public void testGetChoices00() {
+        Parameter param = new CommandIdentifier(this.getClass(), "choicestest00").getMethod().getParameters()[0];
+        String[] choices = Annotations.getChoices(param);
+        Assert.assertNull(choices);
     }
 
     @Command
@@ -210,15 +188,15 @@ public class AnnotationsTest {
 
     }
 
-    @Command(name = "argumenttest00")
+    @Command(value = "argumenttest00")
     private void argumenttest00(
-            @Argument(name = "name", description = "desc")
+            @Argument(value = "name", description = "desc")
             int a
     ) {
 
     }
 
-    @Command(name = "argumenttest01")
+    @Command(value = "argumenttest01")
     private void argumenttest01(
             @Argument
             int name
@@ -226,46 +204,54 @@ public class AnnotationsTest {
 
     }
 
-    @Command(name = "argumenttest02")
+    @Command(value = "argumenttest02")
     private void argumenttest02(
-            @Argument(name = ",", group = Group.OPTIONAL, defaultValue = "5")
+            @Argument(value = ",", defaultValue = "5")
             int name
     ) {
 
     }
 
-    @Command(name = "argumenttest03")
+    @Command(value = "argumenttest03")
     private void argumenttest03(
             int name
     ) {
 
     }
 
-    @Command(name = "convertertest00")
+    @Command(value = "convertertest00")
     private void convertertest00(
             @Argument
             int a
     ) {
     }
 
-    @Command(name = "convertertest01")
+    @Command(value = "convertertest01")
     private void convertertest01(
-            @Argument(typeConverter = IntegerTypeConverter.class, group = Group.POSITIONAL)
+            @Argument(typeAdapter = IntegerTypeAdapter.class, required = true)
             int a
     ) {
     }
 
-    @Command(name = "subclasstest01")
+    @Command(value = "subclasstest01")
     private void subclasstest01(
-            @Argument(group = Group.REQUIRED)
+            @Argument(value = "a", required = true)
             int a
     ) {
 
     }
 
-    public static class IntegerTypeConverter implements TypeConverter<Integer> {
+    @Command
+    public void choicestest00(
+            @Argument(value = "a")
+            int a
+    ) {
 
-        public IntegerTypeConverter() { }
+    }
+
+    public static class IntegerTypeAdapter implements TypeAdapter<Integer> {
+
+        public IntegerTypeAdapter() { }
 
         @Override
         public Integer convert(String s) {

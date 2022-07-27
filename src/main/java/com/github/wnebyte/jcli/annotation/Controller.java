@@ -43,18 +43,18 @@ import java.lang.annotation.Target;
  * <br>
  * @see Command
  * @see Argument
- * @see Resource
+ * @see Inject
  * @see Scope
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Controller {
 
-    Scope value() default Scope.SINGLETON;
-
     /**
      * Specify a name for this Controller.
      * @return the name of this Controller.
      */
-    String name() default "";
+    String value() default "";
+
+    Scope scope() default Scope.SINGLETON;
 }

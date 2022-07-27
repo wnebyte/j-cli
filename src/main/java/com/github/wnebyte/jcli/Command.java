@@ -5,10 +5,7 @@ import java.util.function.Supplier;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import com.github.wnebyte.jarguments.Argument;
-import com.github.wnebyte.jarguments.Flag;
-import com.github.wnebyte.jarguments.convert.TypeConverter;
-import com.github.wnebyte.jarguments.factory.AbstractArgumentFactory;
-import com.github.wnebyte.jarguments.util.Reflections;
+import com.github.wnebyte.jarguments.util.AbstractArgumentFactory;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
@@ -17,7 +14,7 @@ import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 /**
  * This class represents a Command created directly from the properties of a Java Method.
  */
-public class Command extends BaseCommand {
+public class Command extends AbstractCommand {
 
     /*
     ###########################
@@ -55,13 +52,13 @@ public class Command extends BaseCommand {
 
     private static String resolvePrefix(Method method, AbstractArgumentFactory factory) {
         String prefix = Annotations.getName(method.getDeclaringClass());
-        return Strings.removeAll(requireNonNullElseGet(prefix, () -> Strings.EMPTY), factory.getExcludedCharacters());
+        return Strings.removeAll(requireNonNullElseGet(prefix, () -> Strings.EMPTY), factory.getExcludeCharacters());
     }
 
     private static Set<String> resolveNames(Method method, AbstractArgumentFactory factory) {
         Set<String> names = Annotations.getNames(method);
         assert (names != null);
-        return normalize(names, factory.getExcludedCharacters());
+        return normalize(names, factory.getExcludeCharacters());
     }
 
     private static String resolveDesc(Method method) {
@@ -89,34 +86,21 @@ public class Command extends BaseCommand {
         return set;
     }
 
-    private static List<Argument> resolveArgs(Method method, AbstractArgumentFactory factory) {
+    private static Set<Argument> resolveArgs(Method method, AbstractArgumentFactory factory) {
         Parameter[] params = method.getParameters();
 
         try {
             for (Parameter param : params) {
-                Class<? extends Argument> cls = Reflections.isBoolean(param.getType()) ?
-                        Flag.class : Annotations.getSubClass(param);
-                factory.setClass(cls);
-                String[] names = Annotations.getNames(param);
-                if (names != null) {
-                    factory.setName(names);
-                }
-                String description = Annotations.getDescription(param);
-                factory.setDescription(requireNonNullElseGet(description, () -> Strings.EMPTY));
-                factory.setType(param.getType());
-                TypeConverter<?> converter = Annotations.getTypeConverter(param);
-                if (converter != null) {
-                    factory.setTypeConverter(converter);
-                }
-                String defaultValue = Annotations.getDefaultValue(param);
-                if (defaultValue != null) {
-                    factory.setDefaultValue(defaultValue);
-                }
-                String flagValue = Annotations.getFlagValue(param);
-                if (flagValue != null) {
-                    factory.setFlagValue(flagValue);
-                }
-                factory.append();
+                factory.create(
+                        Annotations.getNamesAsString(param),
+                        Annotations.getDescription(param),
+                        Annotations.isRequired(param),
+                        Annotations.getChoices(param),
+                        Annotations.getMetavar(param),
+                        Annotations.getDefaultValue(param),
+                        param.getType()
+
+                );
             }
         } catch (Exception e) {
             throw new IllegalAnnotationException(
@@ -124,7 +108,7 @@ public class Command extends BaseCommand {
             );
         }
 
-        return factory.get();
+        return factory.getAll();
     }
 
     /*

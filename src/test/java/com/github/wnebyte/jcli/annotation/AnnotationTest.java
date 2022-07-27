@@ -1,47 +1,45 @@
 package com.github.wnebyte.jcli.annotation;
 
-import com.github.wnebyte.jcli.CLI;
-import com.github.wnebyte.jcli.conf.Configuration;
 import org.junit.Test;
-import com.github.wnebyte.jcli.annotation.Argument;
-import com.github.wnebyte.jcli.annotation.Command;
+import com.github.wnebyte.jcli.CLI;
+import com.github.wnebyte.jcli.Configuration;
+import com.github.wnebyte.jcli.util.CommandIdentifier;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
-import com.github.wnebyte.jcli.util.Identifier;
 
 public class AnnotationTest {
 
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateArgumentNames00() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
-                .setScanIdentifiers(new Identifier(this.getClass(), "argdup00"))
+                .disableScanPackages()
+                .mapHelpCommand()
+                .setScanCommandIdentifiers(new CommandIdentifier(this.getClass(), "argdup00"))
         );
     }
 
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateArgumentNames01() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
-                .setScanIdentifiers(new Identifier(this.getClass(), "argdup01"))
+                .disableScanPackages()
+                .mapHelpCommand()
+                .setScanCommandIdentifiers(new CommandIdentifier(this.getClass(), "argdup01"))
         );
     }
 
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateArgumentNames02() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
-                .setScanIdentifiers(new Identifier(this.getClass(), "argdup02"))
+                .disableScanPackages()
+                .mapHelpCommand()
+                .setScanCommandIdentifiers(new CommandIdentifier(this.getClass(), "argdup02"))
         );
     }
 
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateCommandNames00() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(
                         this.getClass().getDeclaredMethod("cmddup00"),
                         this.getClass().getDeclaredMethod("cmddup00", int.class)
@@ -52,8 +50,8 @@ public class AnnotationTest {
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateCommandNames01() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(
                         this.getClass().getDeclaredMethod("cmddup01"),
                         this.getClass().getDeclaredMethod("cmddup01mirror")
@@ -64,8 +62,8 @@ public class AnnotationTest {
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateCommandNames02() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(
                         this.getClass().getDeclaredMethod("cmddup02"),
                         this.getClass().getDeclaredMethod("cmddup02", int.class)
@@ -76,16 +74,16 @@ public class AnnotationTest {
     @Test(expected = IllegalAnnotationException.class)
     public void testDuplicateHelpCommandNames00() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .setScanIdentifiers(new Identifier(this.getClass(), "--help"))
+                .disableScanPackages()
+                .setScanCommandIdentifiers(new CommandIdentifier(this.getClass(), "--help"))
         );
     }
 
     @Test(expected = IllegalAnnotationException.class)
     public void testCommandNameNormalization00() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(this.getClass().getDeclaredMethod("cmdnorm01"))
         );
     }
@@ -93,8 +91,8 @@ public class AnnotationTest {
     @Test(expected = IllegalAnnotationException.class)
     public void testCommandNameNormalization01() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(this.getClass().getDeclaredMethod("cmdnorm02"))
         );
     }
@@ -102,89 +100,95 @@ public class AnnotationTest {
     @Test(expected = IllegalAnnotationException.class)
     public void testArgumentNameNormalization02() throws NoSuchMethodException {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
+                .disableScanPackages()
+                .mapHelpCommand()
                 .setScanMethods(this.getClass().getDeclaredMethod("argnorm01", int.class))
         );
     }
 
     @Command
-    private void argdup00(
-            @Argument(name = "a")
+    private int argdup00(
+            @Argument(value = "a")
             int a,
-            @Argument(name = "a")
+            @Argument(value = "a")
             int b
-    ) { }
+    ) {
+        return 1;
+    }
 
 
     @Command
-    private void argdup01(
-            @Argument(name = "a")
+    private int argdup01(
+            @Argument(value = "a")
                     int a,
-            @Argument(name = "a, --a")
+            @Argument(value = "a, --a")
                     int b
-    ) { }
+    ) {
+        return 1;
+    }
 
 
     @Command
-    private void argdup02(
-            @Argument(name = "a, b, c")
+    private int argdup02(
+            @Argument(value = "a, b, c")
                     int a,
-            @Argument(name = "-a, a")
+            @Argument(value = "-a, a")
                     int b
-    ) { }
-
-    @Command
-    private void cmddup00() {
-
+    ) {
+        return 1;
     }
 
     @Command
-    private void cmddup00(int a) {
-
+    private int cmddup00() {
+        return 1;
     }
 
     @Command
-    private void cmddup01() {
-
+    private int cmddup00(int a) {
+        return 1;
     }
 
-    @Command(name = "cmddup01")
-    private void cmddup01mirror() {
-
+    @Command
+    private int cmddup01() {
+        return 1;
     }
 
-    @Command(name = "cmddup02")
-    private void cmddup02() {
-
+    @Command(value = "cmddup01")
+    private int cmddup01mirror() {
+        return 1;
     }
 
-    @Command(name = "cmddup02")
-    private void cmddup02(int a) {
-
+    @Command(value = "cmddup02")
+    private int cmddup02() {
+        return 1;
     }
 
-    @Command(name = "--help")
-    private void help() {
-
+    @Command(value = "cmddup02")
+    private int cmddup02(int a) {
+        return 1;
     }
 
-    @Command(name = ",")
-    private void cmdnorm01() {
-
+    @Command(value = "--help")
+    private int help() {
+        return 1;
     }
 
-    @Command(name = "$['")
-    private void cmdnorm02() {
-
+    @Command(value = ",")
+    private int cmdnorm01() {
+        return 1;
     }
 
-    @Command(name = "argnorm01")
-    private void argnorm01(
-            @Argument(name = "$")
+    @Command(value = "$['")
+    private int cmdnorm02() {
+        return 1;
+    }
+
+    @Command(value = "argnorm01")
+    private int argnorm01(
+            @Argument(value = "$")
             int a
     ) {
-
+        return 1;
     }
 
 }
