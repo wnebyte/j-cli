@@ -12,7 +12,7 @@ import com.github.wnebyte.jcli.util.Annotations;
 import static com.github.wnebyte.jarguments.util.Objects.requireNonNullElseGet;
 
 /**
- * This class represents a Command created directly from the properties of a Java Method.
+ * This class represents a Command mapped directly from the properties of a Java Method.
  */
 public class Command extends AbstractCommand {
 
@@ -130,7 +130,7 @@ public class Command extends AbstractCommand {
             method.invoke(object, args);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            System.err.printf("(Error): Method Threw an Exception: '%s'%n", e.getCause().getClass());
         }
     }
 

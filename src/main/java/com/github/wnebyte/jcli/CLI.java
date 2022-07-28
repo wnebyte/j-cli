@@ -2,20 +2,14 @@ package com.github.wnebyte.jcli;
 
 import java.util.*;
 import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.lang.reflect.Method;
-
-import com.github.wnebyte.jarguments.Argument;
 import com.github.wnebyte.jarguments.ContextView;
 import com.github.wnebyte.jarguments.parser.AbstractParser;
 import com.github.wnebyte.jarguments.parser.Parser;
 import com.github.wnebyte.jarguments.Formatter;
 import com.github.wnebyte.jarguments.exception.*;
-import com.github.wnebyte.jarguments.util.ArgumentFactory;
-import com.github.wnebyte.jarguments.util.Sets;
 import com.github.wnebyte.jarguments.util.TokenSequence;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.annotation.Command;
@@ -34,7 +28,17 @@ public class CLI {
     */
 
     static ContextView contextViewOf(AbstractCommand cmd) {
-        return ContextView.of(String.join(", ", cmd.getNames()), cmd.getDescription(), cmd.getArguments());
+        if (cmd.hasPrefix()) {
+            return ContextView.of(
+                    cmd.getPrefix().concat(Strings.WHITESPACE).concat(String.join(", ", cmd.getNames())),
+                    cmd.getDescription(),
+                    cmd.getArguments());
+        } else {
+            return ContextView.of(
+                    String.join(", ", cmd.getNames()),
+                    cmd.getDescription(),
+                    cmd.getArguments());
+        }
     }
 
     static TokenSequence slice(TokenSequence tokens, AbstractCommand cmd) {
@@ -62,8 +66,6 @@ public class CLI {
 
     protected final AbstractParser parser;
 
-    protected final ExecutorService pool;
-
     /*
     ###########################
     #       CONSTRUCTORS      #
@@ -86,7 +88,6 @@ public class CLI {
         this.prefixes = new HashSet<>();
         this.index = new HashMap<>();
         this.parser = new Parser();
-        this.pool = Executors.newSingleThreadExecutor();
         this.commands = build(new MethodScannerImpl(), new InstanceTrackerImpl(this.conf.getDependencyContainer()));
     }
 
@@ -191,8 +192,15 @@ public class CLI {
 
         try {
             AbstractCommand cmd = lookup(input, tokens);
-            Object[] args = parse(input, tokens, cmd);
-            cmd.execute(args);
+            tokens = slice(tokens, cmd);
+            if (isHelp(tokens)) {
+                Formatter<ContextView> formatter
+                        = conf.getHelpFormatter();
+                conf.out().println(formatter.apply(contextViewOf(cmd)));
+            } else {
+                Object[] args = parser.parse(input, tokens, cmd.getArguments());
+                cmd.execute(args);
+            }
         }
         catch (UnknownCommandException e) {
             Formatter<UnknownCommandException> formatter
@@ -224,9 +232,7 @@ public class CLI {
                     = conf.getFormatter(ConstraintException.class);
             conf.err().println(formatter.apply(e));
         }
-        catch (Exception e) {
-            conf.err().println("(Error): " + e.getClass());
-        }
+        catch (ParseException ignored) {}
     }
 
     public Consumer<String> toConsumer() {
@@ -238,7 +244,7 @@ public class CLI {
 
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine();
-            pool.submit(() -> accept(input));
+            accept(input);
         }
     }
 
@@ -248,17 +254,7 @@ public class CLI {
             throw new UnknownCommandException(String.format(
                     "'%s' is not recognized as an internal command.", input), input);
         }
-        /*
-        if (isHelp(tokens)) {
-            return AbstractCommand.stub((args) -> conf.out().print(conf.getHelpFormatter().apply(contextViewOf(cmd))));
-        }
-         */
         return cmd;
-    }
-
-    protected Object[] parse(String input, TokenSequence tokens, AbstractCommand cmd) throws ParseException {
-        tokens = slice(tokens, cmd);
-        return parser.parse(input, tokens, cmd.getArguments());
     }
 
     protected String getKey(TokenSequence tokens) {
@@ -284,10 +280,16 @@ public class CLI {
         return conf;
     }
 
-    @Command(value = "--help, -h")
+    @Command("--help, -h")
     protected void help() {
         for (AbstractCommand cmd : commands) {
-            conf.out().print(conf.getHelpFormatter().apply(contextViewOf(cmd)));
+            conf.out().println(conf.getHelpFormatter().apply(contextViewOf(cmd)));
+        }
+    }
+
+    private void printIndex() {
+        for (Map.Entry<String, AbstractCommand> entry : index.entrySet()) {
+            System.out.printf("(Debug): Key: '%s', Value: '%s'%n", entry.getKey(), entry.getValue());
         }
     }
 }

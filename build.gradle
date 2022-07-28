@@ -66,6 +66,8 @@ dependencies {
     jmh group: 'org.reflections', name: 'reflections', version: '0.9.11'
     jmh fileTree(dir: "libs", include: ["*.jar"])
     sampleCompile sourceSets.main.output
+    sampleImplementation fileTree(dir: "libs", include: ["*.jar"])
+    sampleImplementation group: 'org.reflections', name: 'reflections', version: '0.9.11'
 }
 
 jar{
