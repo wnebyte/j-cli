@@ -2,9 +2,9 @@ package com.github.wnebyte.jcli.di;
 
 public interface IDependencyContainer {
 
-    <T, R extends T> void registerDependency(Class<T> base, R impl);
+    <T, R extends T> void register(Class<T> base, R impl);
 
-    void unregisterDependency(Class<?> base);
+    void unregister(Class<?> base);
 
     Object newInstance(Class<?> cls) throws ReflectiveOperationException;
 

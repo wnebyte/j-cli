@@ -4,8 +4,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.github.wnebyte.jarguments.convert.TypeConverter;
-import com.github.wnebyte.jcli.StubTypeConverter;
+import com.github.wnebyte.jarguments.adapter.TypeAdapter;
+import com.github.wnebyte.jcli.StubTypeAdapter;
 
 /**
  * Annotate the Parameters of your {@link Command} annotated Java Method with this annotation to explicitly set their
@@ -54,7 +54,7 @@ import com.github.wnebyte.jcli.StubTypeConverter;
  *     // code
  * }
  * </pre>
- * <p>A user-defined {@link TypeConverter} can be specified by assigning to the typeConverter field a class
+ * <p>A user-defined {@link TypeAdapter} can be specified by assigning to the typeConverter field a class
  * which implements the interface (<b>Note</b> that said class is required to have a no-args Constructor).
  * <br>
  * Built in support exists for primitive types, wrapper classes, and arrays where the component type is either a
@@ -76,7 +76,7 @@ public @interface Argument {
      * Defaults to the name of the Java Parameter.
      * @return the name of this Argument.
      */
-    String name() default "";
+    String value() default "";
 
     /**
      * Specify a description for this Argument.
@@ -90,23 +90,15 @@ public @interface Argument {
      */
     String defaultValue() default "";
 
-    /**
-     * Specify a flag value for this (Flag) Argument.
-     * @return the flag value of this Argument.
-     */
-    String flagValue() default "";
+    boolean required() default false;
 
-    /**
-     * <p>Specify a Group for this Argument.</p>
-     * Defaults to {@link Group#REQUIRED}, unless the parameter is of type <code>boolean</code>,
-     * then {@link Group#FLAG} will be enforced.
-     * @return the Group of this Argument.
-     */
-    Group group() default Group.REQUIRED;
+    String[] choices() default "";
+
+    String metavar() default "";
 
     /**
      * Specify a TypeConverter for this Argument.
      * @return the TypeConverter belonging to this Argument.
      */
-    Class<? extends TypeConverter> typeConverter() default StubTypeConverter.class;
+    Class<? extends TypeAdapter> typeAdapter() default StubTypeAdapter.class;
 }

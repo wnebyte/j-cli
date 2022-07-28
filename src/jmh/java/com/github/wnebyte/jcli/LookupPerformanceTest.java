@@ -1,6 +1,5 @@
 package com.github.wnebyte.jcli;
 
-import com.github.wnebyte.jcli.conf.Configuration;
 import org.openjdk.jmh.annotations.*;
 import java.util.concurrent.TimeUnit;
 
@@ -14,9 +13,9 @@ public class LookupPerformanceTest {
     @Setup
     public void setup() {
         cli = new CLI(new Configuration()
-                .nullifyScanPackages()
-                .nullifyHelpCommand()
-                .setScanClasses(PerformanceTest.class)
+                .disableScanPackages()
+                .mapHelpCommand()
+                .setScanClasses(VisualVMTest.class)
         );
     }
 

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
 import java.lang.annotation.Annotation;
-import com.github.wnebyte.jcli.annotation.Resource;
+import com.github.wnebyte.jcli.annotation.Inject;
 import static com.github.wnebyte.jcli.util.Reflections.getNoArgsConstructor;
 import static com.github.wnebyte.jcli.util.Reflections.getFirstAnnotatedConstructor;
 
@@ -17,7 +17,7 @@ public class DependencyContainer implements IDependencyContainer {
     ###########################
     */
 
-    public static final Class<? extends Annotation> DEFAULT_ANNOTATION = Resource.class;
+    public static final Class<? extends Annotation> DEFAULT_ANNOTATION = Inject.class;
 
     /*
     ###########################
@@ -50,14 +50,14 @@ public class DependencyContainer implements IDependencyContainer {
     ###########################
     */
     @Override
-    public <T, R extends T> void registerDependency(Class<T> base, R impl) {
+    public <T, R extends T> void register(Class<T> base, R impl) {
         if ((base != null) && (impl != null)) {
             dependencies.put(base, impl);
         }
     }
 
     @Override
-    public void unregisterDependency(Class<?> base) {
+    public void unregister(Class<?> base) {
         if (base != null) {
             dependencies.remove(base);
         }

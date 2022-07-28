@@ -1,23 +1,24 @@
 package com.github.wnebyte.jcli;
 
 import java.util.*;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.lang.reflect.Method;
-import com.github.wnebyte.jarguments.Argument;
-import com.github.wnebyte.jarguments.TokenSequence;
-import com.github.wnebyte.jarguments.exception.*;
-import com.github.wnebyte.jarguments.factory.ArgumentFactoryBuilder;
+import com.github.wnebyte.jarguments.ContextView;
 import com.github.wnebyte.jarguments.parser.AbstractParser;
 import com.github.wnebyte.jarguments.parser.Parser;
+import com.github.wnebyte.jarguments.Formatter;
+import com.github.wnebyte.jarguments.exception.*;
+import com.github.wnebyte.jarguments.util.TokenSequence;
 import com.github.wnebyte.jarguments.util.Strings;
 import com.github.wnebyte.jcli.annotation.Command;
-import com.github.wnebyte.jcli.conf.Configuration;
 import com.github.wnebyte.jcli.exception.UnknownCommandException;
 import com.github.wnebyte.jcli.processor.*;
-import com.github.wnebyte.jcli.util.Identifier;
+import com.github.wnebyte.jcli.util.CommandIdentifier;
 import com.github.wnebyte.jcli.util.Objects;
 
+@SuppressWarnings("resource")
 public class CLI {
 
     /*
@@ -26,11 +27,21 @@ public class CLI {
     ###########################
     */
 
-    static int hash(Object o) {
-        return (o != null) ? o.hashCode() : 0;
+    static ContextView contextViewOf(AbstractCommand cmd) {
+        if (cmd.hasPrefix()) {
+            return ContextView.of(
+                    cmd.getPrefix().concat(Strings.WHITESPACE).concat(String.join(", ", cmd.getNames())),
+                    cmd.getDescription(),
+                    cmd.getArguments());
+        } else {
+            return ContextView.of(
+                    String.join(", ", cmd.getNames()),
+                    cmd.getDescription(),
+                    cmd.getArguments());
+        }
     }
 
-    static TokenSequence slice(TokenSequence tokens, BaseCommand cmd) {
+    static TokenSequence slice(TokenSequence tokens, AbstractCommand cmd) {
         return tokens.subTokens(cmd.hasPrefix() ? 2 : 1, tokens.size());
     }
 
@@ -47,13 +58,13 @@ public class CLI {
 
     protected final Configuration conf;
 
-    protected final List<BaseCommand> commands;
+    protected final List<AbstractCommand> commands;
 
     protected final Set<String> prefixes;
 
-    protected final HashMap<String, List<BaseCommand>> index;
+    protected final Map<String, AbstractCommand> index;
 
-    protected final AbstractParser<TokenSequence, Collection<Argument>> parser;
+    protected final AbstractParser parser;
 
     /*
     ###########################
@@ -77,7 +88,7 @@ public class CLI {
         this.prefixes = new HashSet<>();
         this.index = new HashMap<>();
         this.parser = new Parser();
-        this.commands = build(new MethodScannerImpl(), new InstanceTrackerImpl(conf.getDependencyContainer()));
+        this.commands = build(new MethodScannerImpl(), new InstanceTrackerImpl(this.conf.getDependencyContainer()));
     }
 
     /*
@@ -86,9 +97,9 @@ public class CLI {
     ###########################
     */
 
-    private List<BaseCommand> build(MethodScanner scanner, InstanceTracker tracker) {
+    private List<AbstractCommand> build(MethodScanner scanner, InstanceTracker tracker) {
         scan(scanner, tracker);
-        List<BaseCommand> commands = map(scanner, tracker);
+        List<AbstractCommand> commands = map(scanner, tracker);
         index(commands);
         sort(commands);
         return commands;
@@ -98,7 +109,7 @@ public class CLI {
         Set<Object> objects = conf.getScanObjects();
         Set<Class<?>> classes = conf.getScanClasses();
         Set<String> packages = conf.getScanPackages();
-        Set<Identifier> identifiers = conf.getScanIdentifiers();
+        Set<CommandIdentifier> commandIdentifiers = conf.getScanCommandIdentifiers();
         Set<Method> methods = conf.getScanMethods();
 
         if (objects != null) {
@@ -111,13 +122,13 @@ public class CLI {
         if (packages != null) {
             scanner.scanUrls(packages);
         }
-        if (identifiers != null) {
-            scanner.scanMethods(identifiers.stream().map(Identifier::getMethod).collect(Collectors.toSet()));
+        if (commandIdentifiers != null) {
+            scanner.scanMethods(commandIdentifiers.stream().map(CommandIdentifier::getMethod).collect(Collectors.toSet()));
         }
         if (methods != null) {
             scanner.scanMethods(methods);
         }
-        if (conf.isNullifyHelpCommand()) {
+        if (!conf.isMapHelpCommand()) {
             scanner.removeScannedElementIf(m -> m.getDeclaringClass() == CLI.class);
         }
         else {
@@ -129,21 +140,21 @@ public class CLI {
         }
     }
 
-    protected List<BaseCommand> map(MethodScanner scanner, InstanceTracker tracker) {
+    protected List<AbstractCommand> map(MethodScanner scanner, InstanceTracker tracker) {
         return scanner.getScannedElements().stream()
+                .filter(new PreMappingFilter())
                 .map(new MethodMapperBuilder()
                         .setInstanceTracker(tracker)
-                        .setArgumentFactoryBuilder(new ArgumentFactoryBuilder()
-                                .useTypeConverterMap(conf.getTypeConverterMap()))
+                        .setTypeAdapterRegistry(conf.getTypeAdapterRegistry())
                         .build()
                 )
                 .filter(Objects::nonNull)
-                .filter(new FilterImpl())
+                .filter(new PostMappingFilter())
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    protected void index(List<BaseCommand> commands) {
-        for (BaseCommand cmd : commands) {
+    protected void index(List<AbstractCommand> commands) {
+        for (AbstractCommand cmd : commands) {
             for (String name : cmd.getNames()) {
                 String key;
 
@@ -155,16 +166,20 @@ public class CLI {
                 }
 
                 if (index.containsKey(key)) {
-                    index.get(key).add(cmd);
+                    throw new IllegalStateException(
+                            String.format(
+                                    "Command with name: '%s' has already been indexed.", key
+                            )
+                    );
                 } else {
-                    index.put(key, Collections.singletonList(cmd));
+                    index.put(key, cmd);
                 }
             }
         }
     }
 
-    protected void sort(List<BaseCommand> commands) {
-        commands.sort(BaseCommand::compareTo);
+    protected void sort(List<AbstractCommand> commands) {
+        commands.sort(AbstractCommand::compareTo);
     }
 
     public void accept(String[] input) {
@@ -176,38 +191,55 @@ public class CLI {
         TokenSequence tokens = TokenSequence.tokenize(input);
 
         try {
-            BaseCommand cmd = lookup(tokens);
-            Object[] args = parser.initialize();
-            cmd.execute(args);
+            AbstractCommand cmd = lookup(input, tokens);
+            tokens = slice(tokens, cmd);
+            if (isHelp(tokens)) {
+                Formatter<ContextView> formatter
+                        = conf.getHelpFormatter();
+                conf.out().println(formatter.apply(contextViewOf(cmd)));
+            } else {
+                Object[] args = parser.parse(input, tokens, cmd.getArguments());
+                cmd.execute(args);
+            }
         }
         catch (UnknownCommandException e) {
-            conf.err().println(conf.getUnknownCommandExceptionFormatter().apply(e));
+            Formatter<UnknownCommandException> formatter
+                    = conf.getUnknownCommandFormatter();
+            conf.err().println(formatter.apply(e));
         }
         catch (TypeConversionException e) {
-            conf.err().println(conf.getTypeConversionExceptionFormatter().apply(e));
+            Formatter<TypeConversionException> formatter
+                    = conf.getFormatter(TypeConversionException.class);
+            conf.err().println(formatter.apply(e));
         }
         catch (NoSuchArgumentException e) {
-            conf.err().println(conf.getNoSuchArgumentExceptionFormatter().apply(e));
-        }
-        catch (MissingArgumentValueException e) {
-            conf.err().println(conf.getMissingArgumentValueExceptionFormatter().apply(e));
+            Formatter<NoSuchArgumentException> formatter
+                    = conf.getFormatter(NoSuchArgumentException.class);
+            conf.err().println(formatter.apply(e));
         }
         catch (MalformedArgumentException e) {
-            conf.err().println(conf.getMalformedArgumentExceptionFormatter().apply(e));
+            Formatter<MalformedArgumentException> formatter
+                    = conf.getFormatter(MalformedArgumentException.class);
+            conf.err().println(formatter.apply(e));
         }
         catch (MissingArgumentException e) {
-            conf.err().println(conf.getMissingArgumentExceptionFormatter().apply(e));
+            Formatter<MissingArgumentException> formatter
+                    = conf.getFormatter(MissingArgumentException.class);
+            conf.err().println(formatter.apply(e));
         }
-        catch (Exception e) {
-            conf.err().println(e.getMessage());
+        catch (ConstraintException e) {
+            Formatter<ConstraintException> formatter
+                    = conf.getFormatter(ConstraintException.class);
+            conf.err().println(formatter.apply(e));
         }
+        catch (ParseException ignored) {}
     }
 
     public Consumer<String> toConsumer() {
         return CLI.this::accept;
     }
 
-    public void read() {
+    public void run() {
         Scanner scanner = new Scanner(conf.in());
 
         while (scanner.hasNextLine()) {
@@ -216,38 +248,13 @@ public class CLI {
         }
     }
 
-    protected BaseCommand lookup(TokenSequence tokens) throws UnknownCommandException, ParseException {
-        List<BaseCommand> c = getBucket(tokens);
-        assert (c.size() <= 1);
-        String input = tokens.join();
-
-        for (BaseCommand cmd : c) {
-            tokens = slice(tokens, cmd);
-            try {
-                parser.parse(tokens, cmd.getArguments());
-                return cmd;
-            }
-            catch (ParseException e) {
-                if (isHelp(tokens)) {
-                    parser.reset();
-                    return BaseCommand.stub((args) -> conf.out().println(conf.getHelpFormatter().apply(cmd)));
-                } else {
-                    throw e;
-                }
-            }
+    protected AbstractCommand lookup(String input, TokenSequence tokens) throws UnknownCommandException {
+        AbstractCommand cmd = getCommand(tokens);
+        if (cmd == null) {
+            throw new UnknownCommandException(String.format(
+                    "'%s' is not recognized as an internal command.", input), input);
         }
-
-        throw new UnknownCommandException(String.format(
-                "'%s' is not recognized as an internal command.", input), input);
-    }
-
-    protected List<BaseCommand> getBucket(TokenSequence tokens) {
-        if (tokens == null) {
-            return Collections.emptyList();
-        }
-        String key = getKey(tokens);
-        List<BaseCommand> c = index.get(key);
-        return (c == null) ? Collections.emptyList() : c;
+        return cmd;
     }
 
     protected String getKey(TokenSequence tokens) {
@@ -260,14 +267,29 @@ public class CLI {
         return key;
     }
 
+    protected AbstractCommand getCommand(TokenSequence tokens) {
+        if (tokens == null || tokens.size() == 0) {
+            return null;
+        }
+        String key = getKey(tokens);
+        AbstractCommand cmd = index.get(key);
+        return cmd;
+    }
+
     public Configuration getConfiguration() {
         return conf;
     }
 
-    @Command(name = "--help, -h")
+    @Command("--help, -h")
     protected void help() {
-        for (BaseCommand cmd : commands) {
-            conf.out().println(conf.getHelpFormatter().apply(cmd));
+        for (AbstractCommand cmd : commands) {
+            conf.out().println(conf.getHelpFormatter().apply(contextViewOf(cmd)));
+        }
+    }
+
+    private void printIndex() {
+        for (Map.Entry<String, AbstractCommand> entry : index.entrySet()) {
+            System.out.printf("(Debug): Key: '%s', Value: '%s'%n", entry.getKey(), entry.getValue());
         }
     }
 }

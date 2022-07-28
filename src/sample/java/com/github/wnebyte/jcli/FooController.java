@@ -1,9 +1,9 @@
-package com.github.wnebyte.jcli.sample;
+package com.github.wnebyte.jcli;
 
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Controller;
 
-@Controller(name = "foo")
+@Controller(value = "foo")
 public class FooController {
 
     @Command

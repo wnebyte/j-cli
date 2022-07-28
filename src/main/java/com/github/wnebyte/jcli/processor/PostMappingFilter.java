@@ -1,11 +1,11 @@
 package com.github.wnebyte.jcli.processor;
 
 import java.util.*;
-import com.github.wnebyte.jcli.BaseCommand;
+import com.github.wnebyte.jcli.AbstractCommand;
 import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Sets;
 
-public class FilterImpl implements Filter<BaseCommand> {
+public class PostMappingFilter implements Filter<AbstractCommand> {
 
     /*
     ###########################
@@ -13,7 +13,7 @@ public class FilterImpl implements Filter<BaseCommand> {
     ###########################
     */
 
-    private final List<BaseCommand> commands;
+    private final List<AbstractCommand> commands;
 
     /*
     ###########################
@@ -21,7 +21,7 @@ public class FilterImpl implements Filter<BaseCommand> {
     ###########################
     */
 
-    public FilterImpl() {
+    public PostMappingFilter() {
         this.commands = new ArrayList<>();
     }
 
@@ -32,14 +32,14 @@ public class FilterImpl implements Filter<BaseCommand> {
     */
 
     @Override
-    public boolean test(BaseCommand cmd) {
+    public boolean test(AbstractCommand cmd) {
         String prefix = cmd.getPrefix();
         Set<String> names = cmd.getNames();
 
         if (names.isEmpty()) {
             throw new IllegalAnnotationException(
                     String.format(
-                            "Command: '%s' must have at least one name.", cmd
+                            "Command: '%s' must have at least one name.", cmd.getCanonicalName()
                     )
             );
         }

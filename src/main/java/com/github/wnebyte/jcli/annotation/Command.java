@@ -44,7 +44,7 @@ public @interface Command {
      * Defaults to the name of the Java Method.
      * @return the name of the <code>Command</code>.
      */
-    String name() default "";
+    String value() default "";
 
     /**
      * Specify a description for this Command.

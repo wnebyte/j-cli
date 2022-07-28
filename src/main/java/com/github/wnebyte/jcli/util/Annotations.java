@@ -4,12 +4,9 @@ import java.util.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import com.github.wnebyte.jarguments.Flag;
-import com.github.wnebyte.jarguments.Optional;
-import com.github.wnebyte.jarguments.Positional;
-import com.github.wnebyte.jarguments.Required;
-import com.github.wnebyte.jarguments.convert.TypeConverter;
-import com.github.wnebyte.jcli.StubTypeConverter;
+import com.github.wnebyte.jarguments.adapter.TypeAdapter;
+import com.github.wnebyte.jarguments.util.Strings;
+import com.github.wnebyte.jcli.StubTypeAdapter;
 import com.github.wnebyte.jcli.annotation.*;
 
 /**
@@ -30,7 +27,7 @@ public class Annotations {
 
     public static Scope getScope(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return cls.getAnnotation(Controller.class).value();
+            return cls.getAnnotation(Controller.class).scope();
         }
         return null;
     }
@@ -41,21 +38,21 @@ public class Annotations {
 
     public static boolean isTransient(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return (cls.getAnnotation(Controller.class).value() == Scope.TRANSIENT);
+            return (cls.getAnnotation(Controller.class).scope() == Scope.TRANSIENT);
         }
         return false;
     }
 
     public static boolean isSingleton(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return (cls.getAnnotation(Controller.class).value() == Scope.SINGLETON);
+            return (cls.getAnnotation(Controller.class).scope() == Scope.SINGLETON);
         }
         return false;
     }
 
     public static String getName(Class<?> cls) {
         if (isAnnotated(cls)) {
-            return cls.getAnnotation(Controller.class).name();
+            return cls.getAnnotation(Controller.class).value();
         }
         return null;
     }
@@ -77,7 +74,7 @@ public class Annotations {
     public static Set<String> getNames(Method method) {
         if (isAnnotated(method)) {
             Set<String> names = new LinkedHashSet<>();
-            String name = method.getAnnotation(Command.class).name();
+            String name = method.getAnnotation(Command.class).value();
             if (name.equals("")) {
                 names.add(method.getName().toLowerCase());
             } else {
@@ -107,10 +104,15 @@ public class Annotations {
         return (param != null) && (param.isAnnotationPresent(Argument.class));
     }
 
+    public static boolean isNotAnnotated(Parameter param) {
+        return !isAnnotated(param);
+    }
+
+    /*
     public static String[] getNames(Parameter param) {
         if (isAnnotated(param)) {
             Set<String> names = new LinkedHashSet<>();
-            String name = param.getAnnotation(Argument.class).name();
+            String name = param.getAnnotation(Argument.class).value();
             if (name.equals("")) {
                 names.add(param.getName().toLowerCase());
             } else {
@@ -120,7 +122,16 @@ public class Annotations {
             return names.toArray(new String[0]);
         }
 
-        return new String[]{ param.getName().toLowerCase() };
+       return null;
+    }
+     */
+
+    public static String getNamesAsString(Parameter param) {
+        if (isAnnotated(param)) {
+            String name = param.getAnnotation(Argument.class).value();
+            return (name == null || name.equals("")) ? null : name;
+        }
+        return null;
     }
 
     public static String getDescription(Parameter param) {
@@ -138,24 +149,39 @@ public class Annotations {
         return null;
     }
 
-    public static String getFlagValue(Parameter param) {
+    public static boolean isRequired(Parameter param) {
         if (isAnnotated(param)) {
-            String flagValue = param.getAnnotation(Argument.class).flagValue();
-            return flagValue.equals("") ? null : flagValue;
+            return param.getAnnotation(Argument.class).required();
+        }
+        return false;
+    }
+
+    public static String[] getChoices(Parameter param) {
+        if (isAnnotated(param)) {
+            String[] array = param.getAnnotation(Argument.class).choices();
+            return (array.length == 1 && array[0].equals("")) ? null : array;
         }
         return null;
     }
 
-    public static TypeConverter<?> getTypeConverter(Parameter param) {
+    public static String getMetavar(Parameter param) {
         if (isAnnotated(param)) {
-            Class<?> cls = param.getAnnotation(Argument.class).typeConverter();
-            if (cls == StubTypeConverter.class) {
+            String metavar = param.getAnnotation(Argument.class).metavar();
+            return Strings.isNullOrEmpty(metavar) ? null : metavar;
+        }
+        return null;
+    }
+
+    public static TypeAdapter<?> getTypeConverter(Parameter param) {
+        if (isAnnotated(param)) {
+            Class<?> cls = param.getAnnotation(Argument.class).typeAdapter();
+            if (cls == StubTypeAdapter.class) {
                 return null;
             } else {
                 try {
                     @SuppressWarnings("unchecked")
-                    Constructor<TypeConverter<?>> cons
-                            = (Constructor<TypeConverter<?>>) Reflections.getNoArgsConstructor(cls);
+                    Constructor<TypeAdapter<?>> cons
+                            = (Constructor<TypeAdapter<?>>) Reflections.getNoArgsConstructor(cls);
                     if (cons != null) {
                         return cons.newInstance();
                     } else {
@@ -169,31 +195,5 @@ public class Annotations {
         }
 
         return null;
-    }
-
-    public static Class<? extends com.github.wnebyte.jarguments.Argument> getSubClass(Parameter param) {
-        if (isAnnotated(param)) {
-            Group group = param.getAnnotation(Argument.class).group();
-            Class<? extends com.github.wnebyte.jarguments.Argument> sClass;
-
-            switch (group) {
-                case OPTIONAL:
-                    sClass = Optional.class;
-                    break;
-                case POSITIONAL:
-                    sClass = Positional.class;
-                    break;
-                case FLAG:
-                    sClass = Flag.class;
-                    break;
-                default:
-                    sClass = Required.class;
-                    break;
-            }
-
-            return sClass;
-        }
-
-        return Required.class;
     }
 }

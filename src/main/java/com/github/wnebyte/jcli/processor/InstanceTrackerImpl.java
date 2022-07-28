@@ -1,7 +1,7 @@
 package com.github.wnebyte.jcli.processor;
 
 import java.util.Collection;
-import com.github.wnebyte.jcli.struct.ClassSet;
+import com.github.wnebyte.jcli.util.ClassSet;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
 
 /**

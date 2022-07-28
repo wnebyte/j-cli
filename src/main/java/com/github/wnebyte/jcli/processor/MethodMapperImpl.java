@@ -4,14 +4,13 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.function.Supplier;
 import java.lang.reflect.Method;
-import com.github.wnebyte.jarguments.factory.AbstractArgumentFactoryBuilder;
+import com.github.wnebyte.jarguments.adapter.AbstractTypeAdapterRegistry;
+import com.github.wnebyte.jarguments.util.ArgumentFactory;
 import com.github.wnebyte.jcli.*;
 import com.github.wnebyte.jcli.annotation.Scope;
 import com.github.wnebyte.jcli.exception.ConfigException;
-import com.github.wnebyte.jcli.exception.IllegalAnnotationException;
 import com.github.wnebyte.jcli.util.Annotations;
 import com.github.wnebyte.jcli.util.Reflections;
-import static com.github.wnebyte.jcli.util.Reflections.*;
 
 public class MethodMapperImpl implements MethodMapper {
 
@@ -23,7 +22,7 @@ public class MethodMapperImpl implements MethodMapper {
 
     private final InstanceTracker tracker;
 
-    private final AbstractArgumentFactoryBuilder builder;
+    private final AbstractTypeAdapterRegistry adapters;
 
     private final Set<Class<?>> classes;
 
@@ -33,9 +32,9 @@ public class MethodMapperImpl implements MethodMapper {
     ###########################
     */
 
-    public MethodMapperImpl(InstanceTracker tracker, AbstractArgumentFactoryBuilder builder) {
+    public MethodMapperImpl(InstanceTracker tracker, AbstractTypeAdapterRegistry adapters) {
         this.tracker = tracker;
-        this.builder = builder;
+        this.adapters = adapters;
         this.classes = new HashSet<>();
     }
 
@@ -59,21 +58,6 @@ public class MethodMapperImpl implements MethodMapper {
         final Scope scope = Annotations.getScopeOrDefaultValue(cls, Scope.SINGLETON);
         Supplier<Object> supplier;
 
-        if (Annotations.isNotAnnotated(method)) {
-            throw new IllegalAnnotationException(
-                    String.format(
-                            "Method: %s is not annotated with com.github.wnebyte.jcli.annotation.Command.", method
-                    )
-            );
-        }
-        if (isNested(cls) && !isStatic(cls) && !isStatic(method)) {
-            throw new ConfigException(
-                    String.format(
-                            "Non-static, Command annotated Method: %s is declared inside a nested class that is not " +
-                                    "declared as static.", method
-                    )
-            );
-        }
         if (Reflections.isStatic(method)) {
             supplier = () -> null;
         }
@@ -114,7 +98,7 @@ public class MethodMapperImpl implements MethodMapper {
             };
         }
 
-        return new Command(supplier, method, builder.build());
+        return new Command(supplier, method, new ArgumentFactory(adapters, null, null));
     }
 
 }

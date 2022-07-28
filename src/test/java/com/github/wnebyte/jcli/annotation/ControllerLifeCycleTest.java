@@ -1,11 +1,11 @@
 package com.github.wnebyte.jcli.annotation;
 
-import com.github.wnebyte.jcli.io.Console;
 import org.junit.Test;
+import com.github.wnebyte.jarguments.util.Console;
+import com.github.wnebyte.jarguments.util.IConsole;
 import com.github.wnebyte.jcli.CLI;
-import com.github.wnebyte.jcli.conf.Configuration;
+import com.github.wnebyte.jcli.Configuration;
 import com.github.wnebyte.jcli.exception.ConfigException;
-import com.github.wnebyte.jcli.io.IConsole;
 
 public class ControllerLifeCycleTest {
 
@@ -18,7 +18,7 @@ public class ControllerLifeCycleTest {
     @Test
     public void testTransientClassNested00() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(TransientClassNested00.class)
                 .registerDependency(IConsole.class, new Console())
         );
@@ -26,10 +26,10 @@ public class ControllerLifeCycleTest {
         cli.accept("foo");
     }
 
-    @Controller(Scope.TRANSIENT)
+    @Controller(scope = Scope.TRANSIENT)
     private static class TransientClassNested00 {
 
-        @Resource
+        @Inject
         IConsole console;
 
         @Command
@@ -47,7 +47,7 @@ public class ControllerLifeCycleTest {
     @Test
     public void testTransientClassNested01() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(TransientClassNested01.class)
                 .registerDependency(IConsole.class, new Console())
         );
@@ -55,12 +55,12 @@ public class ControllerLifeCycleTest {
         cli.accept("foo");
     }
 
-    @Controller(Scope.TRANSIENT)
+    @Controller(scope = Scope.TRANSIENT)
     private static class TransientClassNested01 {
 
         private IConsole console;
 
-        @Resource
+        @Inject
         public TransientClassNested01(IConsole console) {
             this.console = console;
         }
@@ -80,7 +80,7 @@ public class ControllerLifeCycleTest {
     @Test
     public void testSingletonClassNested00() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(SingletonClassNested00.class)
                 .registerDependency(IConsole.class, new Console())
         );
@@ -88,10 +88,10 @@ public class ControllerLifeCycleTest {
         cli.accept("foo");
     }
 
-    @Controller(Scope.SINGLETON)
+    @Controller(scope = Scope.SINGLETON)
     private static class SingletonClassNested00 {
 
-        @Resource
+        @Inject
         private IConsole console;
 
         @Command
@@ -109,7 +109,7 @@ public class ControllerLifeCycleTest {
     @Test
     public void testSingletonClassNested01() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(SingletonClassNested01.class)
                 .registerDependency(IConsole.class, new Console())
         );
@@ -117,12 +117,12 @@ public class ControllerLifeCycleTest {
         cli.accept("foo");
     }
 
-    @Controller(Scope.SINGLETON)
+    @Controller(scope = Scope.SINGLETON)
     private static class SingletonClassNested01 {
 
         private IConsole console;
 
-        @Resource
+        @Inject
         public SingletonClassNested01(IConsole console) {
             this.console = console;
         }
@@ -142,15 +142,15 @@ public class ControllerLifeCycleTest {
     @Test(expected = ConfigException.class)
     public void testNoRegisteredDependency00() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(Cls0.class)
         );
     }
 
-    @Controller(Scope.SINGLETON)
+    @Controller(scope = Scope.SINGLETON)
     private static class Cls0 {
 
-        @Resource
+        @Inject
         private String junk; // has not been registered with the dependency container.
 
         @Command
@@ -168,15 +168,15 @@ public class ControllerLifeCycleTest {
     @Test(expected = ConfigException.class)
     public void testNoRegisteredDependency01() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(Cls1.class)
         );
     }
 
-    @Controller(Scope.TRANSIENT)
+    @Controller(scope = Scope.TRANSIENT)
     private static class Cls1 {
 
-        @Resource
+        @Inject
         private String junk; // has not been registered with the dependency container.
 
         @Command
@@ -194,17 +194,17 @@ public class ControllerLifeCycleTest {
     @Test(expected = ConfigException.class)
     public void testNoRegisteredDependency02() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(Cls2.class)
         );
     }
 
-    @Controller(Scope.SINGLETON)
+    @Controller(scope = Scope.SINGLETON)
     private static class Cls2 {
 
         private String junk; // has not been registered with the dependency container.
 
-        @Resource
+        @Inject
         public Cls2(String junk) {
             this.junk = junk;
         }
@@ -224,17 +224,17 @@ public class ControllerLifeCycleTest {
     @Test(expected = ConfigException.class)
     public void testNoRegisteredDependency03() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(Cls3.class)
         );
     }
 
-    @Controller(Scope.TRANSIENT)
+    @Controller(scope = Scope.TRANSIENT)
     private static class Cls3 {
 
         private String junk; // has not been registered with the dependency container.
 
-        @Resource
+        @Inject
         public Cls3(String junk) {
             this.junk = junk;
         }
@@ -257,7 +257,7 @@ public class ControllerLifeCycleTest {
     @Test(expected = ConfigException.class)
     public void testNonStaticMethodNonStaticClass() {
         CLI cli = new CLI(new Configuration()
-                .nullifyScanPackages()
+                .disableScanPackages()
                 .setScanClasses(Cls4.class)
         );
     }

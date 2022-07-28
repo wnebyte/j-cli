@@ -1,23 +1,31 @@
 package com.github.wnebyte.jcli;
 
-import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Argument;
+import com.github.wnebyte.jcli.annotation.Command;
 
 @SuppressWarnings("unused")
-public class PerformanceTest {
+public class VisualVMTest {
+
+    public static void main(String[] args) {
+        // 0.85 MB heap used
+        CLI cli = new CLI(new Configuration()
+                .setScanClasses(VisualVMTest.class)
+        );
+        cli.run();
+    }
 
     @Command
     public int test00(
             @Argument(required = true)
-            int arg0,
+                    int arg0,
             @Argument(required = true)
-            int arg1,
+                    int arg1,
             @Argument("arg2")
-            int arg2,
+                    int arg2,
             @Argument("arg3")
-            int arg3,
+                    int arg3,
             @Argument("arg4")
-            int arg4
+                    int arg4
     ) {
         return 1;
     }

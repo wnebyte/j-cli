@@ -3,13 +3,13 @@ package com.github.wnebyte.jcli.util;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-public class Identifier {
+public class CommandIdentifier {
 
     private final Class<?> cls;
 
     private final String cmdName;
 
-    public Identifier(Class<?> cls, String cmdName) {
+    public CommandIdentifier(Class<?> cls, String cmdName) {
         this.cls = cls;
         this.cmdName = cmdName;
     }
@@ -30,10 +30,10 @@ public class Identifier {
             return true;
         if (o == null)
             return false;
-        if (!(o instanceof Identifier))
+        if (!(o instanceof CommandIdentifier))
             return false;
-        Identifier identifier = (Identifier) o;
-        return identifier.cls == this.cls && identifier.cmdName.equals(this.cmdName);
+        CommandIdentifier commandIdentifier = (CommandIdentifier) o;
+        return commandIdentifier.cls == this.cls && commandIdentifier.cmdName.equals(this.cmdName);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.github.wnebyte.jcli.struct;
+package com.github.wnebyte.jcli.util;
 
 import java.util.Collection;
 import java.util.Set;
