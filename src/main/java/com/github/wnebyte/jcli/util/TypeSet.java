@@ -1,12 +1,11 @@
 package com.github.wnebyte.jcli.util;
 
 import java.util.Collection;
-import java.util.HashSet;
 
-public class ClassSet extends DerivedSet<Object> {
+public class TypeSet extends DerivedSet<Object> {
 
-    public ClassSet() {
-        super.set = new HashSet<>();
+    public TypeSet() {
+        super();
     }
 
     @Override

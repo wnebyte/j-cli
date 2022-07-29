@@ -1,11 +1,11 @@
 package com.github.wnebyte.jcli.di;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Constructor;
 import java.lang.annotation.Annotation;
 import com.github.wnebyte.jcli.annotation.Inject;
+import com.github.wnebyte.jcli.util.Reflections;
 import static com.github.wnebyte.jcli.util.Reflections.getNoArgsConstructor;
 import static com.github.wnebyte.jcli.util.Reflections.getFirstAnnotatedConstructor;
 
@@ -49,9 +49,10 @@ public class DependencyContainer implements IDependencyContainer {
     #          METHODS        #
     ###########################
     */
+
     @Override
     public <T, R extends T> void register(Class<T> base, R impl) {
-        if ((base != null) && (impl != null)) {
+        if (base != null && impl != null) {
             dependencies.put(base, impl);
         }
     }
@@ -128,5 +129,41 @@ public class DependencyContainer implements IDependencyContainer {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canInstantiate(Class<?> cls) {
+        // constructor can be used
+        Constructor<?> cons = getFirstAnnotatedConstructor(cls, annotation);
+        cons = (cons == null) ? getNoArgsConstructor(cls) : cons;
+
+        if (cons == null) {
+            return false;
+        }
+        else {
+            cons.setAccessible(true);
+            for (Class<?> type : cons.getParameterTypes()) {
+                Object dependency = dependencies.get(type);
+                if (dependency == null) {
+                    return false;
+                }
+            }
+        }
+
+        // fields can be used
+        for (Field field : cls.getDeclaredFields()) {
+            field.setAccessible(true);
+            Class<?> type = field.getType();
+
+            if (field.isAnnotationPresent(annotation)) {
+                Object dependency = dependencies.get(type);
+
+                if (dependency == null) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

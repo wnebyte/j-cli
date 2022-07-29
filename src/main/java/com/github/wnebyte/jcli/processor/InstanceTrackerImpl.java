@@ -1,7 +1,7 @@
 package com.github.wnebyte.jcli.processor;
 
 import java.util.Collection;
-import com.github.wnebyte.jcli.util.ClassSet;
+import com.github.wnebyte.jcli.util.TypeSet;
 import com.github.wnebyte.jcli.di.IDependencyContainer;
 
 /**
@@ -18,7 +18,7 @@ public class InstanceTrackerImpl implements InstanceTracker {
     /**
      * Is used to store Objects of distinct Classes.
      */
-    private final ClassSet classSet;
+    private final TypeSet typeSet;
 
     private final IDependencyContainer dependencyContainer;
 
@@ -29,7 +29,7 @@ public class InstanceTrackerImpl implements InstanceTracker {
     */
 
     public InstanceTrackerImpl(IDependencyContainer dependencyContainer) {
-        this.classSet = new ClassSet();
+        this.typeSet = new TypeSet();
         this.dependencyContainer = dependencyContainer;
     }
 
@@ -41,33 +41,33 @@ public class InstanceTrackerImpl implements InstanceTracker {
 
     @Override
     public boolean add(Object o) {
-        return classSet.add(o);
+        return typeSet.add(o);
     }
 
     @Override
     public boolean addAll(Collection<Object> c) {
-        return classSet.addAll(c);
+        return typeSet.addAll(c);
     }
 
     @Override
     public int size() {
-        return classSet.size();
+        return typeSet.size();
     }
 
     /**
      * Returns the <code>Object</code> that is of the specified <code>aClass</code> if one is being tracked, otherwise
      * constructs a new instance of <code>aClass</code> using this instance's {@link IDependencyContainer},
      * and tracks it.
-     * @param aClass the class of the Object.
+     * @param cls the class of the Object.
      * @throws ReflectiveOperationException if no Object was tracked, and a new instance could not be constructed.
      */
     @Override
-    public Object get(Class<?> aClass) throws ReflectiveOperationException {
-        Object object = classSet.get(aClass);
+    public Object get(Class<?> cls) throws ReflectiveOperationException {
+        Object object = typeSet.get(cls);
         if (object == null) {
-            object = newInstance(aClass);
+            object = newInstance(cls);
             if (object != null) {
-                classSet.add(object);
+                typeSet.add(object);
             }
         }
         return object;
@@ -76,12 +76,16 @@ public class InstanceTrackerImpl implements InstanceTracker {
     /**
      * Constructs and returns a new instance of the specified <code>aClass</code> using this instance's
      * {@link IDependencyContainer} (does not track/store the result).
-     * @param aClass the class of the Object to be instantiated.
+     * @param cls the class of the Object to be instantiated.
      * @throws ReflectiveOperationException if a new instance could not be constructed.
      */
     @Override
-    public Object newInstance(Class<?> aClass) throws ReflectiveOperationException {
-        Object newInstance = dependencyContainer.newInstance(aClass);
-        return newInstance;
+    public Object newInstance(Class<?> cls) throws ReflectiveOperationException {
+        return dependencyContainer.newInstance(cls);
+    }
+
+    @Override
+    public boolean canInstantiate(Class<?> cls) {
+        return dependencyContainer.canInstantiate(cls);
     }
 }

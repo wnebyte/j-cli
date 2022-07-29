@@ -72,17 +72,14 @@ public class MethodMapperImpl implements MethodMapper {
                 );
             }
         }
-        else {
-            // scope is Scope.TRANSIENT
-            if (!classes.contains(cls)) {
-                try {
-                    // dry run to make sure class can be instantiated at 'runtime'.
-                    Object junk = tracker.newInstance(cls);
-                    classes.add(cls);
-                    junk = null;
-                } catch (ReflectiveOperationException e) {
+        else if (scope == Scope.TRANSIENT) {
+            // a new object will be used for each subsequent invocation.
+            if (classes.add(cls)) {
+                if (!tracker.canInstantiate(cls)) {
                     throw new ConfigException(
-                            e.getMessage()
+                            String.format(
+                                    "Class: '%s' could not be instantiated.", cls.getSimpleName()
+                            )
                     );
                 }
             }
@@ -90,12 +87,18 @@ public class MethodMapperImpl implements MethodMapper {
                 try {
                     return tracker.newInstance(cls);
                 } catch (ReflectiveOperationException e) {
-                    // should not be thrown seeing as the previous dry run was successful.
                     throw new ConfigException(
                             e.getMessage()
                     );
                 }
             };
+        }
+        else {
+            throw new IllegalStateException(
+                    String.format(
+                            "Scope: '%s' is not recognized", scope
+                    )
+            );
         }
 
         return new Command(supplier, method, new ArgumentFactory(adapters, null, null));

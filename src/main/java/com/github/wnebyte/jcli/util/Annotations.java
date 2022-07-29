@@ -1,12 +1,10 @@
 package com.github.wnebyte.jcli.util;
 
 import java.util.*;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import com.github.wnebyte.jarguments.adapter.TypeAdapter;
+import java.lang.annotation.Annotation;
 import com.github.wnebyte.jarguments.util.Strings;
-import com.github.wnebyte.jcli.StubTypeAdapter;
 import com.github.wnebyte.jcli.annotation.*;
 
 /**
@@ -104,6 +102,10 @@ public class Annotations {
         return (param != null) && (param.isAnnotationPresent(Argument.class));
     }
 
+    public static boolean isAnnotated(Parameter param, Class<? extends Annotation> cls) {
+        return (param != null && param.isAnnotationPresent(cls));
+    }
+
     public static boolean isNotAnnotated(Parameter param) {
         return !isAnnotated(param);
     }
@@ -169,31 +171,6 @@ public class Annotations {
             String metavar = param.getAnnotation(Argument.class).metavar();
             return Strings.isNullOrEmpty(metavar) ? null : metavar;
         }
-        return null;
-    }
-
-    public static TypeAdapter<?> getTypeConverter(Parameter param) {
-        if (isAnnotated(param)) {
-            Class<?> cls = param.getAnnotation(Argument.class).typeAdapter();
-            if (cls == StubTypeAdapter.class) {
-                return null;
-            } else {
-                try {
-                    @SuppressWarnings("unchecked")
-                    Constructor<TypeAdapter<?>> cons
-                            = (Constructor<TypeAdapter<?>>) Reflections.getNoArgsConstructor(cls);
-                    if (cons != null) {
-                        return cons.newInstance();
-                    } else {
-                        return null;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }
-
         return null;
     }
 }

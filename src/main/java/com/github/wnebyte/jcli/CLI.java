@@ -276,20 +276,10 @@ public class CLI {
         return cmd;
     }
 
-    public Configuration getConfiguration() {
-        return conf;
-    }
-
     @Command("--help, -h")
-    protected void help() {
+    protected final void help() {
         for (AbstractCommand cmd : commands) {
             conf.out().println(conf.getHelpFormatter().apply(contextViewOf(cmd)));
-        }
-    }
-
-    private void printIndex() {
-        for (Map.Entry<String, AbstractCommand> entry : index.entrySet()) {
-            System.out.printf("(Debug): Key: '%s', Value: '%s'%n", entry.getKey(), entry.getValue());
         }
     }
 }

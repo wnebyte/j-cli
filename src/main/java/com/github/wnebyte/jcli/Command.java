@@ -99,7 +99,6 @@ public class Command extends AbstractCommand {
                         Annotations.getMetavar(param),
                         Annotations.getDefaultValue(param),
                         param.getType()
-
                 );
             }
         } catch (Exception e) {

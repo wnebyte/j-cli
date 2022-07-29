@@ -1,6 +1,5 @@
 package com.github.wnebyte.jcli.util;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -129,19 +128,6 @@ public class AnnotationsTest {
     }
 
     @Test
-    public void testGetArgumentTypeConverter00() {
-        Parameter param = new CommandIdentifier(this.getClass(), "convertertest00").getMethod().getParameters()[0];
-        TypeAdapter<?> adapter = Annotations.getTypeConverter(param);
-        Assert.assertNull(adapter);
-        param = new CommandIdentifier(this.getClass(), "convertertest01").getMethod().getParameters()[0];
-        adapter = Annotations.getTypeConverter(param);
-        Assert.assertNotNull(adapter);
-        param = new CommandIdentifier(this.getClass(), "argumenttest03").getMethod().getParameters()[0];
-        adapter = Annotations.getTypeConverter(param);
-        Assert.assertNull(adapter);
-    }
-
-    @Test
     public void testGetArgumentDefaultValue00() {
         // annotated with @Argument and no explicit defaultValue
         Parameter param = new CommandIdentifier(this.getClass(), "argumenttest00").getMethod().getParameters()[0];
@@ -226,12 +212,6 @@ public class AnnotationsTest {
     ) {
     }
 
-    @Command(value = "convertertest01")
-    private void convertertest01(
-            @Argument(typeAdapter = IntegerTypeAdapter.class, required = true)
-            int a
-    ) {
-    }
 
     @Command(value = "subclasstest01")
     private void subclasstest01(

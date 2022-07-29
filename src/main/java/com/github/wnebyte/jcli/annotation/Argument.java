@@ -5,43 +5,39 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import com.github.wnebyte.jarguments.adapter.TypeAdapter;
-import com.github.wnebyte.jcli.StubTypeAdapter;
 
 /**
- * Annotate the Parameters of your {@link Command} annotated Java Method with this annotation to explicitly set their
- * name, description, {@link Group}, and {@link TypeConverter}.<br>
+ * Annotate the Parameters of your {@link Command} annotated Java Methods with this annotation to explicitly set their
+ * name, description, defaultValue and more.<br>
  * Here are some examples of usage:<br><br>
  * <pre>
  *{@literal @}Command
  * public void foo(
- *        {@literal @}Argument
+ *        {@literal @}Argument(value = "bar", defaultValue = "hello")
  *         String bar
  * ) {
  *     // code
  * }
  * </pre>
- * <p>Here the name field is implicitly set to [ "bar" ], or [ "arg0" ] depending on compiler options.
+ * <p>Here the name of this optional argument is set to [ "bar" ].
  * <br>
- * The description field is omitted, and the group field is implicitly set to {@link Group#REQUIRED}.
+ * The description field is omitted, and its defaultValue is set to "hello".
+ *
  * <br>
- * In this instance the annotation could have been omitted, and the same configuration
- * would have been achieved.</p>
+ * </p>
  * <br>
  * <pre>
  *{@literal @}Command
  * public void foo(
- *        {@literal @}Argument(
- *                  name = "-b, --b"
- *        )
- *         boolean bar
+ *        {@literal @}Argument(value = "bar, foo", required = true, choices = {"hello", "there"})
+ *         String bar
  * ) {
  *     // code
  * }
  * </pre>
- * <p>Here the name field is explicitly set to [ "-b", "--b" ], and
- * the description field is omitted. The group field is forcefully set to {@link Group#FLAG} due to the
- * fact that the Parameter is of Type <code>boolean</code>.<br>
- * <b>Note</b> that {@link Group#REQUIRED} is the default group for every other Type.</p>
+ * <p>Here the name of this required argument is set to [ "bar", "foo" ], and
+ * the description field is omitted.
+ * </p>
  * <br>
  * <pre>
  *{@literal @}Command
@@ -85,20 +81,17 @@ public @interface Argument {
     String description() default "";
 
     /**
-     * Specify a default value for this (Optional/Flag) Argument.
+     * Specify a default value for this Optional Argument.
      * @return the default value of this Argument.
      */
     String defaultValue() default "";
 
+    /**
+     * Specify that this Argument is required.
+     */
     boolean required() default false;
 
     String[] choices() default "";
 
     String metavar() default "";
-
-    /**
-     * Specify a TypeConverter for this Argument.
-     * @return the TypeConverter belonging to this Argument.
-     */
-    Class<? extends TypeAdapter> typeAdapter() default StubTypeAdapter.class;
 }

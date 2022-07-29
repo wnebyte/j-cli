@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 /**
  * This class declares utility methods for working with reflective operations.
@@ -128,5 +129,20 @@ public final class Reflections {
                 .filter(c -> c.getParameterCount() == 0)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static boolean canInstantiate(Class<?> cls, Collection<Class<?>> classes) {
+        if (cls != null && classes != null) {
+            Optional<Constructor<?>> optional = Arrays.stream(cls.getDeclaredConstructors()).filter(c -> {
+                for (Class<?> type : c.getParameterTypes()) {
+                    if (!classes.contains(type)) {
+                        return false;
+                    }
+                }
+                return true;
+            }).findAny();
+            return optional.isPresent();
+        }
+        return false;
     }
 }

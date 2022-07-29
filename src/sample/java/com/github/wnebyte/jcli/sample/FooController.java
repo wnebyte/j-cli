@@ -1,4 +1,4 @@
-package com.github.wnebyte.jcli;
+package com.github.wnebyte.jcli.sample;
 
 import com.github.wnebyte.jcli.annotation.Command;
 import com.github.wnebyte.jcli.annotation.Controller;
